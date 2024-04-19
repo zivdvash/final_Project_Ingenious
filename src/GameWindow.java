@@ -1,0 +1,150 @@
+import java.awt.Dimension;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+
+import javax.swing.*;
+/*קוד זה מתזמן את זרימת המשחק, מטפל בקלט של המשתמש ומנהל את התצוגה של מסכים שונים (כגון StartPanel, GameBoard, GameOver ו-StrategyResults).
+ */
+
+public class GameWindow{
+    JFrame frame;
+    StartPanel pan;
+
+    /*  - הוא מאתחל את ה-JFrame ומגדיר את הכותרת שלו.
+    - זה יוצר מופע של StartPanel, שמוצג בתחילה.
+    - זה ממתין למשתמש להתחיל את המשחק או להתחיל מצב ניתוח על ידי לחיצה על כפתורים ב-StartPanel.
+    - אם המשתמש מתחיל את המשחק, הוא מאתחל אובייקט משחק חדש עם הפרמטרים שצוינו (שמות שחקנים, סוגים ואסטרטגיות).
+    - זה מתחיל שרשור חדש ל-GameBoard.
+    - הוא מחליף את חלונית התוכן של ה-JFrame כדי להציג את ה-GameBoard.
+    - הוא ממתין לסיום המשחק, ואז מציג את מסך GameOver עם השחקנים הממוינים והתוצאות שלהם.
+    - הוא ממתין שהמשתמש יבטל את מסך GameOver לפני שיפטר מה-JFrame.
+    */
+    GameWindow(){
+        frame = new JFrame("Ingenious");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        pan = new StartPanel(true);
+
+        frame.setContentPane(pan);
+        frame.pack();
+        frame.setVisible(true);
+        while(!pan.isGameStart() && !pan.isAnalysisStart()){
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        if(pan.isGameStart()){
+            play(0);
+        }else if(pan.isAnalysisStart()){
+            play(1);
+        }
+
+    }
+
+    public void play(int a){
+        if(a == 0){
+            Game game = new Game(pan.getNames(), pan.getPlayerTypes(), pan.getStrategies());
+            GameBoard gameBoard = game.getGameBoard();
+            new Thread(gameBoard).start();/*מנגנון זה מאפשר לבצע ברקע פעולות שעשויות לקחת זמן מה (כמו עדכון לוח משחק), ולהשאיר את ממשק המשתמש מגיב. בהקשר של משחק, זה יכול לשמש לעדכון רציף של מצב המשחק, עיבוד גרפיקה או טיפול בקלט משתמש מבלי להקפיא את ממשק המשתמש.*/
+            frame.setContentPane(gameBoard);
+            frame.pack();
+            frame.setVisible(true);
+            try {
+                game.play();
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            frame.dispose();
+            frame = new GameOver(game.sortPlayers(), game.getSortedScores());
+            frame.setPreferredSize(new Dimension(1500,800));
+            frame.pack();
+            frame.setVisible(true);
+            while(!((GameOver) frame).cancel()){
+                try {
+                    Thread.sleep(0);//נותן שניה למשחק לרוץ ואז בודק האם הוא נגמר שוב
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+            frame.dispose();
+        }else if(a == 1){
+            pan.openAnalysisMode();
+            frame.pack();
+            frame.setVisible(true);
+            while(!pan.isContinueClicked()){
+                try {
+                    Thread.sleep(10);//נותן 10 מילישניות לבוט ללחוץ(משחק של בוטים) ואז בודק האם נלחץ כפתור המשך
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+            if(pan.fastOrSlow() == 0){
+
+                frame.pack();
+                frame.setVisible(true);
+            }else{
+
+            }
+
+
+            Game game;
+            GameBoard gameBoard;
+            int[] wins = new int[pan.numPlayers()];
+            for(int player = 0; player < pan.numPlayers(); player ++){
+                wins[player] = 0;
+            }
+            for(int i = 0; i < pan.getGames(); i ++ ){
+                game = new Game(pan.getNames(), pan.getPlayerTypes(), pan.getStrategies());
+                gameBoard = game.getGameBoard();
+                new Thread(gameBoard).start();
+                if(pan.fastOrSlow() == 1){
+                    frame.setContentPane(gameBoard);
+                    frame.pack();
+                    frame.setVisible(true);
+                }else{
+                    game.setSleepTimer(0);
+                }
+                try {
+                    game.play();
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+
+                for(int player = 0; player < game.numPlayers(); player ++){
+                    if(game.sortPlayers()[0] == game.getPlayers()[player]){
+                        wins[player] += 1;
+                    }
+
+                }
+                game = null;
+                gameBoard = null;
+
+            }
+            for(int player = 0; player < pan.numPlayers(); player ++){
+                System.out.println(wins[player]);
+            }
+            BotGameResults strats = new BotGameResults(wins[0],wins[1]);
+            frame.setContentPane(strats);
+            frame.pack();
+            frame.setVisible(true);
+            while(!strats.end()){
+                try {
+                    Thread.sleep(0);
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+            frame.dispose();
+
+        }
+
+    }
+
+}
