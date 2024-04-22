@@ -1,16 +1,9 @@
-import javax.swing.ButtonGroup;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JTextField;
+import javax.swing.*;
 
-import java.awt.Dimension;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.Color;
+
 /*מחלקת `StartPanel` מספקת ממשק גמיש ואינטראקטיבי להגדרת פרמטרים של משחק וביצוע ניתוח אסטרטגיה.
  */
 public class StartPanel extends JPanel{
@@ -43,27 +36,61 @@ public class StartPanel extends JPanel{
     StartPanel(boolean first){
         if(first){
             this.setSize(600,500);
-            this.setLayout(new GridLayout(7,4));
+            this.setLayout(new GridLayout(12,4)); // Increased rows to accommodate the buttons
+
+            JLabel title = new JLabel("Welcome To Ingenious");
+            title.setFont(new Font(Font.MONOSPACED, Font.BOLD, 48));
+            this.add(title);
+            this.add(new JLabel()); // Add an empty label for spacing
+
+            title = new JLabel("Choose type of players:");
+            title.setFont(new Font(Font.MONOSPACED, Font.BOLD, 36));
+            this.add(title);
+            this.add(new JLabel()); // Add an empty label for spacing
+
+            title = new JLabel("Player 1:");
+            title.setFont(new Font(Font.MONOSPACED, Font.BOLD, 26));
+            this.add(title);
+            title = new JLabel("Player 2:");
+            title.setFont(new Font(Font.MONOSPACED, Font.BOLD, 26));
+            this.add(title);
+
             handle = new InputHandler();
             setRadioButtons();  //handles ALL BUTTONS
-            setNameBoxes();		//handles ALL NAMES
+
+            title = new JLabel("Enter names:");
+            title.setFont(new Font(Font.MONOSPACED, Font.BOLD, 36));
+            this.add(title);
+            this.add(new JLabel()); // Add an empty label for spacing
+            setNameBoxes();     //handles ALL NAMES
+
+            title = new JLabel("Choose strategy's for bots:");
+            title.setFont(new Font(Font.MONOSPACED, Font.BOLD, 26));
+            this.add(title);
+            this.add(new JLabel()); // Add an empty label for spacing
+            title = new JLabel("1 - medium; 2 - easy");
+            title.setFont(new Font(Font.MONOSPACED, Font.BOLD, 26));
+            this.add(title);
+            this.add(new JLabel()); // Add an empty label for spacing
             setStrategyBoxes(); //handles ALL scrolldown strats
-            JLabel blank = new JLabel("");
-            this.add(blank);
+
             play = new JButton("Play");
-            this.add(play);
             play.setActionCommand("Play");
             play.addActionListener(handle);
+            this.add(play);
+
             cancel = new JButton("Cancel");
             cancel.setActionCommand("Cancel");
             cancel.addActionListener(handle);
             this.add(cancel);
+
             isCancelled= false;
             isPlay = false;
             stratScreen = false;
         }
     }
-    //מגדיר וממקם את לחצני הבחירה עבור סוגי נגנים (ללא, אנושי, מחשב).
+
+    //מגדיר וממקם את לחצני הבחירה עבור סוגי שחקנים (ללא, אנושי, מחשב).
     private void setRadioButtons(){//CALLED FROM CONSTRUCTROR
         topButtons = new JRadioButton[3][4];
         buttonGroups = new ButtonGroup[4];
@@ -71,7 +98,7 @@ public class StartPanel extends JPanel{
             buttonGroups[i] = new ButtonGroup();
         }
         for(int row = 0; row < 3; row++){
-            for(int col = 0; col < 4; col++){
+            for(int col = 0; col < 2; col++){
                 if(row == 0){
                     topButtons[row][col] = new JRadioButton("None");
                 }else if(row == 1){
@@ -86,13 +113,12 @@ public class StartPanel extends JPanel{
         }
         topButtons[1][0].setSelected(true);
         topButtons[2][1].setSelected(true);
-        topButtons[0][2].setSelected(true);
-        topButtons[0][3].setSelected(true);
+
     }
     //מגדיר וממקם את שדות הטקסט עבור שמות שחקנים.
     private void setNameBoxes(){
-        names = new JTextField[4];
-        for(int i = 0; i < 4; i++){
+        names = new JTextField[2];
+        for(int i = 0; i < 2; i++){
             names[i] = new JTextField("Player " + (i+1));
             names[i].setPreferredSize(new Dimension(10, 10));
             if(i >= 2){
@@ -103,11 +129,11 @@ public class StartPanel extends JPanel{
     }
     // מגדיר וממקם את תיבות המשולבות לבחירת אסטרטגיות שחקן.
     private void setStrategyBoxes(){
-        strategies = new JComboBox[4];
+        strategies = new JComboBox[2];
         strategy = new String[2];
         strategy[0] = "Strategy 1";
         strategy[1] = "Strategy 2";
-        for(int i = 0; i < 4; i++){
+        for(int i = 0; i < 2; i++){
             strategies[i] = new JComboBox(strategy);
             strategies[i].setSelectedIndex(0);
             if(i != 1){
@@ -147,7 +173,7 @@ public class StartPanel extends JPanel{
     //value of [0] strategy 1 default, [1] strategy 2
     public int[] getStrategies(){
         int[] ret = new int[4];
-        for(int c = 0; c < 4; c++){
+        for(int c = 0; c < 2; c++){
             if(strategies[c].isEnabled()){
                 if(strategies[c].getSelectedIndex() == 0){
                     ret[c] = 1;
@@ -176,7 +202,7 @@ public class StartPanel extends JPanel{
     // מחזירה את מספר השחקנים שנבחרו.
     public int numPlayers(){
         int numPlayers = 0;
-        for(int col = 0; col < 4; col++){
+        for(int col = 0; col < 2; col++){
             if(!topButtons[0][col].isSelected()){//if NONE is NOT SELECTED
                 numPlayers++; //more players
             }
@@ -211,7 +237,7 @@ public class StartPanel extends JPanel{
                     }
                 }
             }
-            for(int col = 0;  col < 4; col++){
+            for(int col = 0;  col < 2; col++){
                 if(topButtons[0][col].isSelected()){ //if NONE
                     names[col].disable();			//no NAME
                     strategies[col].disable();		//no STRATEGY
@@ -231,7 +257,7 @@ public class StartPanel extends JPanel{
             }
         }
         private boolean allComputers(){
-            for(int col = 0; col < 4; col++){
+            for(int col = 0; col < 2; col++){
                 if(topButtons[1][col].isSelected()){//if there is a human
                     return false;
                 }

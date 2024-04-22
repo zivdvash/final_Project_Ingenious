@@ -27,7 +27,7 @@ public class GameWindow{
         frame.setContentPane(pan);
         frame.pack();
         frame.setVisible(true);
-        while(!pan.isGameStart() && !pan.isAnalysisStart()){
+        while(!pan.isGameStart() && !pan.isAnalysisStart() && !pan.isCancelled()){
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
@@ -39,7 +39,10 @@ public class GameWindow{
             play(0);
         }else if(pan.isAnalysisStart()){
             play(1);
+        }else if(pan.isCancelled()){
+            frame.dispose();
         }
+
 
     }
 

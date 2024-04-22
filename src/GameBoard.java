@@ -78,7 +78,7 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
         addMouseListener(this);
         addMouseMotionListener(this);
         initializeGrid();
-        makeBoard(game.numPlayers() - 2);
+        makeBoard();
         makeHand();
         for(int y = 0; y < 15; y++){ // For debugging .
             System.out.println("");
@@ -379,7 +379,7 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
                         }catch(Exception e){
 
                         }
-                    }if(computerGrid[x][y]!=0 ){//הצגה של ניקוד לשחקן מחשב
+                    }if(computerGrid[x][y]!=0){//הצגה של ניקוד לשחקן מחשב
                         onSpace = true;
                         try{
                             if(game.checkLegalMove(orientation, x, y)){
@@ -494,25 +494,16 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
         hexColor[x][y] = c;
     }
     //מאתחל את לוח המשחק
-    private void makeBoard (int players){ // could be made more efficient
+    private void makeBoard (){ // could be made more efficient
         for(int x = 1; x<30; x++){
             for(int y = 0; y<15;y++){
-                if(players == 0 ){
-                    if(!(hexagon[x][y] == null)){
-                        if(x == 1 || x == 29 || x==28 || y == 0 ||  y == 14 || hexagon[x-2][y] == null || hexagon[x+2][y] == null)
-                            hexColor[x][y] = 0;
-                        else if(y==1 || y == 13 || x == 3 || x == 27 || x== 26 || hexagon[x-4][y] == null || hexagon[x+4][y] == null)
-                            hexColor[x][y] = 0;
-                        else
-                            hexColor[x][y] = -1;
-                    }
-                }else if(players == 1){
-                    if(!(hexagon[x][y] == null)){
-                        if(x == 1 || x == 29 || x==28 || y == 0 ||  y == 14 || hexagon[x-2][y] == null || hexagon[x+2][y] == null)
-                            hexColor[x][y] = 0;
-                        else
-                            hexColor[x][y] = -1;
-                    }
+                if(!(hexagon[x][y] == null)){
+                    if(x == 1 || x == 29 || x==28 || y == 0 ||  y == 14 || hexagon[x-2][y] == null || hexagon[x+2][y] == null)
+                        hexColor[x][y] = 0;
+                    else if(y==1 || y == 13 || x == 3 || x == 27 || x== 26 || hexagon[x-4][y] == null || hexagon[x+4][y] == null)
+                        hexColor[x][y] = 0;
+                    else
+                        hexColor[x][y] = -1;
                 }
             }
         }

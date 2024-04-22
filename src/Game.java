@@ -40,7 +40,6 @@ public class Game{
                 emptyGrid[x][y] = 0;//מאתחל כל משושה בלוח
             }
         }
-        //System.out.println("a");
 
     }
     //שיטה זו אחראית על ניהול המשחק. זה חוזר על פני השחקנים, ומאפשר להם לבצע מהלכים עד לסיום המשחק.
@@ -243,134 +242,6 @@ public class Game{
             sortedScores[0]=p[0].getLowestScore();
             sortedScores[1]=p[1].getLowestScore();
         }
-        /* ל-3 שחקנים
-        - בדומה לתרחיש של 2 שחקנים, הוא מאתחל 'ניקוד' של מערך דו-ממדי עבור הניקודים הממוינים ומחשב את הניקודים הנמוכים ביותר להשוואה.
-        - זה קובע את דירוג השחקנים על סמך הניקודים הנמוכים ביותר שלהם. במקרה של שוויון, הקוד מתכוון להשתמש בהשוואות נוספות
-           - השחקנים בדירוג הגבוה, השני והשלישי ביותר נקבעים ומוקצים למערך ה-p, והניקודים הנמוכים ביותר שלהם ל-sortedScores.*/
-            else if (players.length==3) {
-            p = new Player[3];
-            int[][] score = new int[3][6];
-            int[] a = players[0].getScores();
-            Arrays.sort(a);
-            players[0].setLowestScore(a[0]);
-            int[] b = players[1].getScores();
-            Arrays.sort(b);
-            players[1].setLowestScore(b[0]);
-            int[] c = players[2].getScores();
-            Arrays.sort(c);
-            players[2].setLowestScore(c[0]);
-            for (int i=0; i<3; i++) {
-                for (int j=0; j<6; j++) {
-                    if (i==0) {
-                        score[i][j]=a[j];
-                    }
-                    else if (i==1) {
-                        score[i][j]=b[j];
-                    }
-                    else if (i==2) {
-                        score[i][j]=c[j];
-                    }
-                }
-            }
-            int highest = 0;
-            for (int i=0; i<4; i++) {
-                if (score[i][0]>score[highest][0]) {
-                    highest=i;
-                }
-            }
-            p[0]=players[highest];
-            int secondHighest = Math.abs(highest-1);
-            for (int i=0; i<4; i++) {
-                if (score[i][0]>score[secondHighest][0] && i!=highest) {
-                    secondHighest=i;
-                }
-            }
-            int thirdHighest=5;
-            p[1]=players[secondHighest];
-            for (int i=0; i<4; i++) {
-                if (i!=highest && i!=secondHighest) {
-                    thirdHighest=i;
-                }
-            }
-            p[2]=players[thirdHighest];
-            for (int i=0; i<3; i++) {
-                if (score[i][0]==score[i+1][0]) {
-
-                }
-            }
-            sortedScores[0]=p[0].getLowestScore();
-            sortedScores[1]=p[1].getLowestScore();
-            sortedScores[2]=p[2].getLowestScore();
-        }
-            /*ל-4 שחקנים
-            - תרחיש זה מרחיב את ההיגיון לארבעה שחקנים, ממיין את הציונים שלהם וקביעת הציונים הנמוכים ביותר.
-            - היגיון המיון מנסה לדרג את השחקנים על סמך הציונים הנמוכים ביותר שלהם, ובמקרה של שוויון, השוואות נוספות צריכות לפתור תיאורטית את השוויון .
-            - שחקנים מדורגים מהגבוהים לנמוכים ביותר על סמך הניקוד הנמוך ביותר שלהם, ודירוגים אלה מוקצים ל-'p', עם ציונים תואמים ב-'sortedScores'.*/
-        else if (players.length==4) {
-            p = new Player[4];
-            int[][] score = new int[4][6];
-            int[] a = players[0].getScores();
-            Arrays.sort(a);
-            players[0].setLowestScore(a[0]);
-            int[] b = players[1].getScores();
-            Arrays.sort(b);
-            players[1].setLowestScore(b[0]);
-            int[] c = players[2].getScores();
-            Arrays.sort(c);
-            players[2].setLowestScore(c[0]);
-            int[] d = players[3].getScores();
-            Arrays.sort(d);
-            for (int i=0; i<3; i++) {
-                for (int j=0; j<6; j++) {
-                    if (i==0) {
-                        score[i][j]=a[j];
-                    }
-                    else if (i==1) {
-                        score[i][j]=b[j];
-                    }
-                    else if (i==2) {
-                        score[i][j]=c[j];
-                    }
-                    else if (i==3) {
-                        score[i][j]=d[j];
-                    }
-                }
-            }
-            int highest = 0;
-            for (int i=0; i<4; i++) {
-                if (score[i][0]>score[highest][0]) {
-                    highest=i;
-                }
-            }
-            p[0]=players[highest];
-            int secondHighest = Math.abs(highest-1);
-            for (int i=0; i<4; i++) {
-                if (score[i][0]>score[secondHighest][0] && i!=highest) {
-                    secondHighest=i;
-                }
-            }
-            p[1]=players[secondHighest];
-            int firstRemaining=5;
-            int secondRemaining=5;
-            for (int i=0; i<4; i++) {
-                if (i!=highest && i!=secondHighest) {
-                    firstRemaining=i;
-                }
-            }
-            for (int i=0; i<4; i++) {
-                if (i!=highest && i!=secondHighest && i!=firstRemaining) {
-                    secondRemaining=i;
-                }
-            }
-            if (score[firstRemaining][0]>score[secondRemaining][0]) {
-                p[2]=players[firstRemaining];
-                p[3]=players[secondRemaining];
-            }
-            sortedScores[0]=p[0].getLowestScore();
-            sortedScores[1]=p[1].getLowestScore();
-            sortedScores[2]=p[2].getLowestScore();
-            sortedScores[3]=p[3].getLowestScore();
-        }
 
         return p;
     }
@@ -501,7 +372,7 @@ public class Game{
         }
         return score;
     }
-    // שיטה זו מחשבת את הניקוד עבור הצבת יצירה ברשת רזרבי
+    // שיטה זו מחשבת את הניקוד עבור הצבת יצירה בלוח רזרבי
     public int score(int xInit, int yInit, int[][] spareGrid) {
         int score = 0;
         int x=xInit;
@@ -726,7 +597,7 @@ public class Game{
 
         return false;
     }
-    //: שיטה זו בודקת אם הצבת יצירה בקואורדינטות הנתונות תהיה חוקית בהתבסס על משושים שכנים
+    // שיטה זו בודקת אם הצבת יצירה בקואורדינטות הנתונות תהיה חוקית בהתבסס על משושים שכנים
     private boolean checkAround(int color, int x, int y) {
         boolean legal = false;
         for (int i=0; i<6; i++) {

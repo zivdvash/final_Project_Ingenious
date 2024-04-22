@@ -89,7 +89,7 @@ public class GameOver extends JFrame implements ActionListener{
     //יוצר מערך `Color` כדי להבדיל ויזואלית בין דרגות השחקנים.
     private Color[] colorRanks(int numPlayers){
         Color[] colors = new Color[numPlayers];
-        for(int p = 0; p < colors.length; p++){//wont go beyond leng    th
+        for(int p = 0; p < colors.length; p++){//wont go beyond length
             if(p == 0){
                 colors[p] = Color.YELLOW;
             }else if(p == 1){
