@@ -6,7 +6,7 @@ import javax.swing.*;
 /*קוד זה מתזמן את זרימת המשחק, מטפל בקלט של המשתמש ומנהל את התצוגה של מסכים שונים (כגון StartPanel, GameBoard, GameOver ו-StrategyResults).
  */
 
-public class GameWindow{
+public class GameWindow {
     JFrame frame;
     StartPanel pan;
 

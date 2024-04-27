@@ -1,58 +1,65 @@
 import java.util.ArrayList;
-/*מחלקה זו משמשת מסגרת להגדרת סוגים שונים של שחקנים במשחק, עם התנהגויות ספציפיות המיושמות על ידי תת מחלקות*/
-public abstract class Player {
-    //אובייקט מסוג `PlayerHand`, המייצג את ידו של השחקן במשחק
+import java.util.PriorityQueue;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
+
+// מחלקה אבסטרקטית המייצגת שחקן במשחק
+public abstract class Player{
+    // יד השחקן
     PlayerHand hand;
-    //מחרוזת המייצגת את שם השחקן
+    // שם השחקן
     String name;
-    //מערך של מספרים שלמים המייצגים את הציונים של השחקן עבור צבעים שונים
-    int[] score;
-    //ערך בוליאני המציין אם זה התור הנוכחי של השחקן.
+    Comparator<ColorScore> comparator = Comparator.comparingInt(ColorScore::getScore);
+
+    // צבעים מסודרים לפי הציון
+    PriorityQueue<ColorScore> colorScores = new PriorityQueue<>(comparator);
+    // האם זה תור השחקן הנוכחי
     boolean isCurrentTurn;
-    //ערך בוליאני המציין אם השחקן סיים את תורו
+    // האם השחקן השלים את תורו
     boolean isTurnComplete;
-    //מספר שלם המייצג את הכיוון של החלק
+    // כיוון החלק הנוכחי של השחקן
     int orientation;
-    //אובייקט מסוג `Piece`, המייצג את החלק המוחזק כעת על ידי השחקן
+    // החלק הנוכחי שהשחקן מחזיק
     Piece currentPiece;
-    //מספרים שלמים המייצגים את הקואורדינטות של הכלי הנוכחי על לוח המשחק
+    // קואורדינטות החלק של השחקן על לוח המשחק
     int pieceX;
     int pieceY;
-    //מספר שלם המייצג את הציון הנמוך ביותר מבין הציונים של השחקן
-    int lowestScore;
-    //מאתחל את שמו, היד ומערך הניקוד של השחקן. זה גם מגדיר את המשתנה 'isTurnComplete' ל-false ומאתחל את המשתנה 'orientation' ל-0
-    public Player(String name1, PlayerHand hand1){
+
+    // בנאי
+    public Player(String name1, PlayerHand hand1) {
         hand = hand1;
         name = name1;
-        score = new int[6];
+        // הגדרת תורים מסודרים על פי הציון
+
+        colorScores = new PriorityQueue<>(Comparator.comparingInt(ColorScore::getScore));
+        for(int i = 0; i<6; i++){
+            ColorScore C = new ColorScore(i,0);
+            colorScores.offer(C);
+        }
+        // איתחול משתנים נוספים
         isTurnComplete = false;
         orientation = 0;
-        for (int a = 0; a < 6; a ++){
-            score[a] = 0;
-        }
     }
-    //שיטה זו חייבת להיות מיושמת על ידי תת מחלקות כדי להגדיר כיצד השחקן מבצע מהלך במשחק
+
+    // מתודה אבסטרקטית לתנועת השחקן
     public abstract void move();
-    public String getName(){
+
+    // קבלת שם השחקן
+    public String getName() {
         return name;
     }
+
     // ודא שאם לשחקן יש קבוצה של נקודות שוות עבור הניקוד הנמוך ביותר, צור מערך שני של כל הצבעים הנמוכים ביותר, ועברו בדוק אם יש כל אחד מהצבעים האלה ביד
     //בעצם בודק האם יש אפשרות להחלפה
     public boolean checkHand() {
-        int lowestScore = score[0];
-        // red = 0, green = 1, blue = 2, orange = 3, yellow = 4, purple = 5
-        int lowestColor = 0; //lowest scoring color
+        int lowestScore = colorScores.peek().getScore();
         //checks for lowest scoring color
         ArrayList<Integer> lowestColors = new ArrayList<Integer>();
-        for (int count = 0; count < 6; count++) {
-            if (score[count] < lowestScore) {
-                lowestScore = score[count];
-                lowestColor = count;
-            }
-        }
-        for (int count = 0; count < 6; count++) {
-            if(score[count] == lowestScore)
-                lowestColors.add(count);
+
+        for (ColorScore i: colorScores){
+            if(i.getScore() == lowestScore)
+                lowestColors.add(i.getColor());
         }
         //lowestColor (lowest scoring color) is finally determined
         //System.out.println(lowestColor);
@@ -69,76 +76,102 @@ public abstract class Player {
         }
         return true;
     }
-    //מחליף את כל הכלים ביד השחקן עם כלים מתיק המשחק
-    public void tradeHand(){
-        for(int a = 0; a < 6; a ++){
+    // החלפת היד של השחקן
+    public void tradeHand() {
+        for (int a = 0; a < 6; a++) {
             hand.getBag().addPiece(hand.removePiece(0));
         }
         hand.getBag().shuffle();
-        for(int a = 0; a < 6; a ++){
+        for (int a = 0; a < 6; a++) {
             hand.addNewPiece(hand.getBag().drawPiece(0));
         }
     }
-    public void setLowestScore(int s) {
-        lowestScore = s;
-    }
-    public int getLowestScore() {
-        return lowestScore;
-    }
-    public PlayerHand getHand(){
-        return hand;
-    }
+
     //מעדכן את הציונים של השחקן על סמך מערך הקלט
     public void updateScore(int[] score){
-        for(int a = 0; a < this.score.length; a ++){
-            this.score[a] += score[a];
-            if(this.score[a] > 18){
-                this.score[a] = 18;
+        for(ColorScore i : colorScores){
+            for(int a = 0; a < colorScores.size(); a ++) {
+                if(i.getColor() == a) {
+                    i.setScore(i.getScore() + score[a]);
+                    if (i.getScore() > 18) {
+                        i.setScore(18);
+                    }
+                }
             }
         }
     }
-    public int[] getScores(){return score;}
-    public boolean getCurrentTurn()
-    {
+
+    // קבלת התורים המסודרים על פי הציון
+    public PriorityQueue<ColorScore> getColorScores() {
+        return colorScores;
+    }
+
+    // האם זה תור השחקן הנוכחי
+    public boolean getCurrentTurn() {
         return isCurrentTurn;
     }
-    public void setCurrentTurn(boolean bool){
+
+    // הגדרת תור השחקן
+    public void setCurrentTurn(boolean bool) {
         isCurrentTurn = bool;
     }
-    public boolean getTurnComplete()
-    {
+
+    // האם השחקן השלים את תורו
+    public boolean getTurnComplete() {
         return isTurnComplete;
     }
-    public void setTurnComplete(boolean bool){
+
+    // הגדרת השלמת התור של השחקן
+    public void setTurnComplete(boolean bool) {
         isTurnComplete = bool;
     }
+    public void setColorScores(PriorityQueue<ColorScore> colorScores) {
+        this.colorScores = colorScores;
+    }
 
-    public int getOrientation(){
+    // קבלת כיוון החלק של השחקן
+    public int getOrientation() {
         return orientation;
     }
-    public void setOrientation(int orientation){
+
+    // הגדרת כיוון החלק של השחקן
+    public void setOrientation(int orientation) {
         this.orientation = orientation;
     }
-    public int getPieceX(){
+
+    // קבלת קואורדינטות החלק של השחקן לפי ציר X
+    public int getPieceX() {
         return pieceX;
     }
-    public int getPieceY(){
+
+    // קבלת קואורדינטות החלק של השחקן לפי ציר Y
+    public int getPieceY() {
         return pieceY;
     }
-    public Piece getCurrentPiece(){
+
+    // קבלת החלק הנוכחי של השחקן
+    public Piece getCurrentPiece() {
         return currentPiece;
     }
-    public void removeCurrentPiece(){
+
+    // הסרת החלק הנוכחי של השחקן
+    public void removeCurrentPiece() {
         currentPiece = null;
     }
-    public void addNewPiece(){
-        getHand().addNewPiece(getHand().getBag().drawPiece(0));
-    }//מכניס חלק חדש מהשקית של כל החלקים
-    public void resetDefault(){
-        pieceX = -1;
-        pieceY = -1;
 
+    // הוספת חלק חדש ליד השחקן
+    public void addNewPiece() {
+        hand.addNewPiece(hand.getBag().drawPiece(0));
     }
 
-}
+    public PlayerHand getHand(){
+        return hand;
+    }
+    // איפוס הגדרות ברירת המחדל של השחקן
+    public void resetDefault() {
+        pieceX = -1;
+        pieceY = -1;
+    }
 
+
+}

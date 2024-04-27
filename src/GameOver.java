@@ -142,33 +142,33 @@ public class GameOver extends JFrame implements ActionListener{
                 g.drawRect(15,change,435,105);//380 * 10
                 g.setColor(Color.RED);
                 int constant=15;
-                for (int c=0;c<=orderOfPlayers[counter].getScores()[3];c++)
+                for (int c=0;c<=getScoreByColor(orderOfPlayers[counter],3);c++)
                 {
                     g.fillRect(constant+(23 * c),change+15,24,15);
                 }
 
                 g.setColor(Color.BLUE);
-                for (int c=0;c<=orderOfPlayers[counter].getScores()[5];c++)
+                for (int c=0;c<=getScoreByColor(orderOfPlayers[counter],5);c++)
                 {
                     g.fillRect(constant+(23 * c),change+30,24,15);
                 }
                 g.setColor(Color.GREEN);
-                for (int c=0;c<=orderOfPlayers[counter].getScores()[4];c++)
+                for (int c=0;c<=getScoreByColor(orderOfPlayers[counter],4);c++)
                 {
                     g.fillRect(constant+(23 * c),change+45,24,15);
                 }
                 g.setColor(new Color(255,128,0));
-                for (int c=0;c<=orderOfPlayers[counter].getScores()[0];c++)
+                for (int c=0;c<=getScoreByColor(orderOfPlayers[counter],0);c++)
                 {
                     g.fillRect(constant+(23 * c),change+60,24,15);
                 }
                 g.setColor(Color.YELLOW);
-                for (int c=0;c<=orderOfPlayers[counter].getScores()[1];c++)
+                for (int c=0;c<=getScoreByColor(orderOfPlayers[counter],1);c++)
                 {
                     g.fillRect(constant+(23 * c),change+75,24,15);
                 }
                 g.setColor(Color.MAGENTA);
-                for (int c=0;c<=orderOfPlayers[counter].getScores()[2];c++)
+                for (int c=0;c<=getScoreByColor(orderOfPlayers[counter],2);c++)
                 {
                     g.fillRect(constant+(23 * c),change+90,24,15);
                 }
@@ -183,8 +183,19 @@ public class GameOver extends JFrame implements ActionListener{
             }
         }
     }
-
-
+    // Get the score for a specific color from the player's colorScores PriorityQueue
+    public int getScoreByColor(Player player, int color) {
+        // Iterate over the colorScores PriorityQueue
+        for (ColorScore colorScore : player.getColorScores()) {
+            // Check if the color matches the desired color
+            if (colorScore.getColor() == color) {
+                // Return the score associated with the color
+                return colorScore.getScore();
+            }
+        }
+        // If the color is not found, return a default value (e.g., 0)
+        return 0; // or any other default value as per your requirement
+    }
 
 }
 

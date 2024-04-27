@@ -1,5 +1,5 @@
 // מקפלת את ההתנהגות של שחקן מחשב במשחק. הוא משתמש באסטרטגיה כדי לחשב את המהלכים שלו ומספק שיטות לגשת למידע על החלק הנוכחי של השחקן, המיקום והכיוון
-public class ComputerPlayer extends Player{
+public class ComputerPlayer extends Player {
     //מכריז על משתני המופע `compName` ו-`compStrategy`
     String compName;
     Strategy compStrategy;
@@ -17,7 +17,7 @@ public class ComputerPlayer extends Player{
      - הוא מסיר את הכלי מידו של השחקן לאחר ביצוע המהלך.
 */
     public void move(){
-        compStrategy.calculateMove(hand, score);
+        compStrategy.calculateMove(hand, colorScores);
         currentPiece = compStrategy.getPiece();
         hand.removePiece(compStrategy.getPieceIndex());
         pieceX = compStrategy.getXCoordinate();

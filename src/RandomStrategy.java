@@ -1,4 +1,6 @@
 import java.lang.Math;
+import java.util.PriorityQueue;
+
 public class RandomStrategy extends Strategy {
     private Piece piece;
     private int xCoord;
@@ -11,7 +13,7 @@ public class RandomStrategy extends Strategy {
     }
     /*שיטה זו יוצרת קואורדינטות אקראיות `(xCoord, yCoord)` בתוך גבולות לוח המשחק וכיוון אקראי לכלי. הוא בודק אם המהלך שנוצר חוקי באמצעות שיטת `checkLegalMove()`. אם המהלך חוקי, הוא מגדיר את 'legalMove' ל'true' ובוחר באופן אקראי חתיכה מידו של השחקן. תהליך זה נמשך עד למציאת מהלך חוקי.
      */
-    public void calculateMove(PlayerHand h, int[] score) {
+    public void calculateMove(PlayerHand h, PriorityQueue<ColorScore> colorScores) {
         checkHandAndTrade();
         boolean legalMove = false;
         do {

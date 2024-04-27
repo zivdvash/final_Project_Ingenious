@@ -1,6 +1,6 @@
 import java.util.ArrayList;
 /*בסך הכל, מחלקת 'יד' מספקת פונקציונליות לניהול הכלים שבידי שחקן במהלך המשחק, כולל הוספה, הסרה וגישה לכלים, כמו גם קבלת גודל היד וגישה ל-GrabBag המשויך.*/
-public class PlayerHand {
+public class PlayerHand{
     //player refills hand and creates
     private ArrayList<Piece> pieces=new ArrayList<Piece>();
     PiecesBag bag;

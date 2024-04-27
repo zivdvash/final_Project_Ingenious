@@ -30,6 +30,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Rectangle2D;
+import java.util.HashMap;
+import java.util.Map;
 import javax.swing.JPanel;
 /*`GameBoard` פועלת כמרכיב החזותי והאינטראקטיבי המרכזי של המשחק. הוא מגשר על המצב הלוגי של המשחק עם המצגת הגרפית שלו, מטפל בתשומות משתמש לפעולות משחק, ומעדכן את האלמנטים החזותיים בתגובה להתקדמות המשחק, מה שמבטיח חווית שחקן מגיבה ומושכת.*/
 public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMotionListener{
@@ -47,7 +49,7 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
     11. **כיוון**: מספר שלם המייצג את הכיוון של היצירה הנוכחית.
     12. **colors, colorcoord**: מערכים המייצגים צבעים והערכים המספריים המתאימים להם.
     13. **ניקוד1, ניקוד2**: משתנים לאחסון תוצאות השחקנים.
-    14. **computerGrid**: מערך דו-ממדי המייצג את הרשת של נגן המחשב.
+    14. **computerGrid**: מערך דו-ממדי המייצג את הלוח של שחקן המחשב.
     */
     private Polygon[][] hexagon = new Polygon[30][15];
     private Polygon[][] handPieces = new Polygon[6][2];
@@ -197,33 +199,33 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
             g.drawRect(50,change,435,105);//380 * 10
             g.setColor(Color.RED);
             int constant=50;
-            for (int c=0;c<=game.getPlayers()[counter].getScores()[3] && c <= 18;c++)
+            for (int c=0;c<=getScoreByColor(game.getPlayers()[counter],3)&& c <= 18;c++)
             {
                 g.fillRect(constant+(23 * c),change+15,24,15);
             }
 
             g.setColor(Color.BLUE);
-            for (int c=0;c<=game.getPlayers()[counter].getScores()[5] && c <= 18;c++)
+            for (int c=0;c<=getScoreByColor(game.getPlayers()[counter],5) && c <= 18;c++)
             {
                 g.fillRect(constant+(23 * c),change+30,24,15);
             }
             g.setColor(Color.GREEN);
-            for (int c=0;c<=game.getPlayers()[counter].getScores()[4] && c <= 18;c++)
+            for (int c=0;c<=getScoreByColor(game.getPlayers()[counter],4) && c <= 18;c++)
             {
                 g.fillRect(constant+(23 * c),change+45,24,15);
             }
             g.setColor(new Color(255,128,0));//orange
-            for (int c=0;c<=game.getPlayers()[counter].getScores()[0] && c <= 18;c++)
+            for (int c=0;c<=getScoreByColor(game.getPlayers()[counter],0) && c <= 18;c++)
             {
                 g.fillRect(constant+(23 * c),change+60,24,15);
             }
             g.setColor(Color.YELLOW);
-            for (int c=0;c<=game.getPlayers()[counter].getScores()[1] && c <= 18;c++)
+            for (int c=0;c<=getScoreByColor(game.getPlayers()[counter],1) && c <= 18;c++)
             {
                 g.fillRect(constant+(23 * c),change+75,24,15);
             }
             g.setColor(Color.MAGENTA);
-            for (int c=0;c<=game.getPlayers()[counter].getScores()[2] && c <= 18;c++)
+            for (int c=0;c<=getScoreByColor(game.getPlayers()[counter],2) && c <= 18;c++)
             {
                 g.fillRect(constant+(23 * c),change+90,24,15);
             }
@@ -237,6 +239,20 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
             change+=140;
         }
     }
+    // Get the score for a specific color from the player's colorScores PriorityQueue
+    public int getScoreByColor(Player player, int color) {
+        // Iterate over the colorScores PriorityQueue
+        for (ColorScore colorScore : player.getColorScores()) {
+            // Check if the color matches the desired color
+            if (colorScore.getColor() == color) {
+                // Return the score associated with the color
+                return colorScore.getScore();
+            }
+        }
+        // If the color is not found, return a default value (e.g., 0)
+        return 0; // or any other default value as per your requirement
+    }
+
     // יוצר משושה לתצוגת הניקוד
     private Polygon makeScoreHex(int x, int y, int z){
         Polygon hex = new Polygon();

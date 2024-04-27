@@ -1,6 +1,9 @@
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.PriorityQueue;
+
 /*מחלקת 'משחק' היא לב ליבה של אפליקציית המשחק, שבה מנוהלים הכללים, ההתקדמות ומצבי המשחק. הוא מתזמר כיצד שחקנים מקיימים אינטראקציה עם המשחק, מעבד מהלכים, שומר על מצב לוח המשחק ובסופו של דבר קובע את תוצאת המשחק. באמצעות השיטות שלו, הוא מטמיע את ההיגיון של משחק אסטרטגיה מבוסס תורות, ומספק מסגרת למשחק הכוללת ניהול תור, פעולות שחקן, שמירת תוצאות ומעברי מצב משחק.*/
-public class Game{
+public class Game {
 
     Player[] players;
     Player currentPlayer;
@@ -30,9 +33,10 @@ public class Game{
             if(playerTypes[a] == 0){//שם ערכים של שחקן אנושי
                 players[a] = new HumanPlayer(names[a],new PlayerHand(PiecesBag));
             }else{//שם ערכים של שחקן ממוחשב
-                players[a] = new ComputerPlayer(names[a],getStrategy(strategies[a] - 1),new PlayerHand(PiecesBag));
+                players[a] = new ComputerPlayer(names[a], getStrategy(strategies[a] - 1), new PlayerHand(PiecesBag));
             }
         }
+        //new ComputerPlayer(names[a], getStrategy(strategies[a] - 1), new PlayerHand(PiecesBag))
         gameBoard = new GameBoard(this);
         for (int x = 0; x < 30; x ++){
             for (int y = 0; y < 15; y ++){
@@ -44,8 +48,8 @@ public class Game{
     }
     //שיטה זו אחראית על ניהול המשחק. זה חוזר על פני השחקנים, ומאפשר להם לבצע מהלכים עד לסיום המשחק.
     public void play() throws InterruptedException{
-
-        int[] startScores = new int[]{0,0,0,0,0,0};
+        Comparator<ColorScore> comparator = Comparator.comparingInt(ColorScore::getScore);
+        PriorityQueue<ColorScore> startScores = new PriorityQueue<>(comparator);
         boolean isSecondPlay = false;
         ExtraTern extraTern = null;
         while(!isGameOver){//ניהול תורים של שחקנים
@@ -63,8 +67,10 @@ public class Game{
                 currentPlayer = players[a];
                 currentPlayer.setTurnComplete(false);
                 isSecondPlay = false;
-                for(int i = 0; i < 6; i ++){//תבדוק ניקוד שחקן
-                    startScores[i] = currentPlayer.getScores()[i];
+                startScores.clear();
+                for(ColorScore i : currentPlayer.getColorScores()){
+                    ColorScore Cs = new ColorScore(i.getScore(),i.getColor());
+                    startScores.add(Cs);
                 }
                 if(currentPlayer.checkHand() && currentPlayer.getClass() == HumanPlayer.class){
                     HandTrade handTrade = new HandTrade();//פותח אינטראקציה של החלפת יד לדעתי שימוש לא טוב במסך תצוגה ולוגיקה
@@ -98,12 +104,16 @@ public class Game{
                 updateGrid(twoHexGrid(currentPlayer.getOrientation(), currentPlayer.getPieceX(), currentPlayer.getPieceY()));//עדכן לצמיתות את הייצוג הפנימי של המשחק של הלוח עם המהלך של השחקן הנוכחי.
 
                 currentPlayer.removeCurrentPiece();
-
-                for(int i = 0; i < 6; i ++){
-                    if(currentPlayer.getScores()[i] == 18 && startScores[i] < 18){//בודק האם מגיע עוד תור
-                        isSecondPlay = true;
+                for (ColorScore x : currentPlayer.getColorScores()) {
+                    for (ColorScore i : startScores) {
+                        if (i.getColor() == x.getColor()) {
+                            if (x.getScore() == 2 && i.getScore() < 2) {//בודק האם מגיע עוד תור
+                                isSecondPlay = true;
+                            }
+                        }
                     }
                 }
+
                 if(!isSecondPlay){
                     do{
                         currentPlayer.addNewPiece();//אם הוא לא שיחק שוב תוסיף ותוריד חלק
@@ -132,53 +142,35 @@ public class Game{
         return playerNames;
     }
 
-    //שיטה זו מחזירה את סדר השחקנים על סמך התוצאות שלהם -- שונה
+    //שיטה זו מחזירה את סדר השחקנים על סמך התוצאות שלהם
     public int[] scoreOrder() {
         int[] scoreOrder = new int[players.length];
-        Integer[] lowScore = new Integer[players.length];
-        for (int a = 0; a < players.length; a++) {
-            lowScore[a] = players[a].getScores()[0];
-            for (int score : players[a].getScores()) {
-                lowScore[a] = Math.min(lowScore[a], score);
-            }
-            scoreOrder[a] = a;
+        PriorityQueue<Player> playerQueue = new PriorityQueue<>(Comparator.comparing(p -> p.getColorScores().peek().getScore()));
+
+        // Enqueue players into the priority queue
+        for (int i = 0; i < players.length; i++) {
+            playerQueue.offer(players[i]);
         }
 
-        // מיון בועות
-        boolean swapped;
-        do {
-            swapped = false;
-            for (int i = 0; i < lowScore.length - 1; i++) {
-                if (lowScore[i] > lowScore[i + 1]) {
-                    // Swap in lowScore array
-                    int tempScore = lowScore[i];
-                    lowScore[i] = lowScore[i + 1];
-                    lowScore[i + 1] = tempScore;
-
-                    // החלפה
-                    int tempOrder = scoreOrder[i];
-                    scoreOrder[i] = scoreOrder[i + 1];
-                    scoreOrder[i + 1] = tempOrder;
-
-                    swapped = true;
-                }
-            }
-        } while (swapped);
+        // Dequeue players from the priority queue and record their order
+        for (int i = 0; i < players.length; i++) {
+            Player currentPlayer = playerQueue.poll();
+            scoreOrder[i] = Arrays.asList(players).indexOf(currentPlayer);
+        }
 
         return scoreOrder;
     }
 
+
     //שיטה זו מחזירה את הציונים של השחקנים.
-    public int[] scores(){
+     public int[] scores(){
         int[] lowScore = new int[players.length];
         int[] scores = new int[players.length];
         for(int a = 0; a < players.length; a ++){
-            lowScore[a] = players[a].getScores()[0];
-            for(int score = 0; score < players[a].getScores().length; score ++){
-                if(players[a].getScores()[score] < lowScore[a]){
-                    lowScore[a] = players[a].getScores()[score];
-                }
+            for(ColorScore i : players[a].getColorScores()){
+                lowScore[a] = players[a].getColorScores().peek().getScore();
             }
+
         }
         for(int a = 0; a < players.length; a ++){
             scores[scoreOrder()[a]] = lowScore[a];
@@ -186,6 +178,7 @@ public class Game{
         return scores;
 
     }
+
     // שיטה זו מחזירה את סדר שמות השחקנים על סמך הניקוד שלהם
     public String[] nameOrder(){
         String[] nameOrder = new String[playerNames.length];
@@ -194,29 +187,35 @@ public class Game{
         }
         return nameOrder;
     }
-    // שיטה זו ממיינת את השחקנים על סמך התוצאות שלהם כל שחקן משובץ על פי הניקוד שלו, הפונקציה יודעת להבדיל בין כמות השחקנים
+    // שיטה זו ממיינת את השחקנים על סמך התוצאות שלהם כל שחקן משובץ על פי הניקוד שלו
     public Player[] sortPlayers() {
         //אם יש רק 2 שחקנים
         /*- זה מאתחל 'ניקוד' של מערך דו-ממדי כדי להחזיק נקודות ממוינות של שני השחקנים לשם השוואה.
     - הוא ממיין את הניקוד של שני השחקנים ומאחסן את הניקוד הנמוך ביותר שלהם בשיטת 'setLowestScore'.
     - הוא משווה את ההניקוד הנמוך ביותר כדי לקבוע את סדר השחקנים. אם הניקוד הנמוך ביותר שלהם שווה, הוא מסתכל על הניקוד השני הנמוך ביותר כשובר שוויון כדי להכריע בדירוג.
     - לבסוף, הוא מקצה את השחקנים הממוינים ואת הניקוד הנמוכים ביותר שלהם למערכי 'p' ו-'sortedScores' בהתאמה.*/
-            if (players.length==2) {
+        if (players.length==2) {
             p = new Player[2];
             sortedScores = new int[2];
             int[][] score = new int[2][6];
-            int[] a = players[0].getScores();
-            Arrays.sort(a);
-            players[0].setLowestScore(a[0]);
-            int[] b = players[1].getScores();
-            Arrays.sort(b);
-            players[1].setLowestScore(b[0]);
+            int[] a = new int[6];
+            int[] b = new int[6];
+            int C = 0;
+            for(ColorScore i: players[0].getColorScores()) {
+                a[C] = i.getScore();
+                C++;
+            }
+            C = 0;
+            for(ColorScore i: players[1].getColorScores()) {
+                b[C] = i.getScore();
+                C++;
+            }
             for (int i=0; i<2; i++) {
                 for (int j=0; j<6; j++) {
                     if (i==0) {
                         score[i][j]=a[j];
                     }
-                    else if (i==1) {
+                    if (i==1){
                         score[i][j]=b[j];
                     }
                 }
@@ -225,7 +224,7 @@ public class Game{
                 p[0]=players[0];
                 p[1]=players[1];
             }
-            else if (score[0][0]>score[1][0]){
+            else if (score[0][0]<score[1][0]){
                 p[0]=players[1];
                 p[1]=players[0];
             }
@@ -239,8 +238,8 @@ public class Game{
                     p[1]=players[0];
                 }
             }
-            sortedScores[0]=p[0].getLowestScore();
-            sortedScores[1]=p[1].getLowestScore();
+            sortedScores[0]=p[0].getColorScores().peek().getScore();
+            sortedScores[1]=p[1].getColorScores().peek().getScore();
         }
 
         return p;
@@ -746,12 +745,11 @@ public class Game{
         return grid;
     }
     //בודק ניצחון
-
     public boolean isWinner(){
         try{
             boolean isWinner = true;
-            for(int s = 0; s < 6; s ++){
-                if(currentPlayer.getScores()[s] < 18){
+            for (ColorScore i : currentPlayer.getColorScores()){
+                if(i.getScore() < 18){
                     isWinner = false;
                 }
             }

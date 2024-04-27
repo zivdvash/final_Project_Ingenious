@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.PriorityQueue;
 
 public class BasicStrategy extends Strategy {
     /*שדות:
@@ -38,33 +39,24 @@ public class BasicStrategy extends Strategy {
     אסטרטגיה זו שואפת למקסם את הניקוד על ידי התחשבות בצבעים בעלי הניקוד הנמוך ביותר בידו של השחקן וניסיון למקם כלים בעמדות המניבות את הניקוד הגבוה ביותר. הוא גם מתאים את האסטרטגיה שלו אם הוא לא יכול למצוא מהלך חוקי עם הצבעים בעלי הניקוד הנמוך ביותר.
     לבסוף, הוא מדפיס את ייצוג הרשת הזמני למטרות ניפוי באגים.
      */
-    public void calculateMove(PlayerHand h, int[] score) {
+    public void calculateMove(PlayerHand h, PriorityQueue<ColorScore> score) {
         int highestScore = 0;
         int highestX = 0;
         int highestY = 0;
         int highestOrientation = 0;
         int highestPieceIndex = 0;
-        int lowestScore = game.getCurrentPlayer().getScores()[0];
+        int lowestScore = game.getCurrentPlayer().getColorScores().peek().getScore();
 
-        ArrayList<Integer> hScore = new ArrayList<Integer>();
-        ArrayList<Integer> hX = new ArrayList<Integer>();
-        ArrayList<Integer> hY = new ArrayList<Integer>();
-        ArrayList<Integer> hO = new ArrayList<Integer>();
-        ArrayList<Integer> hPI = new ArrayList<Integer>();
-        //מוצא צבע נמוך ביותר
-        for (int a = 0; a < 6; a++) {
-            if (game.getCurrentPlayer().getScores()[a] < lowestScore) {
-                lowestScore = game.getCurrentPlayer().getScores()[a];
-            }
-        }
+
         ArrayList<Integer> lowestColor = new ArrayList<Integer>();
         ArrayList<Integer> oldColors = new ArrayList<Integer>();
         //מוצא אם יש צבע נוסף נמוך ביותר
-        for (int a = 0; a < 6; a++) {
-            if (game.getCurrentPlayer().getScores()[a] == lowestScore) {
-                lowestColor.add(a + 1);
+        for (ColorScore i : game.getCurrentPlayer().getColorScores()) {
+            if (i.getScore() == lowestScore) {
+                lowestColor.add(i.getColor());
             }
         }
+
         PlayerHand hand = game.getCurrentPlayer().getHand();
         //בודק אם היד צריכה החלפה ואם כן מחליפה
         if (game.getCurrentPlayer().checkHand() && game.getCurrentPlayer().getHand().getSize() == 6) {
@@ -112,33 +104,34 @@ public class BasicStrategy extends Strategy {
             if (!isMove) {
                 ArrayList<Integer> newLowestColor = new ArrayList<Integer>();
                 lowestScore = 19;
-                for (int i = 0; i < lowestColor.size(); i++) {//מוסיף את כל הצבעים שהם הכי נמוכים
-                    oldColors.add(lowestColor.get(i));
-                }
+                //מוסיף את כל הצבעים שהם הכי נמוכים
+                oldColors.addAll(lowestColor);
                 boolean use = true;
+                int a = 0;
 
                 /*מחפש את הצבע הבא הנמוך ביותר שלא נמצא בצבעים שכבר היו הנמוכים ביותר*/
-                for (int a = 0; a < 6; a++) {//עובר על כל הצבעים
+                for (ColorScore i : game.currentPlayer.getColorScores()){//עובר על כל הצבעים
                     use = true;
-                    for (int i = 0; i < oldColors.size(); i++) {//עובר על כל הצבעים הכי נמוכים
-                        if (a+1 == oldColors.get(i)) {
+                    for (Integer oldColor : oldColors) {//עובר על כל הצבעים הכי נמוכים
+                        if (a + 1 == oldColor) {
                             use = false;
                         }
                     }
-                    if (use && game.getCurrentPlayer().getScores()[a] < lowestScore) {
-                        lowestScore = game.getCurrentPlayer().getScores()[a];
+                    if (use && i.getScore() < lowestScore) {
+                        lowestScore = i.getScore();
                     }
                 }
                 use = true;
+                a = 0;
                 /*מוצא את כל הצבעים שהם באותו ניקוד כמו ההכי נמוך החדש*/
-                for (int a = 0; a < 6; a++) {
+                for (ColorScore i : game.currentPlayer.getColorScores()){
                     use = true;
-                    for (int i = 0; i < oldColors.size(); i++) {
-                        if (a+1 == oldColors.get(i)) {
+                    for (int j = 0; j < oldColors.size(); j++) {
+                        if (a+1 == oldColors.get(j)) {
                             use = false;
                         }
                     }
-                    if (use && game.getCurrentPlayer().getScores()[a] == lowestScore) {
+                    if (use && i.getScore() == lowestScore) {
                         newLowestColor.add(a+1);
                     }
                 }

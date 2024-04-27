@@ -1,3 +1,5 @@
+import java.util.PriorityQueue;
+
 /*'אסטרטגיה' משמש כתבנית ליישום אסטרטגיות שונות ששחקנים יכולים להשתמש בהם במהלך המשחק.*/
 public abstract class Strategy {
     //`משחק `: מייצג את מופע המשחק המשויך לאסטרטגיה.
@@ -7,7 +9,7 @@ public abstract class Strategy {
         game = g;
     }
     //calculateMove(Hand h, int[] score)`: שיטה זו אחראית לחישוב המהלך הבא על סמך ידו של השחקן והניקוד הנוכחי.
-    abstract public void calculateMove(PlayerHand h, int[] score);
+    abstract public void calculateMove(PlayerHand h, PriorityQueue<ColorScore> score);
     //`getPiece()`: מחזירה את החלק שנבחר על ידי האסטרטגיה למהלך הבא
     abstract public Piece getPiece();
     //`getPieceIndex()`: מחזירה את האינדקס של החלק שנבחר ביד השחקן
