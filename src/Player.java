@@ -1,8 +1,4 @@
-import java.util.ArrayList;
-import java.util.PriorityQueue;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 // מחלקה אבסטרקטית המייצגת שחקן במשחק
 public abstract class Player{
@@ -86,19 +82,27 @@ public abstract class Player{
             hand.addNewPiece(hand.getBag().drawPiece(0));
         }
     }
-
+/*        Comparator<ColorScore> comparator = Comparator.comparingInt(ColorScore::getScore);
+        PriorityQueue<ColorScore> Temp = new PriorityQueue<>(comparator);*/
     //מעדכן את הציונים של השחקן על סמך מערך הקלט
-    public void updateScore(int[] score){
-        for(ColorScore i : colorScores){
-            for(int a = 0; a < colorScores.size(); a ++) {
-                if(i.getColor() == a) {
-                    i.setScore(i.getScore() + score[a]);
-                    if (i.getScore() > 18) {
-                        i.setScore(18);
+    public void updateScore(int[] score) {
+        List<ColorScore> updatedScores = new ArrayList<>();
+
+        for (ColorScore cs : colorScores) {
+            for (int a = 0; a < colorScores.size(); a++) {
+                if (cs.getColor() == a) {
+                    int newScore = cs.getScore() + score[a];
+                    if (newScore > 18) {
+                        newScore = 18;
                     }
+                    cs.setScore(newScore);
+                    updatedScores.add(cs);
                 }
             }
         }
+
+        colorScores.clear();
+        colorScores.addAll(updatedScores);
     }
 
     // קבלת התורים המסודרים על פי הציון

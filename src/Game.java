@@ -69,7 +69,7 @@ public class Game {
                 isSecondPlay = false;
                 startScores.clear();
                 for(ColorScore i : currentPlayer.getColorScores()){
-                    ColorScore Cs = new ColorScore(i.getScore(),i.getColor());
+                    ColorScore Cs = new ColorScore(i.getColor(),i.getScore());
                     startScores.add(Cs);
                 }
                 if(currentPlayer.checkHand() && currentPlayer.getClass() == HumanPlayer.class){
@@ -107,7 +107,7 @@ public class Game {
                 for (ColorScore x : currentPlayer.getColorScores()) {
                     for (ColorScore i : startScores) {
                         if (i.getColor() == x.getColor()) {
-                            if (x.getScore() == 2 && i.getScore() < 2) {//בודק האם מגיע עוד תור
+                            if (x.getScore() == 18 && i.getScore() < 18) {//בודק האם מגיע עוד תור
                                 isSecondPlay = true;
                             }
                         }
@@ -421,7 +421,7 @@ public class Game {
 
     //שיטה זו בודקת אם המהלך חוקי עבור השחקן הנוכחי
     public boolean checkLegalMove() {
-        if(currentPlayer.getCurrentPiece() != null){
+        if(currentPlayer != null && currentPlayer.getCurrentPiece() != null){
             int CoordX = currentPlayer.getPieceX();
             int CoordY = currentPlayer.getPieceY();
             int color1 = currentPlayer.getCurrentPiece().getPrimaryHexagon().getColor();
