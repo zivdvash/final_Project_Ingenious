@@ -3,7 +3,7 @@ import java.util.ArrayList;
 public class PlayerHand{
     //player refills hand and creates
     private ArrayList<Piece> pieces=new ArrayList<Piece>();
-    PiecesBag bag;
+   private PiecesBag bag;
     //הבנאי מאתחל אובייקט `יד` חדש על ידי מילויו בחלקים שנלקחו מה-GrabBag המסופק. זה מוסיף שישה חלקים ליד בהתחלה
     PlayerHand(PiecesBag bag)
     {

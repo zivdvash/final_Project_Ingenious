@@ -16,7 +16,7 @@ public class ExtraTern extends JFrame implements ActionListener{
      */
     private JLabel text;
     private JButton cont;
-    public boolean close; //set to true when u need to close
+    private boolean close; //set to true when u need to close
     /*בנאי:
    - מאתחל את JFrame עם JPanel כחלונית התוכן שלו.
    - מגדיר את הפריסה של חלונית התוכן ל-GridLayout עם 2 שורות ועמודה אחת.

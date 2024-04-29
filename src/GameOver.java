@@ -13,11 +13,11 @@ import java.awt.Dimension;
 public class GameOver extends JFrame implements ActionListener{
     //takes a string of the length the # of players,
     //and is order of players: [0] == first place, [1] == second place etc
-    boolean cancel;
-    String[] players;
-    Player[] orderOfPlayers;
-    int[] Scores;
-    JPanel pan, pan1;
+    private boolean cancel;
+    private String[] players;
+    private Player[] orderOfPlayers;
+    private int[] Scores;
+    private JPanel pan, pan1;
 	/*קונסטרוקטור ואיתחול
 	- **שדות**: המחלקה מתחזקת מספר שדות, כולל דגלים (`ביטול בוליאני`), מערכים של אובייקטים של `שחקן` והניקודים שלהם ורכיבי `JPanel` לארגון תוכן.
 	- **קונסטרוקטור `GameOver(Player[] orderOfPlayers, int[] scores)`**: בנאי זה מקבל מערך של אובייקטים `Player` ממוינים לפי הדירוג שלהם והציונים התואמים להם. זה מאתחל את רכיבי ה-GUI כדי להציג את המשחק על המסך, כולל דירוגי שחקנים, תוצאות וכפתור dismiss.

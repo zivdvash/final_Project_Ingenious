@@ -29,8 +29,8 @@ public class RandomStrategy extends Strategy {
     }
     //בודק אם יש צורך להחלפת יד
     private void checkHandAndTrade() {
-        if (game.getCurrentPlayer().checkHand() && game.getCurrentPlayer().getHand().getSize() == 6) {
-            game.getCurrentPlayer().tradeHand();
+        if (getGame().getCurrentPlayer().checkHand() && getGame().getCurrentPlayer().getHand().getSize() == 6) {
+            getGame().getCurrentPlayer().tradeHand();
         }
     }
     /* שיטה זו בודקת אם המהלך שנוצר `(CoordX, CoordY)` עם הכיוון הנתון הוא חוקי. זה בודק כל כיוון אפשרי כדי להבטיח שהצבת יצירה בקואורדינטות שצוינו לא תפר שום כללי המשחק. אם המהלך חוקי, הוא מחזיר 'נכון'; אחרת, הוא מחזיר 'false'.
@@ -49,17 +49,17 @@ public class RandomStrategy extends Strategy {
     */
     public boolean checkLegalMove(int CoordX, int CoordY, int orientation) {
         // Modified to use the orientation parameter
-        if (orientation==0 && CoordX > 0 && CoordY > 0 && game.grid[CoordX][CoordY]==-1 && game.grid[CoordX-1][CoordY-1]==-1) {
+        if (orientation==0 && CoordX > 0 && CoordY > 0 && getGame().getGrid()[CoordX][CoordY]==-1 && getGame().getGrid()[CoordX-1][CoordY-1]==-1) {
             return true;
-        } else if (orientation==1 && CoordX < 29 && CoordY > 0 && game.grid[CoordX][CoordY]==-1 && game.grid[CoordX+1][CoordY-1]==-1) {
+        } else if (orientation==1 && CoordX < 29 && CoordY > 0 && getGame().getGrid()[CoordX][CoordY]==-1 && getGame().getGrid()[CoordX+1][CoordY-1]==-1) {
             return true;
-        } else if (orientation==2 && CoordX < 28 && game.grid[CoordX][CoordY]==-1 && game.grid[CoordX+2][CoordY]==-1) {
+        } else if (orientation==2 && CoordX < 28 && getGame().getGrid()[CoordX][CoordY]==-1 && getGame().getGrid()[CoordX+2][CoordY]==-1) {
             return true;
-        } else if (orientation==3 && CoordX < 29 && CoordY < 14 && game.grid[CoordX][CoordY]==-1 && game.grid[CoordX+1][CoordY+1]==-1) {
+        } else if (orientation==3 && CoordX < 29 && CoordY < 14 && getGame().getGrid()[CoordX][CoordY]==-1 && getGame().getGrid()[CoordX+1][CoordY+1]==-1) {
             return true;
-        } else if (orientation==4 && CoordX > 0 && CoordY < 14 && game.grid[CoordX][CoordY] == -1 && game.grid[CoordX-1][CoordY+1] == -1) {
+        } else if (orientation==4 && CoordX > 0 && CoordY < 14 && getGame().getGrid()[CoordX][CoordY] == -1 && getGame().getGrid()[CoordX-1][CoordY+1] == -1) {
             return true;
-        } else if (orientation==5 && CoordX > 1 && game.grid[CoordX][CoordY] == -1 && game.grid[CoordX-2][CoordY] == -1) {
+        } else if (orientation==5 && CoordX > 1 && getGame().getGrid()[CoordX][CoordY] == -1 && getGame().getGrid()[CoordX-2][CoordY] == -1) {
             return true;
         }
         return false;

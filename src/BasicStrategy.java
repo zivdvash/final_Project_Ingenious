@@ -26,10 +26,10 @@ public class BasicStrategy extends Strategy {
         tempGrid = new int[30][15];
         for (int X = 0; X < 30; X++) {
             for (int Y = 0; Y < 15; Y++) {
-                if (game.twoHexGrid(o, x, y, color1, color2)[X][Y] == 0) {
-                    tempGrid[X][Y] = game.grid[X][Y];
+                if (getGame().twoHexGrid(o, x, y, color1, color2)[X][Y] == 0) {
+                    tempGrid[X][Y] = getGame().getGrid()[X][Y];
                 } else {
-                    tempGrid[X][Y] = game.twoHexGrid(o, x, y, color1, color2)[X][Y];
+                    tempGrid[X][Y] = getGame().twoHexGrid(o, x, y, color1, color2)[X][Y];
                 }
             }
         }
@@ -45,22 +45,22 @@ public class BasicStrategy extends Strategy {
         int highestY = 0;
         int highestOrientation = 0;
         int highestPieceIndex = 0;
-        int lowestScore = game.getCurrentPlayer().getColorScores().peek().getScore();
+        int lowestScore = getGame().getCurrentPlayer().getColorScores().peek().getScore();
 
 
         ArrayList<Integer> lowestColor = new ArrayList<Integer>();
         ArrayList<Integer> oldColors = new ArrayList<Integer>();
         //מוצא אם יש צבע נוסף נמוך ביותר
-        for (ColorScore i : game.getCurrentPlayer().getColorScores()) {
+        for (ColorScore i : getGame().getCurrentPlayer().getColorScores()) {
             if (i.getScore() == lowestScore) {
                 lowestColor.add(i.getColor());
             }
         }
 
-        PlayerHand hand = game.getCurrentPlayer().getHand();
+        PlayerHand hand = getGame().getCurrentPlayer().getHand();
         //בודק אם היד צריכה החלפה ואם כן מחליפה
-        if (game.getCurrentPlayer().checkHand() && game.getCurrentPlayer().getHand().getSize() == 6) {
-            game.getCurrentPlayer().tradeHand();
+        if (getGame().getCurrentPlayer().checkHand() && getGame().getCurrentPlayer().getHand().getSize() == 6) {
+            getGame().getCurrentPlayer().tradeHand();
         }
         boolean isColor1 = false, isColor2 = false;
         boolean isMove = false;
@@ -70,9 +70,9 @@ public class BasicStrategy extends Strategy {
             for (int x = 0; x < 30; x++) {
                 for (int y = 0; y < 15; y++) {
                     for (int o = 0; o < 6; o++) {
-                        for (int piece = 0; piece < game.currentPlayer.getHand().getSize(); piece++) {
-                            int color1 = game.currentPlayer.getHand().getPiece(piece).getPrimaryHexagon().getColor(); //צבע ראשון
-                            int color2 = game.currentPlayer.getHand().getPiece(piece).getSecondaryHexagon().getColor(); //צבע שני
+                        for (int piece = 0; piece < getGame().getCurrentPlayer().getHand().getSize(); piece++) {
+                            int color1 = getGame().getCurrentPlayer().getHand().getPiece(piece).getPrimaryHexagon().getColor(); //צבע ראשון
+                            int color2 = getGame().getCurrentPlayer().getHand().getPiece(piece).getSecondaryHexagon().getColor(); //צבע שני
                             isColor1 = false;
                             isColor2 = false;
                             //לכל הצבעים הכי נמוכים אם אחד מהצבעים נמצא בחתיכה תשנה דגל
@@ -85,10 +85,10 @@ public class BasicStrategy extends Strategy {
                                 }
                             }
                             //אם אחד מהדגלים השתנה ויש מהלך חוקי בקורדינטות האלה ובכיוון הזה עם הצבע הזה אז תעדכן את כל המשתנים עם המידע הנוכחי
-                            if ((isColor1 || isColor2) && game.checkLegalMove(o, x, y, color1, color2)) {
+                            if ((isColor1 || isColor2) && getGame().checkLegalMove(o, x, y, color1, color2)) {
                                 isMove = true;
                                 makeTempGrid(o, x, y, color1, color2);
-                                highestScore = game.score(x, y, tempGrid);
+                                highestScore = getGame().score(x, y, tempGrid);
                                 highestX = x;
                                 highestY = y;
                                 highestOrientation = o;
@@ -110,7 +110,7 @@ public class BasicStrategy extends Strategy {
                 int a = 0;
 
                 /*מחפש את הצבע הבא הנמוך ביותר שלא נמצא בצבעים שכבר היו הנמוכים ביותר*/
-                for (ColorScore i : game.currentPlayer.getColorScores()){//עובר על כל הצבעים
+                for (ColorScore i : getGame().getCurrentPlayer().getColorScores()){//עובר על כל הצבעים
                     use = true;
                     for (Integer oldColor : oldColors) {//עובר על כל הצבעים הכי נמוכים
                         if (a + 1 == oldColor) {
@@ -124,7 +124,7 @@ public class BasicStrategy extends Strategy {
                 use = true;
                 a = 0;
                 /*מוצא את כל הצבעים שהם באותו ניקוד כמו ההכי נמוך החדש*/
-                for (ColorScore i : game.currentPlayer.getColorScores()){
+                for (ColorScore i : getGame().getCurrentPlayer().getColorScores()){
                     use = true;
                     for (int j = 0; j < oldColors.size(); j++) {
                         if (a+1 == oldColors.get(j)) {
@@ -143,9 +143,9 @@ public class BasicStrategy extends Strategy {
         for (int x = 0; x < 30; x++) {
             for (int y = 0; y < 15; y++) {
                 for (int o = 0; o < 6; o++) {
-                    for (int piece = 0; piece < game.currentPlayer.getHand().getSize(); piece++) {
-                        int color1 = game.currentPlayer.getHand().getPiece(piece).getPrimaryHexagon().getColor();
-                        int color2 = game.currentPlayer.getHand().getPiece(piece).getSecondaryHexagon().getColor();
+                    for (int piece = 0; piece < getGame().getCurrentPlayer().getHand().getSize(); piece++) {
+                        int color1 = getGame().getCurrentPlayer().getHand().getPiece(piece).getPrimaryHexagon().getColor();
+                        int color2 = getGame().getCurrentPlayer().getHand().getPiece(piece).getSecondaryHexagon().getColor();
                         isColor1 = false;
                         isColor2 = false;
                         for (int i = 0; i < lowestColor.size(); i++) {//מוצא חתיכות שנמצאות במערך חתיכות קטנות ביותר
@@ -156,29 +156,29 @@ public class BasicStrategy extends Strategy {
                                 isColor2 = true;
                             }
                         }
-                        if ((isColor1 || isColor2) && game.checkLegalMove(o, x, y, color1, color2)) { // אם אחד מהם שנמצא ויש איתו מהלך מתאים
+                        if ((isColor1 || isColor2) && getGame().checkLegalMove(o, x, y, color1, color2)) { // אם אחד מהם שנמצא ויש איתו מהלך מתאים
                             makeTempGrid(o, x, y, color1, color2);
                             if (isColor1 && isColor2) {//אם שניהם מתאימים
                                 //בודק את שני הכיוונים של החלק והאם הניקוד שיצא יותר גבוה מהנוכחי
-                                if (game.score(x, y, tempGrid) > highestScore || game.score(game.getSecondX(o, x, y),
-                                        game.getSecondY(o, x, y), tempGrid) > highestScore) {
-                                    highestScore = game.score(x, y, tempGrid);
+                                if (getGame().score(x, y, tempGrid) > highestScore || getGame().score(getGame().getSecondX(o, x, y),
+                                        getGame().getSecondY(o, x, y), tempGrid) > highestScore) {
+                                    highestScore = getGame().score(x, y, tempGrid);
                                     highestX = x;
                                     highestY = y;
                                     highestOrientation = o;
                                     highestPieceIndex = piece;
                                 }
                             } else if (isColor1) {
-                                if (game.score(x, y, tempGrid) > highestScore) {
-                                    highestScore = game.score(x, y, tempGrid);
+                                if (getGame().score(x, y, tempGrid) > highestScore) {
+                                    highestScore = getGame().score(x, y, tempGrid);
                                     highestX = x;
                                     highestY = y;
                                     highestOrientation = o;
                                     highestPieceIndex = piece;
                                 }
                             } else if (isColor2) {
-                                if (game.score(game.getSecondX(o, x, y), game.getSecondY(o, x, y),tempGrid) > highestScore) {
-                                    highestScore = game.score(x, y, tempGrid);
+                                if (getGame().score(getGame().getSecondX(o, x, y), getGame().getSecondY(o, x, y),tempGrid) > highestScore) {
+                                    highestScore = getGame().score(x, y, tempGrid);
                                     highestX = x;
                                     highestY = y;
                                     highestOrientation = o;

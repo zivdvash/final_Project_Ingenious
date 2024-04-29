@@ -7,8 +7,8 @@ import javax.swing.*;
  */
 
 public class GameWindow {
-    JFrame frame;
-    StartPanel pan;
+    private JFrame frame;
+    private StartPanel pan;
 
     /*  - הוא מאתחל את ה-JFrame ומגדיר את הכותרת שלו.
     - זה יוצר מופע של StartPanel, שמוצג בתחילה.

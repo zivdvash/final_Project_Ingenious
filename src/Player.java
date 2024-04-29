@@ -3,24 +3,24 @@ import java.util.*;
 // מחלקה אבסטרקטית המייצגת שחקן במשחק
 public abstract class Player{
     // יד השחקן
-    PlayerHand hand;
+    private PlayerHand hand;
     // שם השחקן
-    String name;
-    Comparator<ColorScore> comparator = Comparator.comparingInt(ColorScore::getScore);
+    private String name;
+    private Comparator<ColorScore> comparator = Comparator.comparingInt(ColorScore::getScore);
 
     // צבעים מסודרים לפי הציון
-    PriorityQueue<ColorScore> colorScores = new PriorityQueue<>(comparator);
+    private PriorityQueue<ColorScore> colorScores = new PriorityQueue<>(comparator);
     // האם זה תור השחקן הנוכחי
-    boolean isCurrentTurn;
+    private boolean isCurrentTurn;
     // האם השחקן השלים את תורו
-    boolean isTurnComplete;
+    private boolean isTurnComplete;
     // כיוון החלק הנוכחי של השחקן
-    int orientation;
+    private int orientation;
     // החלק הנוכחי שהשחקן מחזיק
-    Piece currentPiece;
+    private Piece currentPiece;
     // קואורדינטות החלק של השחקן על לוח המשחק
-    int pieceX;
-    int pieceY;
+    private int pieceX;
+    private int pieceY;
 
     // בנאי
     public Player(String name1, PlayerHand hand1) {
@@ -82,8 +82,7 @@ public abstract class Player{
             hand.addNewPiece(hand.getBag().drawPiece(0));
         }
     }
-/*        Comparator<ColorScore> comparator = Comparator.comparingInt(ColorScore::getScore);
-        PriorityQueue<ColorScore> Temp = new PriorityQueue<>(comparator);*/
+
     //מעדכן את הציונים של השחקן על סמך מערך הקלט
     public void updateScore(int[] score) {
         List<ColorScore> updatedScores = new ArrayList<>();
@@ -176,6 +175,18 @@ public abstract class Player{
         pieceX = -1;
         pieceY = -1;
     }
+    public void setCurrentPiece(Piece currentPiece) {
+        this.currentPiece = currentPiece;
+    }
+
+    public void setPieceX(int pieceX) {
+        this.pieceX = pieceX;
+    }
+
+    public void setPieceY(int pieceY) {
+        this.pieceY = pieceY;
+    }
+
 
 
 }

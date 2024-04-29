@@ -6,15 +6,15 @@ import javax.swing.*;
 // מחלקה זו מטפלת בעיקר ב-GUI ובאינטראקציה של המשתמש למסחר ביד, עם תלות חיצונית מינימלית.
 public class HandTrade extends JFrame implements ActionListener{
 
-    JFrame frame;
-    JPanel pan;
-    JPanel pan1;
-    JPanel pan2;
-    JLabel label;
-    JButton trade;
-    JButton cancel;
+    private JFrame frame;
+    private JPanel pan;
+    private JPanel pan1;
+    private JPanel pan2;
+    private JLabel label;
+    private JButton trade;
+    private JButton cancel;
     public boolean isTrade;
-    public boolean isClosed;
+    private boolean isClosed;
     /*`HandTrade()` Constructor**:
     - מאתחל את רכיבי ה-GUI של מחלקת `HandTrade`, כולל המסגרת, הלוחות, התווית והלחצנים. הוא מגדיר את הפריסה, מוסיף רכיבים לפאנלים ומצמיד מאזיני פעולה ללחצנים.
     - מאתחל את הדגלים 'isTrade' ו-'isClosed' ל'false'.

@@ -5,22 +5,24 @@ import java.util.PriorityQueue;
 /*מחלקת 'משחק' היא לב ליבה של אפליקציית המשחק, שבה מנוהלים הכללים, ההתקדמות ומצבי המשחק. הוא מתזמר כיצד שחקנים מקיימים אינטראקציה עם המשחק, מעבד מהלכים, שומר על מצב לוח המשחק ובסופו של דבר קובע את תוצאת המשחק. באמצעות השיטות שלו, הוא מטמיע את ההיגיון של משחק אסטרטגיה מבוסס תורות, ומספק מסגרת למשחק הכוללת ניהול תור, פעולות שחקן, שמירת תוצאות ומעברי מצב משחק.*/
 public class Game {
 
-    Player[] players;
-    Player currentPlayer;
-    int[][] grid;
-    int[][] tempGrid;
-    int[][] emptyGrid;
-    GameBoard gameBoard;
-    PiecesBag PiecesBag;
+    private Player[] players;
+
+    private Player currentPlayer;
+    private int[][] grid;
+    private int[][] tempGrid;
+    private int[][] emptyGrid;
+    private GameBoard gameBoard;
+    private PiecesBag PiecesBag;
     private boolean isGameOver;
-    Strategy[] gameStrategies;
-    String[] playerNames;
-    int sleepTimer = 500;
-    Player[] p;
-    int[] sortedScores;
+    private Strategy[] gameStrategies;
+    private String[] playerNames;
+    private int sleepTimer;
+    private Player[] p;
+    private int[] sortedScores;
     /*הבנאי של המחלקה `Game`. זה מאתחל משחק חדש עם שמות השחקנים, סוגי השחקנים (אנושי או מחשב) ואסטרטגיות (פשוט או אקראי).
      */
     Game(String[] names, int[] playerTypes, int[] strategies){
+        setSleepTimer(100);
         PiecesBag = new PiecesBag();
         players = new Player[names.length];
         isGameOver = false;
@@ -418,67 +420,67 @@ public class Game {
         //System.out.println("Score: " +score);
         return score;
     }
-
     //שיטה זו בודקת אם המהלך חוקי עבור השחקן הנוכחי
     public boolean checkLegalMove() {
-        if(currentPlayer != null && currentPlayer.getCurrentPiece() != null){
+        if(currentPlayer.getCurrentPiece() != null){
             int CoordX = currentPlayer.getPieceX();
             int CoordY = currentPlayer.getPieceY();
-            int color1 = currentPlayer.getCurrentPiece().getPrimaryHexagon().getColor();
-            int color2 = currentPlayer.getCurrentPiece().getSecondaryHexagon().getColor();
-            if(CoordX > -1 && CoordY > -1){
-                if (currentPlayer.getOrientation()==0) {
-                    if (CoordX > 0 && CoordY > 0) {
-                        if (grid[CoordX][CoordY]==-1 && grid[(CoordX-1)][(CoordY-1)]==-1) {
-                            if (checkAround(color1, CoordX, CoordY) || checkAround(color2, CoordX-1, CoordY-1))
-                                return true;
-                        }
-                    }
-                }
-                else if (currentPlayer.getOrientation()==1) {
-                    if (CoordX < 29 && CoordY > 0) {
-                        if (grid[CoordX][CoordY]==-1 && grid[(CoordX+1)][(CoordY-1)]==-1) {
-                            if (checkAround(color1, CoordX, CoordY) || checkAround(color2, CoordX+1, CoordY-1))
-                                return true;
-                        }
-                    }
-                }
-                else if (currentPlayer.getOrientation()==2) {
-                    if (CoordX < 28) {
-                        if (grid[CoordX][CoordY]==-1 && grid[(CoordX+2)][(CoordY)]==-1) {
-                            if (checkAround(color1, CoordX, CoordY) || checkAround(color2, CoordX+2, CoordY))
-                                return true;
-                        }
-                    }
-                }
-                else if (currentPlayer.getOrientation()==3) {
-                    if (CoordX < 29 && CoordY < 14)
-                        if (grid[CoordX][CoordY]==-1 && grid[(CoordX+1)][(CoordY+1)]==-1) {
-                            if (checkAround(color1, CoordX, CoordY) || checkAround(color2, CoordX+1, CoordY+1))
-                                return true;
-                        }
 
-                }
-                else if (currentPlayer.getOrientation()==4) {
-                    if (CoordX > 0 && CoordY < 14) {
-                        if (grid[CoordX][CoordY] == -1 && grid[(CoordX - 1)][(CoordY + 1)] == -1) {
-                            if (checkAround(color1, CoordX, CoordY) || checkAround(color2, CoordX-1, CoordY+1))
-                                return true;
+            if (currentPlayer.getCurrentPiece().getPrimaryHexagon() != null && currentPlayer.getCurrentPiece().getSecondaryHexagon() != null) {
+                Hex primaryHex = currentPlayer.getCurrentPiece().getPrimaryHexagon();   // Potential null source
+                Hex secondaryHex = currentPlayer.getCurrentPiece().getSecondaryHexagon(); // Potential null source
+                int color1 = primaryHex.getColor();
+                int color2 = secondaryHex.getColor();
+                if(CoordX > -1 && CoordY > -1) {
+                    if (currentPlayer.getOrientation() == 0) {
+                        if (CoordX > 0 && CoordY > 0) {
+                            if (grid[CoordX][CoordY] == -1 && grid[(CoordX - 1)][(CoordY - 1)] == -1) {
+                                if (checkAround(color1, CoordX, CoordY) || checkAround(color2, CoordX - 1, CoordY - 1))
+                                    return true;
+                            }
+                        }
+                    } else if (currentPlayer.getOrientation() == 1) {
+                        if (CoordX < 29 && CoordY > 0) {
+                            if (grid[CoordX][CoordY] == -1 && grid[(CoordX + 1)][(CoordY - 1)] == -1) {
+                                if (checkAround(color1, CoordX, CoordY) || checkAround(color2, CoordX + 1, CoordY - 1))
+                                    return true;
+                            }
+                        }
+                    } else if (currentPlayer.getOrientation() == 2) {
+                        if (CoordX < 28) {
+                            if (grid[CoordX][CoordY] == -1 && grid[(CoordX + 2)][(CoordY)] == -1) {
+                                if (checkAround(color1, CoordX, CoordY) || checkAround(color2, CoordX + 2, CoordY))
+                                    return true;
+                            }
+                        }
+                    } else if (currentPlayer.getOrientation() == 3) {
+                        if (CoordX < 29 && CoordY < 14)
+                            if (grid[CoordX][CoordY] == -1 && grid[(CoordX + 1)][(CoordY + 1)] == -1) {
+                                if (checkAround(color1, CoordX, CoordY) || checkAround(color2, CoordX + 1, CoordY + 1))
+                                    return true;
+                            }
+
+                    } else if (currentPlayer.getOrientation() == 4) {
+                        if (CoordX > 0 && CoordY < 14) {
+                            if (grid[CoordX][CoordY] == -1 && grid[(CoordX - 1)][(CoordY + 1)] == -1) {
+                                if (checkAround(color1, CoordX, CoordY) || checkAround(color2, CoordX - 1, CoordY + 1))
+                                    return true;
+                            }
+                        }
+                    } else if (currentPlayer.getOrientation() == 5) {
+                        if (CoordX > 1) {
+                            if (grid[CoordX][CoordY] == -1 && grid[(CoordX - 2)][(CoordY)] == -1) {
+                                if (checkAround(color1, CoordX, CoordY) || checkAround(color2, CoordX - 2, CoordY))
+                                    return true;
+                            }
                         }
                     }
                 }
-                else if (currentPlayer.getOrientation()==5) {
-                    if (CoordX > 1) {
-                        if (grid[CoordX][CoordY] == -1 && grid[(CoordX - 2)][(CoordY)] == -1) {
-                            if (checkAround(color1, CoordX, CoordY) || checkAround(color2, CoordX-2, CoordY))
-                                return true;
-                        }
-                    }
-                }
-            }
+           }
         }
         return false;
     }
+
     // שיטה זו בודקת אם מהלך חוקי עם הכיוון והקואורדינטות הנתונות
     public boolean checkLegalMove(int o, int x, int y) {
         if(currentPlayer.getCurrentPiece() != null){
@@ -780,6 +782,17 @@ public class Game {
 
     }
 
+    public void setCurrentPlayer(Player currentPlayer) {
+        this.currentPlayer = currentPlayer;
+    }
+
+    public int[][] getGrid() {
+        return grid;
+    }
+
+    public void setGrid(int[][] grid) {
+        this.grid = grid;
+    }
 
 
 }

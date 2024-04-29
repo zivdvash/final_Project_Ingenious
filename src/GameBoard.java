@@ -51,23 +51,23 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
     13. **ניקוד1, ניקוד2**: משתנים לאחסון תוצאות השחקנים.
     14. **computerGrid**: מערך דו-ממדי המייצג את הלוח של שחקן המחשב.
     */
-    private Polygon[][] hexagon = new Polygon[30][15];
-    private Polygon[][] handPieces = new Polygon[6][2];
+    private static final Polygon[][] hexagon = new Polygon[30][15];
+    private static final Polygon[][] handPieces = new Polygon[6][2];
     private int[][] gameBoardTempGrid;
     private Polygon piece;
-    private int[][]hexColor = new int[30][15]; //Contains value representing color of a hex on the grid - for actual game, not initializing board
-    private int width = 1500;
-    private int length = 800;
+    private static final int[][]hexColor = new int[30][15]; //Contains value representing color of a hex on the grid - for actual game, not initializing board
+    private static final int width = 1500;
+    private static final int length = 800;
     private int X, Y, stoX, stoY;
     private boolean isHumanPlayer;
-    private Rectangle2D rotateClockwise = new Rectangle2D.Double(width - 175, length -175, 175, 175);
-    private Rectangle2D rotateCounterClockwise = new Rectangle2D.Double(width/3 , length -175, 175, 175);
-    private Rectangle2D returnPiece = new Rectangle2D.Double(width - 175, 0, 175, 175);
-    private Rectangle2D scoreBox = new Rectangle2D.Double(width/3, 0, 175, 175);
+    private static final Rectangle2D rotateClockwise = new Rectangle2D.Double(width - 175, length -175, 175, 175);
+    private static final Rectangle2D rotateCounterClockwise = new Rectangle2D.Double(width/3 , length -175, 175, 175);
+    private static final Rectangle2D returnPiece = new Rectangle2D.Double(width - 175, 0, 175, 175);
+    private static final Rectangle2D scoreBox = new Rectangle2D.Double(width/3, 0, 175, 175);
     private Game game;
     private int orientation;
-    private Color[] colors=new Color[]{Color.ORANGE,Color.YELLOW,Color.MAGENTA,Color.RED,Color.GREEN,Color.BLUE};
-    private int[] colorcoord=new int[]{1,2,3,4,5,6};
+    private static final Color[] colors=new Color[]{Color.ORANGE,Color.YELLOW,Color.MAGENTA,Color.RED,Color.GREEN,Color.BLUE};
+    private static final int[] colorcoord=new int[]{1,2,3,4,5,6};
     private int score1;
     private int score2;
     private int[][] computerGrid;
@@ -362,7 +362,7 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
         for (int X = 0; X < 30; X ++){
             for (int Y = 0; Y < 15; Y ++){
                 if(game.twoHexGrid(o,x,y)[X][Y] == 0){
-                    gameBoardTempGrid[X][Y] = game.grid[X][Y];
+                    gameBoardTempGrid[X][Y] = game.getGrid()[X][Y];
                 }else{
                     gameBoardTempGrid[X][Y] = game.twoHexGrid(o,x,y)[X][Y];
                 }
@@ -574,10 +574,12 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
                             }
                         }
                     }
+
                 }catch(Exception exception){
                 }
             }
         }
+
         if(game.getCurrentPlayer().getCurrentPiece() != null){
             if(rotateClockwise.contains(X,Y)){
                 rotate(1);

@@ -1,9 +1,9 @@
 /*מכילה את ההתנהגות הספציפית לשחקנים אנושיים במשחק, כולל בחירת חלקים, סיבוב ומיקום על לוח המשחק*/
 public class HumanPlayer extends Player{
     //מייצג את כיוון השעון עבור חלקים מסתובבים
-    static int CLOCKWISE = 1;
+    private static final int CLOCKWISE = 1;
     //מייצג את הכיוון נגד כיוון השעון עבור חלקים מסתובבים
-    static int COUNTERCLOCKWISE = -1;
+    private static final int COUNTERCLOCKWISE = -1;
 
 
     //מאתחל שחקן אנושי עם השם והיד הנתונים, ומגדיר את הכיוון הראשוני ל-0
@@ -39,25 +39,15 @@ public class HumanPlayer extends Player{
     }
     //בוחרת כלי מידו של השחקן באינדקס שצוין ומגדירה אותו בתור הכלי הנוכחי למיקום על לוח המשחק
     public void selectPiece(int index){
-        currentPiece = getHand().removePiece(index);
-
+        setCurrentPiece( getHand().removePiece(index));
+        System.out.print(getCurrentPiece());
+        System.out.print("");
     }
     //מחזירה את הכלי הנוכחי לידיו של השחקן, ולמעשה מבטלת אותו להצבה על לוח המשחק
     public void deselect(){
-        getHand().addNewPiece(currentPiece);
-        currentPiece = null;
+        getHand().addNewPiece(getCurrentPiece());
+         setCurrentPiece(null);
     }
-    //קובעות את קואורדינטות ה-x וה-y של היצירה הנוכחית, בהתאמה
-    public void setPieceX(int x){
-        pieceX = x;
-    }
-    public void setPieceY(int y){
-        pieceY = y;
-    }
-    //מגדירה בו-זמנית את קואורדינטות ה-x וה-y של היצירה הנוכחית
-    public void setPieceCoordinate(int x, int y){
-        pieceX = x;
-        pieceY = y;
-    }
+
 
 }
