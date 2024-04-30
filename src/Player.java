@@ -85,8 +85,6 @@ public abstract class Player{
 
     //מעדכן את הציונים של השחקן על סמך מערך הקלט
     public void updateScore(int[] score) {
-        List<ColorScore> updatedScores = new ArrayList<>();
-
         for (ColorScore cs : colorScores) {
             for (int a = 0; a < colorScores.size(); a++) {
                 if (cs.getColor() == a) {
@@ -95,13 +93,9 @@ public abstract class Player{
                         newScore = 18;
                     }
                     cs.setScore(newScore);
-                    updatedScores.add(cs);
                 }
             }
         }
-
-        colorScores.clear();
-        colorScores.addAll(updatedScores);
     }
 
     // קבלת התורים המסודרים על פי הציון

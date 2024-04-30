@@ -26,6 +26,7 @@ public class RandomStrategy extends Strategy {
                 piece = h.getPiece(pieceIndex);
             }
         } while (!legalMove);
+
     }
     //בודק אם יש צורך להחלפת יד
     private void checkHandAndTrade() {

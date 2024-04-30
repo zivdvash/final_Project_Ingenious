@@ -6,7 +6,6 @@ import java.util.PriorityQueue;
 public class Game {
 
     private Player[] players;
-
     private Player currentPlayer;
     private int[][] grid;
     private int[][] tempGrid;
@@ -22,7 +21,7 @@ public class Game {
     /*הבנאי של המחלקה `Game`. זה מאתחל משחק חדש עם שמות השחקנים, סוגי השחקנים (אנושי או מחשב) ואסטרטגיות (פשוט או אקראי).
      */
     Game(String[] names, int[] playerTypes, int[] strategies){
-        setSleepTimer(100);
+        setSleepTimer(500);
         PiecesBag = new PiecesBag();
         players = new Player[names.length];
         isGameOver = false;
@@ -93,6 +92,7 @@ public class Game {
                             currentPlayer.removeCurrentPiece();//מוחק את הנוכחי
                         }
                     }
+                    System.out.println(currentPlayer);
                     currentPlayer.move();//תעשה מהלך
                 }while(!checkLegalMove());//כל עוד המהלך לא חוקי
                 gameBoard.computerGrid(emptyGrid);//מאפס את הייצוג החזותי של לוח המשחק למצב ריק או התחלתי

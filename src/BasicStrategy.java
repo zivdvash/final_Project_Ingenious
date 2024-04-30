@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.PriorityQueue;
 
 public class BasicStrategy extends Strategy {
@@ -47,9 +48,10 @@ public class BasicStrategy extends Strategy {
         int highestPieceIndex = 0;
         int lowestScore = getGame().getCurrentPlayer().getColorScores().peek().getScore();
 
-
         ArrayList<Integer> lowestColor = new ArrayList<Integer>();
         ArrayList<Integer> oldColors = new ArrayList<Integer>();
+        ColorScore[] scoreArray = score.toArray(new ColorScore[0]);
+
         //מוצא אם יש צבע נוסף נמוך ביותר
         for (ColorScore i : getGame().getCurrentPlayer().getColorScores()) {
             if (i.getScore() == lowestScore) {
@@ -100,46 +102,46 @@ public class BasicStrategy extends Strategy {
                     }
                 }
             }
+            System.out.println(isMove);
             //אם לא נמצא מהלך מתאים
             if (!isMove) {
                 ArrayList<Integer> newLowestColor = new ArrayList<Integer>();
-                lowestScore = 19;
                 //מוסיף את כל הצבעים שהם הכי נמוכים
-                oldColors.addAll(lowestColor);
-                boolean use = true;
+               for (Integer i : lowestColor){
+                   if (!oldColors.contains(i)){
+                       oldColors.add(i);
+                   }
+               }
+                boolean found = false;
                 int a = 0;
-
                 /*מחפש את הצבע הבא הנמוך ביותר שלא נמצא בצבעים שכבר היו הנמוכים ביותר*/
-                for (ColorScore i : getGame().getCurrentPlayer().getColorScores()){//עובר על כל הצבעים
-                    use = true;
-                    for (Integer oldColor : oldColors) {//עובר על כל הצבעים הכי נמוכים
-                        if (a + 1 == oldColor) {
-                            use = false;
-                        }
+                while (a<6 && !found){
+                    for (ColorScore i : getGame().getCurrentPlayer().getColorScores()) {
+                        if (!oldColors.contains(i.getColor()))
+                            found = true;
+
+                        if(!found)
+                            a++;
+
                     }
-                    if (use && i.getScore() < lowestScore) {
-                        lowestScore = i.getScore();
-                    }
+
                 }
-                use = true;
-                a = 0;
+                if(a == 6)
+                    a-=1;
+                lowestScore = scoreArray[a].getScore();
+
                 /*מוצא את כל הצבעים שהם באותו ניקוד כמו ההכי נמוך החדש*/
-                for (ColorScore i : getGame().getCurrentPlayer().getColorScores()){
-                    use = true;
-                    for (int j = 0; j < oldColors.size(); j++) {
-                        if (a+1 == oldColors.get(j)) {
-                            use = false;
-                        }
-                    }
-                    if (use && i.getScore() == lowestScore) {
-                        newLowestColor.add(a+1);
+                for (ColorScore i : getGame().getCurrentPlayer().getColorScores()) {
+                    if (i.getScore() == lowestScore) {
+                        ColorScore cs = new ColorScore(i.getColor(),i.getScore());
+                        newLowestColor.add(cs.getColor());
                     }
                 }
                 lowestColor = newLowestColor;
+
             }
             System.out.println(isMove);
         } while (!isMove);//כל עוד לא נמצא לנו מהלך
-
         for (int x = 0; x < 30; x++) {
             for (int y = 0; y < 15; y++) {
                 for (int o = 0; o < 6; o++) {

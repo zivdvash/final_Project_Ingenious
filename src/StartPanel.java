@@ -68,7 +68,7 @@ public class StartPanel extends JPanel{
             title.setFont(new Font(Font.MONOSPACED, Font.BOLD, 26));
             this.add(title);
             this.add(new JLabel()); // Add an empty label for spacing
-            title = new JLabel("1 - medium; 2 - easy");
+            title = new JLabel("1 - easy; 2 - medium");
             title.setFont(new Font(Font.MONOSPACED, Font.BOLD, 26));
             this.add(title);
             this.add(new JLabel()); // Add an empty label for spacing
@@ -172,7 +172,7 @@ public class StartPanel extends JPanel{
     //מחזירה מערך המציין את האסטרטגיה שנבחרה עבור כל שחקן.
     //value of [0] strategy 1 default, [1] strategy 2
     public int[] getStrategies(){
-        int[] ret = new int[4];
+        int[] ret = new int[2];
         for(int c = 0; c < 2; c++){
             if(strategies[c].isEnabled()){
                 if(strategies[c].getSelectedIndex() == 0){
