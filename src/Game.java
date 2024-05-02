@@ -14,7 +14,6 @@ public class Game {
     private final PiecesBag PiecesBag;
     private boolean isGameOver;
     private Strategy[] gameStrategies;
-    private final String[] playerNames;
     private int sleepTimer;
     private Player[] p;
     private int[] sortedScores;
@@ -25,7 +24,6 @@ public class Game {
         PiecesBag = new PiecesBag();
         players = new Player[names.length];
         isGameOver = false;
-        playerNames = names;
         initializeStrategies();
         grid = new int[30][15];
         emptyGrid = new int[30][15];
