@@ -1,14 +1,12 @@
 // מקפלת את ההתנהגות של שחקן מחשב במשחק. הוא משתמש באסטרטגיה כדי לחשב את המהלכים שלו ומספק שיטות לגשת למידע על החלק הנוכחי של השחקן, המיקום והכיוון
 public class ComputerPlayer extends Player {
-    //מכריז על משתני המופע `compName` ו-`compStrategy`
-   private String compName;
-   private Strategy compStrategy;
+    private final Strategy compStrategy;
     // הבנאי 'ComputerPlayer' מאתחל שחקן מחשב עם שם נתון, אסטרטגיה ויד.
     //     - הוא קורא לבנאי של מחלקת העל 'שחקן' באמצעות מילת המפתח 'סופר' כדי לאתחל את שמו והיד של השחקן.
     //     - הוא מקצה את האסטרטגיה והשם המועברים כפרמטרים למשתני המופע `compStrategy` ו`compName`, בהתאמה.
     public ComputerPlayer(String name, Strategy s, PlayerHand h) {
         super(name, h);
-        compName = name;
+        //מכריז על משתנה`compStrategy`
         compStrategy = s;
     }
     /*שיטת `move()` אחראית על ביצוע המהלך של נגן המחשב.

@@ -14,12 +14,6 @@ public class HumanPlayer extends Player{
 
     // מציין מקום לכל פעולה ששחקן עשוי לבצע במהלך התור שלו
     public void move() {
-//		try {
-//			Thread.sleep(0);
-//		} catch (InterruptedException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
     }
     // מאפשרת לשחקן לסובב את היצירה הנוכחית בכיוון השעון או נגד כיוון השעון על סמך הכיוון שצוין. זה מעדכן את הכיוון בהתאם
     public void rotate(int direction){
@@ -40,8 +34,6 @@ public class HumanPlayer extends Player{
     //בוחרת כלי מידו של השחקן באינדקס שצוין ומגדירה אותו בתור הכלי הנוכחי למיקום על לוח המשחק
     public void selectPiece(int index){
         setCurrentPiece( getHand().removePiece(index));
-        System.out.print(getCurrentPiece());
-        System.out.print("");
     }
     //מחזירה את הכלי הנוכחי לידיו של השחקן, ולמעשה מבטלת אותו להצבה על לוח המשחק
     public void deselect(){

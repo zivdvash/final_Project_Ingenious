@@ -1,24 +1,3 @@
-/*
- * In case of Connor's untimely death:
- * 100:87 is the ratio between radius of a hexagon from the point to the radius from the side
- * 45 seems to be the functional radius of the current hexagons, even though it is set to 50
- * The makeHexagon method is borrowed from the internet, doesn't work very well, and should be repealed and replaced.
- * The Polygon array is patterned to have null spaces to represent absent hexagons, i.e. 0,null,2,null...
- *  orange = 1, yellow = 2, purple = 3, red = 4, green = 5, blue = 6
- *
-//getGridType()
-/*To do
- * Yellow Highlighting:DONE
- * Red outlines: slow mode: DONE?
- * Fix bolded hex borders:DONE
- * Colored Pieces in corners:DONE
- * Make it able to paint any color: DONE
- * UpdateGrid: take 2d array and setHex color to it and reset the grid:DONE
- * Make 2d array of hand hexes and detect clicks on them
- * Piece, Score
- */
-//getScore() pass x coordinate
-//primary hexagon
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -30,8 +9,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Rectangle2D;
-import java.util.HashMap;
-import java.util.Map;
 import javax.swing.JPanel;
 /*`GameBoard` פועלת כמרכיב החזותי והאינטראקטיבי המרכזי של המשחק. הוא מגשר על המצב הלוגי של המשחק עם המצגת הגרפית שלו, מטפל בתשומות משתמש לפעולות משחק, ומעדכן את האלמנטים החזותיים בתגובה להתקדמות המשחק, מה שמבטיח חווית שחקן מגיבה ומושכת.*/
 public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMotionListener{
@@ -47,7 +24,7 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
     9. **rotateClockwise, rotateCounterClockwise, returnPiece, scoreBox**: אובייקטים 'Rectangle2D' עבור אינטראקציה של ממשק משתמש.
     10. **משחק**: התייחסות לאובייקט המשחק.
     11. **כיוון**: מספר שלם המייצג את הכיוון של היצירה הנוכחית.
-    12. **colors, colorcoord**: מערכים המייצגים צבעים והערכים המספריים המתאימים להם.
+    12. **colors, colorcord**: מערכים המייצגים צבעים והערכים המספריים המתאימים להם.
     13. **ניקוד1, ניקוד2**: משתנים לאחסון תוצאות השחקנים.
     14. **computerGrid**: מערך דו-ממדי המייצג את הלוח של שחקן המחשב.
     */
@@ -64,10 +41,8 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
     private static final Rectangle2D rotateCounterClockwise = new Rectangle2D.Double(width/3 , length -175, 175, 175);
     private static final Rectangle2D returnPiece = new Rectangle2D.Double(width - 175, 0, 175, 175);
     private static final Rectangle2D scoreBox = new Rectangle2D.Double(width/3, 0, 175, 175);
-    private Game game;
+    private final Game game;
     private int orientation;
-    private static final Color[] colors=new Color[]{Color.ORANGE,Color.YELLOW,Color.MAGENTA,Color.RED,Color.GREEN,Color.BLUE};
-    private static final int[] colorcoord=new int[]{1,2,3,4,5,6};
     private int score1;
     private int score2;
     private int[][] computerGrid;
@@ -82,12 +57,6 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
         initializeGrid();
         makeBoard();
         makeHand();
-        for(int y = 0; y < 15; y++){ // For debugging .
-            System.out.println("");
-            for(int x = 0; x < 30;x++){
-                //System.out.print(hexColor[x][y]);
-            }
-        }
         computerGrid = new int[30][15];
         for(int y = 0; y < 15; y++){
             for(int x = 0; x < 30;x++){
@@ -114,27 +83,30 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
             g.drawRect(50,650,400,140);
             paintScore(g);
             g.setColor(pickColor(game.getCurrentPlayer().getCurrentPiece().getPrimaryHexagon().getColor()));
-            g.drawPolygon(makeHex(width/3 + 40, 50,30)); //getColor for hexagon
-            g.fillPolygon(makeHex(width/3 + 40, 50,30)); //getColor for hexagon
-            if(game.getCurrentPlayer().getCurrentPiece().getPrimaryHexagon().getColor() == game.getCurrentPlayer().getCurrentPiece().getSecondaryHexagon().getColor()){
-                score1 = score1 + score2;
-                g.setColor(Color.BLACK);
-                g2d.drawString(Integer.toString(score1), width/3 +80, 54); //getScore for the string
-                score1 = 0;
-                score2 = 0;
-            }else{
-                g.setColor(Color.BLACK);
-                g2d.drawString(Integer.toString(score1), width/3 +80, 54); //getScore for the string
-                g2d.drawString(Integer.toString(score2), width/3 +80, 129);
-                g.setColor(pickColor(game.getCurrentPlayer().getCurrentPiece().getSecondaryHexagon().getColor()));
-                g.drawPolygon(makeHex(width/3 + 40, 125,30));
-                g.fillPolygon(makeHex(width/3 + 40, 125,30));
-                score1 = 0;
-                score2 = 0;
-            }
+            g.drawPolygon(makeHex(width/3 + 40, 50)); //getColor for hexagon
+            g.fillPolygon(makeHex(width/3 + 40, 50)); //getColor for hexagon
+            ShowScore(g, g2d);
         }catch(Exception e){}
         paintBoard(g);
     }
+
+    private void ShowScore(Graphics g, Graphics2D g2d) {
+        if(game.getCurrentPlayer().getCurrentPiece().getPrimaryHexagon().getColor() == game.getCurrentPlayer().getCurrentPiece().getSecondaryHexagon().getColor()){
+            score1 = score1 + score2;
+            g.setColor(Color.BLACK);
+            g2d.drawString(Integer.toString(score1), width/3 +80, 54); //getScore for the string
+        }else{
+            g.setColor(Color.BLACK);
+            g2d.drawString(Integer.toString(score1), width/3 +80, 54); //getScore for the string
+            g2d.drawString(Integer.toString(score2), width/3 +80, 129);
+            g.setColor(pickColor(game.getCurrentPlayer().getCurrentPiece().getSecondaryHexagon().getColor()));
+            g.drawPolygon(makeHex(width/3 + 40, 125));
+            g.fillPolygon(makeHex(width/3 + 40, 125));
+        }
+        score1 = 0;
+        score2 = 0;
+    }
+
     //מחזירה את מערך hexColor 2D
     public int[][] getHexColor(){
         return hexColor;
@@ -148,12 +120,12 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
         //score drawing below
         int c=85;
         for(int x = 0; x < 6; x++){
-            handPieces[x][0] = makeScoreHex(c, 693,30);
+            handPieces[x][0] = makeScoreHex(c, 693);
             c+=65;
         }
         c = 85;
         for(int x = 0; x < 6; x++){
-            handPieces[x][1] = makeScoreHex(c, 745,30);
+            handPieces[x][1] = makeScoreHex(c, 745);
             c+=65;
         }
     }
@@ -168,10 +140,10 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
             game.getCurrentPlayer().getHand().getPiece(counter);
             int color=game.getCurrentPlayer().getHand().getPiece(counter).getSecondaryHexagon().getColor();
             g.setColor(pickColor(color));
-            g.fillPolygon(makeScoreHex(c,693,30));
+            g.fillPolygon(makeScoreHex(c,693));
             color=game.getCurrentPlayer().getHand().getPiece(counter).getPrimaryHexagon().getColor();
             g.setColor(pickColor(color));
-            g.fillPolygon(makeScoreHex(c,745,30));
+            g.fillPolygon(makeScoreHex(c,745));
             c+=65;
         }
     }
@@ -254,13 +226,13 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
     }
 
     // יוצר משושה לתצוגת הניקוד
-    private Polygon makeScoreHex(int x, int y, int z){
+    private Polygon makeScoreHex(int x, int y){
         Polygon hex = new Polygon();
         double init,value;
         for(int a = 0; a<=6; a++){
             init = Math.PI/6;
             value = Math.PI / 3.0 * a;
-            hex.addPoint((int)(Math.round(x + Math.sin(value+init) * z)), (int)(Math.round(y + Math.cos(value+init) * z)));
+            hex.addPoint((int)(Math.round(x + Math.sin(value+init) * 30)), (int)(Math.round(y + Math.cos(value+init) * 30)));
         }
         return hex;
     }
@@ -280,38 +252,39 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
                     hexagon[x][y] = null;
                 }else if((y == 5 || y == 9) && (x< 2 || x >28)){
                     hexagon[x][y] = null;
-                }else if((y == 6 || y == 8) && (x< 1 || x >29)){
+                }else if((y == 6 || y == 8) && x < 1){
                     hexagon[x][y] = null;
                 }else{
-                    if(x % 2 == 0 && y % 2 == 0){
-                        if(x >= 10 && x < 20)
-                            hexagon[x][y] = makeHex((int)((width/3 + 110)+x*87*.6*.5) - 1, (y*45 + 80), 30);
-                        else if(x>=20)
-                            hexagon[x][y] = makeHex((int)((width/3 + 110)+x*87*.6*.5) - 2, (y*45 + 80), 30);
-                        else
-                            hexagon[x][y] = makeHex((int)((width/3 + 110)+x*87*.6*.5), (y*45 + 80), 30);
-                        hexColor[x][y] = -1;
-                    }
-                    else if(!(x % 2 == 0) && !(y % 2 == 0)){
-                        if(x >= 11 && x < 21)
-                            hexagon[x][y] = makeHex((int)(((width/3 + 110)+x*87*.6 *.5)) - 1 , (y*45 + 80), 30);
-                        else if(x>=21)
-                            hexagon[x][y] = makeHex((int)(((width/3 + 110)+x*87*.6 *.5)) - 2, (y*45 + 80), 30);
-                        else
-                            hexagon[x][y] = makeHex((int)(((width/3 + 110)+x*87*.6 *.5)) , (y*45 + 80), 30);
-                        hexColor[x][y] = -1;
-                    }
+                    SetHexes(x, y);
                 }
             }
         }
     }
+//מכניס ערך התחלתי לכל משושה
+    private void SetHexes(int x, int y) {
+        if(x % 2 == 0 && y % 2 == 0){
+            if(x >= 10 && x < 20)
+                hexagon[x][y] = makeHex((int)((width/3 + 110)+ x *87*.6*.5) - 1, (y *45 + 80));
+            else if(x >=20)
+                hexagon[x][y] = makeHex((int)((width/3 + 110)+ x *87*.6*.5) - 2, (y *45 + 80));
+            else
+                hexagon[x][y] = makeHex((int)((width/3 + 110)+ x *87*.6*.5), (y *45 + 80));
+            hexColor[x][y] = -1;
+        }
+        else if(!(x % 2 == 0) && !(y % 2 == 0)){
+            if(x >= 11 && x < 21)
+                hexagon[x][y] = makeHex((int)(((width/3 + 110)+ x *87*.6 *.5)) - 1 , (y *45 + 80));
+            else if(x >=21)
+                hexagon[x][y] = makeHex((int)(((width/3 + 110)+ x *87*.6 *.5)) - 2, (y *45 + 80));
+            else
+                hexagon[x][y] = makeHex((int)(((width/3 + 110)+ x *87*.6 *.5)) , (y *45 + 80));
+            hexColor[x][y] = -1;
+        }
+    }
+
     //יוצר כלי משחק
     private void makePiece(/*Piece myPiece*/int x, int y){
-        piece = makeHex(x,y,30);
-    }
-    // בודק אם יש אריח בקואורדינטות נתונות
-    private Polygon tileChecker(int myX, int myY){// will check every polygon for set of coordinates
-        return piece;
+        piece = makeHex(x,y);
     }
     //מכוון את החלק הנוכחי
     private void orientPiece(Graphics g){
@@ -373,54 +346,60 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
     //צובע את לוח המשחק
     private void paintBoard(Graphics g){
         boolean onSpace = false;
-        boolean strategy = false; //for testing purposes
         orientation = game.getCurrentPlayer().getOrientation();
         for(int x = 1; x<30; x++){
             for(int y = 0; y<15;y++){
-                if(!(hexagon[x][y] == null)){
-                    if(x == 1 || x == 29 || x==28 || y == 0 ||  y == 14 || hexagon[x-2][y] == null || hexagon[x+2][y] == null)
-                        g.setColor(Color.GRAY);
-                    else if(y==1 || y == 13 || x == 3 || x == 27 || x== 26 || hexagon[x-4][y] == null || hexagon[x+4][y] == null)
-                        g.setColor(Color.LIGHT_GRAY);
-                    if(hexagon[x][y].contains(X,Y) ){
-                        onSpace = true;
-                        stoX = x;
-                        stoY = y;
-                        try{
-                            if(game.checkLegalMove(orientation, x, y)){
-                                makeGameBoardTempGrid(x,y, orientation);
-                                score1 = game.score(x,y,gameBoardTempGrid);
-                                score2 = game.score(game.getSecondX(orientation, x, y), game.getSecondY(orientation, x, y) , gameBoardTempGrid);
-                            }
-                        }catch(Exception e){
-
-                        }
-                    }if(computerGrid[x][y]!=0){//הצגה של ניקוד לשחקן מחשב
-                        onSpace = true;
-                        try{
-                            if(game.checkLegalMove(orientation, x, y)){
-                                makeGameBoardTempGrid(x,y,orientation);
-                                score1 = game.score(x,y , gameBoardTempGrid);
-                                score2 = game.score(game.getSecondX(orientation, x, y), game.getSecondY(orientation, x, y) ,gameBoardTempGrid);
-
-                            }
-                        }catch(Exception e){
-
-                        }
-                    }
-                    if(hexColor[x][y] != -1)
-                        g.setColor(pickColor(hexColor[x][y]));
-                    g.fillPolygon(hexagon[x][y]); //draws hex
-
-                    g.setColor(Color.BLACK);
-                    g.drawPolygon(hexagon[x][y]); // draws hex outline
-
-                    ((Graphics2D)g).setStroke(new BasicStroke(1));
-                    g.setColor(Color.WHITE);
-                }
+                onSpace = PaintBaseGrid(g, x, y, onSpace);
             }
 
         }
+        EmphasizeBotMove(g);
+        EmphasizePiece(g, onSpace);
+        g.setColor(Color.BLACK);
+        orientPiece(g);
+
+    }
+//שם את הצבעים בפינות הלוח
+    private boolean PaintBaseGrid(Graphics g, int x, int y, boolean onSpace) {
+        if(!(hexagon[x][y] == null)){
+            if(x == 1 || x == 29 || x ==28 || y == 0 ||  y == 14 || hexagon[x -2][y] == null || hexagon[x +2][y] == null)
+                g.setColor(Color.GRAY);
+            else if(y ==1 || y == 13 || x == 3 || x == 27 || x == 26 || hexagon[x -4][y] == null || hexagon[x +4][y] == null)
+                g.setColor(Color.LIGHT_GRAY);
+            if(hexagon[x][y].contains(X,Y) ){
+                onSpace = true;
+                stoX = x;
+                stoY = y;
+                getScoreToShow(x, y);
+            }if(computerGrid[x][y]!=0){//הצגה של ניקוד לשחקן מחשב
+                onSpace = true;
+                getScoreToShow(x, y);
+            }
+            if(hexColor[x][y] != -1)
+                g.setColor(pickColor(hexColor[x][y]));
+            g.fillPolygon(hexagon[x][y]); //draws hex
+
+            g.setColor(Color.BLACK);
+            g.drawPolygon(hexagon[x][y]); // draws hex outline
+
+            ((Graphics2D) g).setStroke(new BasicStroke(1));
+            g.setColor(Color.WHITE);
+        }
+        return onSpace;
+    }
+//מחשב ומציג את הצבעים בריבוע משמאל למעלה ללוח
+    private void getScoreToShow(int x, int y) {
+        try{
+            if(game.checkLegalMove(x, y)){
+                makeGameBoardTempGrid(x,y, orientation);
+                score1 = game.CalculateScore(x,y,gameBoardTempGrid);
+                score2 = game.CalculateScore(game.getSecondX(orientation, x, y), game.getSecondY(orientation, x, y) , gameBoardTempGrid);
+            }
+        }catch(Exception e){
+        }
+    }
+//מדגיש את מהלך הבוט
+    private void EmphasizeBotMove(Graphics g) {
         for(int x = 1; x<30; x++){
             for(int y = 0; y<15;y++){
                 if(!(hexagon[x][y] == null)){
@@ -428,12 +407,15 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
                         g.setColor(pickColor(computerGrid[x][y]));
                         g.fillPolygon(hexagon[x][y]);
                         g.setColor(Color.RED);
-                        ((Graphics2D)g).setStroke(new BasicStroke(5));
+                        ((Graphics2D) g).setStroke(new BasicStroke(5));
                         g.drawPolygon(hexagon[x][y]);
                     }
                 }
             }
         }
+    }
+//מסמן את חלק המשחק אצל שחקן אנושי לפני שהוא מונח
+    private void EmphasizePiece(Graphics g, boolean onSpace) {
         g.setColor(Color.CYAN);
         if(onSpace && game.getCurrentPlayer().getCurrentPiece() != null && game.getCurrentPlayer().getClass() == HumanPlayer.class){
             try{
@@ -485,14 +467,8 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
                 }
             }catch(Exception e){}
         }
-        if(strategy){
-            g.setColor(Color.RED);
-            g.drawPolygon(hexagon[9/*Game.getX()*/][9/*Game.getY()*/]);
-        }
-        g.setColor(Color.BLACK);
-        orientPiece(g);
-
     }
+
     //עדכון הלוח של שחקן המחשב
     public void computerGrid(int[][] newGrid){
         computerGrid = newGrid;
@@ -506,7 +482,7 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
         }
     }
     //מגדיר את הצבעים הראשוניים על לוח המשחק
-    private void setGrid(int x, int y, int c){ //sets intitial colors
+    private void setGrid(int x, int y, int c){ //sets initial colors
         hexColor[x][y] = c;
     }
     //מאתחל את לוח המשחק
@@ -531,22 +507,14 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
         setGrid(5,7,3);
     }
     //יוצר משושה
-    private Polygon makeHex(int x, int y, int z){ //z is currently radius of hex
+    private Polygon makeHex(int x, int y){ //z is currently radius of hex
         Polygon hex = new Polygon();
         double value;
         for(int a = 0; a<=6; a++){
             value = Math.PI / 3.0 * a;
-            hex.addPoint((int)(Math.round(x + Math.sin(value) * z)), (int)(Math.round(y + Math.cos(value) * z)));
+            hex.addPoint((int)(Math.round(x + Math.sin(value) * 30)), (int)(Math.round(y + Math.cos(value) * 30)));
         }
         return hex;
-    }
-    //קובע אם השחקן הנוכחי הוא אנושי
-    public void setIsHumanPlayer(boolean human){
-        isHumanPlayer = human;
-    }
-    //מקבל אם השחקן הנוכחי הוא אנושי
-    public void getIsHumanPlayer(boolean human){
-        isHumanPlayer = human;
     }
     // מעדכן ברציפות את לוח המשחק
     public void run() {//update mouse x and y location, or something.
@@ -561,25 +529,33 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
         for(int x = 0; x < 30; x++){
             for(int y = 0; y < 15;y++){
                 try{
-                    if(hexagon[x][y]!= null && hexagon[x][y].contains(e.getX(),e.getY())){
-
-                        if(game.getCurrentPlayer().getCurrentPiece() != null){
-                            game.setPiece(x,y);
-                        }
-                    }
-                    if(x < 6 && y < 2){
-                        if(handPieces[x][y]!= null && handPieces[x][y].contains(e.getX(),e.getY())){
-                            if(game.getCurrentPlayer().getCurrentPiece() == null){
-                                game.select(x);
-                            }
-                        }
-                    }
+                    GetAndSetPieceOnBoard(e, x, y);
 
                 }catch(Exception exception){
                 }
             }
         }
 
+        SquaresOnTheSidesHandling();
+    }
+
+    private void GetAndSetPieceOnBoard(MouseEvent e, int x, int y) {
+        if(hexagon[x][y]!= null && hexagon[x][y].contains(e.getX(), e.getY())){
+
+            if(game.getCurrentPlayer().getCurrentPiece() != null){
+                game.setPiece(x, y);
+            }
+        }
+        if(x < 6 && y < 2){
+            if(handPieces[x][y]!= null && handPieces[x][y].contains(e.getX(), e.getY())){
+                if(game.getCurrentPlayer().getCurrentPiece() == null){
+                    game.select(x);
+                }
+            }
+        }
+    }
+
+    private void SquaresOnTheSidesHandling() {
         if(game.getCurrentPlayer().getCurrentPiece() != null){
             if(rotateClockwise.contains(X,Y)){
                 rotate(1);
@@ -594,6 +570,7 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
             }
         }
     }
+
     //מטפל בתנועת עכבר
     public void mouseMoved(MouseEvent e) {
         X = e.getX();

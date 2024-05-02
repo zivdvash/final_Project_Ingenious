@@ -7,7 +7,7 @@ public class Ingenious extends GameWindow {
        - הבנאי `GameWindow` מאתחל את חלון המשחק ומרכיביו, מציג את חלונית ההתחלה כדי לאפשר למשתמש להגדיר את המשחק.
        - בהתאם לקלט של המשתמש (בין אם הוא בוחר להתחיל משחק או להיכנס למצב ניתוח אסטרטגיה), מחלקת `GameWindow` ממשיכה לאתחל את המשחק או ניתוח האסטרטגיה בהתאם.
     */
-    public static void main(String args[]){
-        GameWindow gameWindow = new GameWindow();
+    public static void main(String[] args){
+        new GameWindow();
     }
 }

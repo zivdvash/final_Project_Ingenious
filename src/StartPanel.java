@@ -9,24 +9,19 @@ import java.awt.event.ActionListener;
 public class StartPanel extends JPanel{
     private InputHandler handle;
     private JRadioButton[][] topButtons;
-    private ButtonGroup[] buttonGroups;
     private JTextField[] names;
     private JComboBox[] strategies;
-    private String[] strategy;
     private JButton play;
-    private JButton cancel;
     private boolean stratScreen;
     private boolean isCancelled;
     private boolean isPlay;
     private JRadioButton fastMode;
-    private JRadioButton slowMode;
     private int games;
     private JTextField numOfGames;
-    private StrategyAnalysisMode stratListener;
     private JLabel error;
     private int errorCounter;
 
-    boolean isContinueClicked = false;
+    private boolean isContinueClicked;
     /*בנאי:
    - מאתחל את פריסת הפאנל ומגדיר את מטפל הקלט.
    - קורא שיטות להגדרת לחצני בחירה, תיבות קלט שמות וחלונות גלילה מטה של אסטרטגיה.
@@ -34,6 +29,7 @@ public class StartPanel extends JPanel{
    - מגדיר דגלים למסכי ביטול, משחק ואסטרטגיה.
     */
     StartPanel(boolean first){
+        isContinueClicked = false;
         if(first){
             this.setSize(600,500);
             this.setLayout(new GridLayout(12,4)); // Increased rows to accommodate the buttons
@@ -79,7 +75,7 @@ public class StartPanel extends JPanel{
             play.addActionListener(handle);
             this.add(play);
 
-            cancel = new JButton("Cancel");
+            JButton cancel = new JButton("Cancel");
             cancel.setActionCommand("Cancel");
             cancel.addActionListener(handle);
             this.add(cancel);
@@ -93,7 +89,7 @@ public class StartPanel extends JPanel{
     //מגדיר וממקם את לחצני הבחירה עבור סוגי שחקנים (ללא, אנושי, מחשב).
     private void setRadioButtons(){//CALLED FROM CONSTRUCTROR
         topButtons = new JRadioButton[3][4];
-        buttonGroups = new ButtonGroup[4];
+        ButtonGroup[] buttonGroups = new ButtonGroup[4];
         for(int i = 0; i < 4; i++){
             buttonGroups[i] = new ButtonGroup();
         }
@@ -103,7 +99,7 @@ public class StartPanel extends JPanel{
                     topButtons[row][col] = new JRadioButton("None");
                 }else if(row == 1){
                     topButtons[row][col] = new JRadioButton("Human");
-                }else if(row == 2){
+                }else {
                     topButtons[row][col] = new JRadioButton("Computer");
                 }
                 buttonGroups[col].add(topButtons[row][col]);
@@ -121,16 +117,13 @@ public class StartPanel extends JPanel{
         for(int i = 0; i < 2; i++){
             names[i] = new JTextField("Player " + (i+1));
             names[i].setPreferredSize(new Dimension(10, 10));
-            if(i >= 2){
-                names[i].disable();
-            }
             this.add(names[i]);
         }
     }
     // מגדיר וממקם את תיבות המשולבות לבחירת אסטרטגיות שחקן.
     private void setStrategyBoxes(){
         strategies = new JComboBox[2];
-        strategy = new String[2];
+        String[] strategy = new String[2];
         strategy[0] = "Strategy 1";
         strategy[1] = "Strategy 2";
         for(int i = 0; i < 2; i++){
@@ -209,34 +202,18 @@ public class StartPanel extends JPanel{
         }
         return numPlayers;
     }
-    //מחזירה true אם מסך האסטרטגיה פעיל
-    public boolean strategyScreen(){
-        return stratScreen;
-    }
     /*מיישמת ActionListener לטיפול בלחיצות כפתורים ולעדכן רכיבי ממשק משתמש בהתבסס על קלט המשתמש*/
     private class InputHandler implements ActionListener{
 
         public void actionPerformed(ActionEvent arg0) {
             String clicked = arg0.getActionCommand();
             int numPlayers = numPlayers();
-            if(numPlayers < 2){//אם אין מספיק שחקנים
-                play.disable();
-                play.setForeground(Color.GRAY);
-            }else if(numPlayers >= 2){
-                play.enable();
-                play.setForeground(Color.BLACK);
-            }
-            if(clicked.equals("Cancel")){
-                isCancelled = true;
-            }else if(clicked.equals("Play")){
-                if(numPlayers >= 2){
-                    if(allComputers()){
-                        stratScreen = true;
-                    }else{
-                        isPlay = true;
-                    }
-                }
-            }
+            PlayerCheck(numPlayers);
+            StartCancelCheck(clicked, numPlayers);
+            PlayerInput();
+        }
+//מכניס ערכים לכל סוג שחקן
+        private void PlayerInput() {
             for(int col = 0;  col < 2; col++){
                 if(topButtons[0][col].isSelected()){ //if NONE
                     names[col].disable();			//no NAME
@@ -256,6 +233,32 @@ public class StartPanel extends JPanel{
                 }
             }
         }
+        //בודק האם נלחץ כפתור המשך או ביטול
+
+        private void StartCancelCheck(String clicked, int numPlayers) {
+            if(clicked.equals("Cancel")){
+                isCancelled = true;
+            }else if(clicked.equals("Play")){
+                if(numPlayers >= 2){
+                    if(allComputers()){
+                        stratScreen = true;
+                    }else{
+                        isPlay = true;
+                    }
+                }
+            }
+        }
+//בודק אם יש מספיק שחקנים בשביל להתחיל משחק
+        private void PlayerCheck(int numPlayers) {
+            if(numPlayers < 2){//אם אין מספיק שחקנים
+                play.disable();
+                play.setForeground(Color.GRAY);
+            }else {
+                play.enable();
+                play.setForeground(Color.BLACK);
+            }
+        }
+//בודק אם כל השחקנים ממוחשבים
         private boolean allComputers(){
             for(int col = 0; col < 2; col++){
                 if(topButtons[1][col].isSelected()){//if there is a human
@@ -269,11 +272,11 @@ public class StartPanel extends JPanel{
     public void openAnalysisMode(){
         this.removeAll();
         this.setLayout(new GridLayout(5,2));
-        stratListener = new StrategyAnalysisMode();
+        StrategyAnalysisMode stratListener = new StrategyAnalysisMode();
 
         ButtonGroup fastOrSlow = new ButtonGroup();
         fastMode = new JRadioButton("Fast Mode");
-        slowMode= new JRadioButton("Slow Mode");
+        JRadioButton slowMode = new JRadioButton("Slow Mode");
         fastOrSlow.add(fastMode);
         fastOrSlow.add(slowMode);
         fastMode.setSelected(true);

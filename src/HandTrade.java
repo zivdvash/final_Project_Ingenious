@@ -6,13 +6,7 @@ import javax.swing.*;
 // מחלקה זו מטפלת בעיקר ב-GUI ובאינטראקציה של המשתמש למסחר ביד, עם תלות חיצונית מינימלית.
 public class HandTrade extends JFrame implements ActionListener{
 
-    private JFrame frame;
-    private JPanel pan;
-    private JPanel pan1;
-    private JPanel pan2;
-    private JLabel label;
-    private JButton trade;
-    private JButton cancel;
+    private final JFrame frame;
     public boolean isTrade;
     private boolean isClosed;
     /*`HandTrade()` Constructor**:
@@ -22,16 +16,16 @@ public class HandTrade extends JFrame implements ActionListener{
 */
     HandTrade(){
         frame = new JFrame("Ingenious");
-        pan = new JPanel();
-        pan1 = new JPanel();
-        pan2 = new JPanel();
+        JPanel pan = new JPanel();
+        JPanel pan1 = new JPanel();
+        JPanel pan2 = new JPanel();
         isTrade = false;
         isClosed = false;
-        label = new JLabel("Would you like to trade your hand?");
-        trade = new JButton("Trade");
+        JLabel label = new JLabel("Would you like to trade your hand?");
+        JButton trade = new JButton("Trade");
         trade.setActionCommand("Trade");
         trade.addActionListener(this);
-        cancel = new JButton("Cancel");
+        JButton cancel = new JButton("Cancel");
         cancel.setActionCommand("Cancel");
         cancel.addActionListener(this);
         pan.setLayout(new GridLayout(1,1));

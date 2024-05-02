@@ -4,7 +4,7 @@ import java.util.Collections;
 public class PiecesBag
 {
     //`ArrayList` בשם `Pieces` כדי לאחסן את החלקים בתיק
-    private ArrayList<Piece> Pieces=new ArrayList<Piece>();
+    private final ArrayList<Piece> Pieces=new ArrayList<>();
 
     //מאתחל את תיק האחיזה על ידי יצירת חלקים וערבוב שלהם
     PiecesBag()
@@ -52,11 +52,6 @@ public class PiecesBag
     public Piece drawPiece(int i)
     {
         return (Pieces.remove(i));
-    }
-    //מחזירה את `ArrayList` המכילה את החלקים בתיק האחיזה
-    public ArrayList<Piece> getBag()
-    {
-        return Pieces;
     }
     //מוסיפה חתיכה לתיק האחיזה
     public void addPiece(Piece p)

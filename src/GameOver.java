@@ -14,11 +14,10 @@ public class GameOver extends JFrame implements ActionListener{
     //takes a string of the length the # of players,
     //and is order of players: [0] == first place, [1] == second place etc
     private boolean cancel;
-    private String[] players;
-    private Player[] orderOfPlayers;
-    private int[] Scores;
-    private JPanel pan, pan1;
-	/*קונסטרוקטור ואיתחול
+    private final String[] players;
+    private final Player[] orderOfPlayers;
+    private final JPanel pan;
+    /*קונסטרוקטור ואיתחול
 	- **שדות**: המחלקה מתחזקת מספר שדות, כולל דגלים (`ביטול בוליאני`), מערכים של אובייקטים של `שחקן` והניקודים שלהם ורכיבי `JPanel` לארגון תוכן.
 	- **קונסטרוקטור `GameOver(Player[] orderOfPlayers, int[] scores)`**: בנאי זה מקבל מערך של אובייקטים `Player` ממוינים לפי הדירוג שלהם והציונים התואמים להם. זה מאתחל את רכיבי ה-GUI כדי להציג את המשחק על המסך, כולל דירוגי שחקנים, תוצאות וכפתור dismiss.
 	*/
@@ -35,9 +34,8 @@ public class GameOver extends JFrame implements ActionListener{
         for(int a = 0; a < orderOfPlayers.length; a ++){
             players[a]=orderOfPlayers[a].getName();
         }
-        Scores=scores;
         pan = new JPanel();
-        pan1 = new JPanel();
+        JPanel pan1 = new JPanel();
         ScorePanel scorePanel = new ScorePanel();
         pan.setSize(2000,2000);
         pan.setLayout(new GridLayout(3+numPlayers,2));
@@ -61,17 +59,7 @@ public class GameOver extends JFrame implements ActionListener{
 
         Color[] colors = colorRanks(numPlayers);
 
-        for(int i = 0; i < numPlayers; i++){
-            JLabel player = new JLabel(orderOfPlayers[i].getName());
-            player.setFont(new Font(Font.MONOSPACED, Font.BOLD, 24));
-            player.setForeground(colors[i]);
-            JLabel score = new JLabel("" + scores[i]);
-            score.setFont(new Font(Font.MONOSPACED, Font.BOLD, 24));
-            score.setForeground(colors[i]);
-
-            pan.add(player);
-            pan.add(score);
-        }
+        EnterPlayersOutcome(orderOfPlayers, scores, numPlayers, colors);
         pan.add(dismiss);
 
         pan1.setLayout(new GridLayout(1,2));
@@ -84,6 +72,20 @@ public class GameOver extends JFrame implements ActionListener{
         this.setVisible(true);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+    }
+
+    private void EnterPlayersOutcome(Player[] orderOfPlayers, int[] scores, int numPlayers, Color[] colors) {
+        for(int i = 0; i < numPlayers; i++){
+            JLabel player = new JLabel(orderOfPlayers[i].getName());
+            player.setFont(new Font(Font.MONOSPACED, Font.BOLD, 24));
+            player.setForeground(colors[i]);
+            JLabel score = new JLabel("" + scores[i]);
+            score.setFont(new Font(Font.MONOSPACED, Font.BOLD, 24));
+            score.setForeground(colors[i]);
+
+            pan.add(player);
+            pan.add(score);
+        }
     }
 
     //יוצר מערך `Color` כדי להבדיל ויזואלית בין דרגות השחקנים.

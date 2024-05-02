@@ -3,24 +3,24 @@ import java.util.PriorityQueue;
 
 public class RandomStrategy extends Strategy {
     private Piece piece;
-    private int xCoord;
-    private int yCoord;
+    private int xCord;
+    private int yCord;
     private int orientation;
     private int pieceIndex;
     //מאתחל את האובייקט `RandomStrategy` על ידי קריאה לבנאי מחלקת העל (`אסטרטגיה`) עם אובייקט `Game` המסופק.
     RandomStrategy(Game g) {
         super(g);
     }
-    /*שיטה זו יוצרת קואורדינטות אקראיות `(xCoord, yCoord)` בתוך גבולות לוח המשחק וכיוון אקראי לכלי. הוא בודק אם המהלך שנוצר חוקי באמצעות שיטת `checkLegalMove()`. אם המהלך חוקי, הוא מגדיר את 'legalMove' ל'true' ובוחר באופן אקראי חתיכה מידו של השחקן. תהליך זה נמשך עד למציאת מהלך חוקי.
+    /*שיטה זו יוצרת קואורדינטות אקראיות `(xCord, yCord)` בתוך גבולות לוח המשחק וכיוון אקראי לכלי. הוא בודק אם המהלך שנוצר חוקי באמצעות שיטת `checkLegalMove()`. אם המהלך חוקי, הוא מגדיר את 'legalMove' ל'true' ובוחר באופן אקראי חתיכה מידו של השחקן. תהליך זה נמשך עד למציאת מהלך חוקי.
      */
     public void calculateMove(PlayerHand h, PriorityQueue<ColorScore> colorScores) {
         checkHandAndTrade();
         boolean legalMove = false;
         do {
-            xCoord = (int)(Math.random() * 30);
-            yCoord = (int)(Math.random() * 15);
+            xCord = (int)(Math.random() * 30);
+            yCord = (int)(Math.random() * 15);
             orientation = (int)(Math.random() * 6);
-            if (checkLegalMove(xCoord, yCoord, orientation)) {
+            if (checkLegalMove(xCord, yCord, orientation)) {
                 legalMove = true;
                 pieceIndex = (int)(Math.random() * h.getSize());
                 piece = h.getPiece(pieceIndex);
@@ -34,8 +34,8 @@ public class RandomStrategy extends Strategy {
             getGame().getCurrentPlayer().tradeHand();
         }
     }
-    /* שיטה זו בודקת אם המהלך שנוצר `(CoordX, CoordY)` עם הכיוון הנתון הוא חוקי. זה בודק כל כיוון אפשרי כדי להבטיח שהצבת יצירה בקואורדינטות שצוינו לא תפר שום כללי המשחק. אם המהלך חוקי, הוא מחזיר 'נכון'; אחרת, הוא מחזיר 'false'.
-    כל תנאי אם מותאם לכיוון ספציפי של חלק ובודק אם הצבת חלק בכיוון זה בקואורדינטות הנתונות (CoordX, CoordY) היא חוקית (כלומר, שני המשושים שבהם החתיכה ימוקם ריקים, מסומנים ב-1 ב-game.grid).
+    /* שיטה זו בודקת אם המהלך שנוצר `(CordX, CordY)` עם הכיוון הנתון הוא חוקי. זה בודק כל כיוון אפשרי כדי להבטיח שהצבת יצירה בקואורדינטות שצוינו לא תפר שום כללי המשחק. אם המהלך חוקי, הוא מחזיר 'נכון'; אחרת, הוא מחזיר 'false'.
+    כל תנאי אם מותאם לכיוון ספציפי של חלק ובודק אם הצבת חלק בכיוון זה בקואורדינטות הנתונות (CordX, CordY) היא חוקית (כלומר, שני המשושים שבהם החתיכה ימוקם ריקים, מסומנים ב-1 ב-game.grid).
     להלן הסבר על מה שכל תנאי בודק, בהתחשב באופי המשושה של הרשת:
     כיוון 0: זה מרמז שהיצירה מכוונת כך שהמשושה השני שלה נמצא מצפון-מערב לראשון. התנאי בודק אם המיקום המיועד של היצירה והתא מצפון-מערב לו הם גם ריקים וגם בגבולות הרשת.
     כיוון 1: לכיוון זה יש את המשושה השני מצפון מזרח לראשון. הוא מאמת את הריקנות של תא המטרה והתא מצפון-מזרח לו, ומבטיח שהם נמצאים בגבולות העליונים והימניים של הרשת.
@@ -43,24 +43,24 @@ public class RandomStrategy extends Strategy {
     כיוון 3: בכיוון זה, היצירה ממוקמת עם המשושה השני מדרום מזרח לראשון. הוא בודק את הזמינות של תא היעד ושל תא היעד הדרום-מזרחי, ונשאר בתוך הקצוות התחתונים והימניים של הרשת.
     כיוון 4: זה כולל את היצירה עם המשושה השני שלה מדרום-מערב לראשון. התנאי מאשר שגם המיקום המיועד וגם התא הדרום-מערבי ריקים ובגבולות הרשת השמאלית והתחתון.
     כיוון 5: היצירה מיושרת אופקית אך נמשכת שמאלה, כשהמשושה השני שני שלבים משמאל לראשון. זה בודק את הריקנות והגבולות בצד שמאל של הרשת.
-    קואורדינטות הרשת CoordX ו-CoordY מייצגות את המיקומים על ייצוג דו-ממדי של רשת משושה, כאשר גודל הרשת נחשב למשושים של 30x15. הבדיקות עבור CoordX ו-CoordY מבטיחות שהיצירה לא יוצאת מגבולות הרשת כאשר היא מונחת.
-    CoordX > 0 ו-CoordX < 29 משמשים לבדיקת גבולות אופקיים, בהתחשב בכך שהיצירה יכולה להרחיב משושה אחד לכל צד (או שני משושים ימינה בכיוון 2).
-    CoordY > 0 ו-CoordY < 14 בודקים גבולות אנכיים, ומבטיחים שהיצירה אינה חורגת מעבר לחלק העליון או התחתון של הרשת.
-    הבדיקות game.grid[CoordX][CoordY] == -1 מוודאות שתא משושה ריק לפני שממקמים שם חתיכה. מערכת זו מאפשרת אסטרטגיית מיקום רב-תכליתית המתאימה לרשת המשושה של המשחק, ומאפשרת שש כיוונים אפשריים למיקום חלקים ומבטיחה שכל מהלך עומד בכללי המשחק למיקום חוקי.
+    קואורדינטות הרשת CordX ו-CordY מייצגות את המיקומים על ייצוג דו-ממדי של רשת משושה, כאשר גודל הרשת נחשב למשושים של 30x15. הבדיקות עבור CordX ו-CordY מבטיחות שהיצירה לא יוצאת מגבולות הרשת כאשר היא מונחת.
+    CordX > 0 ו-CordX < 29 משמשים לבדיקת גבולות אופקיים, בהתחשב בכך שהיצירה יכולה להרחיב משושה אחד לכל צד (או שני משושים ימינה בכיוון 2).
+    CordY > 0 ו-CordY < 14 בודקים גבולות אנכיים, ומבטיחים שהיצירה אינה חורגת מעבר לחלק העליון או התחתון של הרשת.
+    הבדיקות game.grid[CordX][CordY] == -1 מוודאות שתא משושה ריק לפני שממקמים שם חתיכה. מערכת זו מאפשרת אסטרטגיית מיקום רב-תכליתית המתאימה לרשת המשושה של המשחק, ומאפשרת שש כיוונים אפשריים למיקום חלקים ומבטיחה שכל מהלך עומד בכללי המשחק למיקום חוקי.
     */
-    public boolean checkLegalMove(int CoordX, int CoordY, int orientation) {
+public boolean checkLegalMove(int CordX, int CordY, int orientation) {
         // Modified to use the orientation parameter
-        if (orientation==0 && CoordX > 0 && CoordY > 0 && getGame().getGrid()[CoordX][CoordY]==-1 && getGame().getGrid()[CoordX-1][CoordY-1]==-1) {
+        if (orientation==0 && CordX > 0 && CordY > 0 && getGame().getGrid()[CordX][CordY]==-1 && getGame().getGrid()[CordX-1][CordY-1]==-1) {
             return true;
-        } else if (orientation==1 && CoordX < 29 && CoordY > 0 && getGame().getGrid()[CoordX][CoordY]==-1 && getGame().getGrid()[CoordX+1][CoordY-1]==-1) {
+        } else if (orientation==1 && CordX < 29 && CordY > 0 && getGame().getGrid()[CordX][CordY]==-1 && getGame().getGrid()[CordX+1][CordY-1]==-1) {
             return true;
-        } else if (orientation==2 && CoordX < 28 && getGame().getGrid()[CoordX][CoordY]==-1 && getGame().getGrid()[CoordX+2][CoordY]==-1) {
+        } else if (orientation==2 && CordX < 28 && getGame().getGrid()[CordX][CordY]==-1 && getGame().getGrid()[CordX+2][CordY]==-1) {
             return true;
-        } else if (orientation==3 && CoordX < 29 && CoordY < 14 && getGame().getGrid()[CoordX][CoordY]==-1 && getGame().getGrid()[CoordX+1][CoordY+1]==-1) {
+        } else if (orientation==3 && CordX < 29 && CordY < 14 && getGame().getGrid()[CordX][CordY]==-1 && getGame().getGrid()[CordX+1][CordY+1]==-1) {
             return true;
-        } else if (orientation==4 && CoordX > 0 && CoordY < 14 && getGame().getGrid()[CoordX][CoordY] == -1 && getGame().getGrid()[CoordX-1][CoordY+1] == -1) {
+        } else if (orientation==4 && CordX > 0 && CordY < 14 && getGame().getGrid()[CordX][CordY] == -1 && getGame().getGrid()[CordX-1][CordY+1] == -1) {
             return true;
-        } else if (orientation==5 && CoordX > 1 && getGame().getGrid()[CoordX][CoordY] == -1 && getGame().getGrid()[CoordX-2][CoordY] == -1) {
+        } else if (orientation==5 && CordX > 1 && getGame().getGrid()[CordX][CordY] == -1 && getGame().getGrid()[CordX-2][CordY] == -1) {
             return true;
         }
         return false;
@@ -73,10 +73,10 @@ public class RandomStrategy extends Strategy {
         return piece;
     }
     public int getXCoordinate() {
-        return xCoord;
+        return xCord;
     }
     public int getYCoordinate() {
-        return yCoord;
+        return yCord;
     }
     public int getOrientation() {
         return orientation;

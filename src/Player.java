@@ -3,13 +3,12 @@ import java.util.*;
 // מחלקה אבסטרקטית המייצגת שחקן במשחק
 public abstract class Player{
     // יד השחקן
-    private PlayerHand hand;
+    private final PlayerHand hand;
     // שם השחקן
-    private String name;
-    private Comparator<ColorScore> comparator = Comparator.comparingInt(ColorScore::getScore);
+    private final String name;
 
     // צבעים מסודרים לפי הציון
-    private PriorityQueue<ColorScore> colorScores = new PriorityQueue<>(comparator);
+    private PriorityQueue<ColorScore> colorScores;
     // האם זה תור השחקן הנוכחי
     private boolean isCurrentTurn;
     // האם השחקן השלים את תורו
@@ -28,7 +27,8 @@ public abstract class Player{
         name = name1;
         // הגדרת תורים מסודרים על פי הציון
 
-        colorScores = new PriorityQueue<>(Comparator.comparingInt(ColorScore::getScore));
+        Comparator<ColorScore> comparator = Comparator.comparingInt(ColorScore::getScore);
+        colorScores = new PriorityQueue<>(comparator);
         for(int i = 0; i<6; i++){
             ColorScore C = new ColorScore(i,0);
             colorScores.offer(C);
@@ -51,7 +51,7 @@ public abstract class Player{
     public boolean checkHand() {
         int lowestScore = colorScores.peek().getScore();
         //checks for lowest scoring color
-        ArrayList<Integer> lowestColors = new ArrayList<Integer>();
+        ArrayList<Integer> lowestColors = new ArrayList<>();
 
         for (ColorScore i: colorScores){
             if(i.getScore() == lowestScore)
@@ -60,12 +60,12 @@ public abstract class Player{
         //lowestColor (lowest scoring color) is finally determined
         //System.out.println(lowestColor);
         for (int count = 0; count < hand.getSize(); count++) {
-            for(int a = 0; a < lowestColors.size(); a++){
+            for (Integer lowestColor : lowestColors) {
                 //check to see if the lowest scoring color (lowestColor) is NOT in the hand/rack
                 //if lowestColor is in the hand, checkHand returns false;
-                if (hand.getPiece(count).getPrimaryHexagon().getColor() - 1 == lowestColors.get(a) /*lowestColor*/)
+                if (hand.getPiece(count).getPrimaryHexagon().getColor() - 1 == lowestColor /*lowestColor*/)
                     return false;
-                if (hand.getPiece(count).getSecondaryHexagon().getColor() - 1== lowestColors.get(a) /*lowestColor*/)
+                if (hand.getPiece(count).getSecondaryHexagon().getColor() - 1 == lowestColor /*lowestColor*/)
                     return false;
             }
 
@@ -85,6 +85,8 @@ public abstract class Player{
 
     //מעדכן את הציונים של השחקן על סמך מערך הקלט
     public void updateScore(int[] score) {
+        List<ColorScore> updatedScores = new ArrayList<>();
+
         for (ColorScore cs : colorScores) {
             for (int a = 0; a < colorScores.size(); a++) {
                 if (cs.getColor() == a) {
@@ -93,37 +95,26 @@ public abstract class Player{
                         newScore = 18;
                     }
                     cs.setScore(newScore);
+                    updatedScores.add(cs);
                 }
             }
         }
+
+        colorScores.clear();
+        colorScores.addAll(updatedScores);
     }
 
     // קבלת התורים המסודרים על פי הציון
     public PriorityQueue<ColorScore> getColorScores() {
         return colorScores;
     }
-
-    // האם זה תור השחקן הנוכחי
-    public boolean getCurrentTurn() {
-        return isCurrentTurn;
-    }
-
     // הגדרת תור השחקן
     public void setCurrentTurn(boolean bool) {
         isCurrentTurn = bool;
     }
-
-    // האם השחקן השלים את תורו
-    public boolean getTurnComplete() {
-        return isTurnComplete;
-    }
-
     // הגדרת השלמת התור של השחקן
     public void setTurnComplete(boolean bool) {
         isTurnComplete = bool;
-    }
-    public void setColorScores(PriorityQueue<ColorScore> colorScores) {
-        this.colorScores = colorScores;
     }
 
     // קבלת כיוון החלק של השחקן
