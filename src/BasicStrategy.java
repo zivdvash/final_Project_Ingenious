@@ -76,7 +76,6 @@ public class BasicStrategy extends Strategy {
             }
         } while (!isMove);//כל עוד לא נמצא לנו מהלך
         FindBestMove(returnValues,lowestColors);
-        System.out.println("High Score" + highestScore);
         InsertHighestMove(highestPieceIndex, hand, highestX, highestY, highestOrientation);
         makeTempGrid(highestOrientation,highestX, highestY,hand.getPiece(pieceIndex).getPrimaryHexagon().getColor(),hand.getPiece(pieceIndex).getSecondaryHexagon().getColor());
         printBestMoveGrid();
@@ -259,11 +258,11 @@ public class BasicStrategy extends Strategy {
         return piece;
     }
 
-    public int getXCoordinate() {
+    public int getXCordinate() {
         return xCord;
     }
 
-    public int getYCoordinate() {
+    public int getYCordinate() {
         return yCord;
     }
 

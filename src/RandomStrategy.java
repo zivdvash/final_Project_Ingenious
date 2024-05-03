@@ -72,10 +72,10 @@ public boolean checkLegalMove(int CordX, int CordY, int orientation) {
     public Piece getPiece() {
         return piece;
     }
-    public int getXCoordinate() {
+    public int getXCordinate() {
         return xCord;
     }
-    public int getYCoordinate() {
+    public int getYCordinate() {
         return yCord;
     }
     public int getOrientation() {

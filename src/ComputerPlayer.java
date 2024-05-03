@@ -18,8 +18,8 @@ public class ComputerPlayer extends Player {
         compStrategy.calculateMove(getHand(), getColorScores());
         setCurrentPiece( compStrategy.getPiece());
         getHand().removePiece(compStrategy.getPieceIndex());
-        setPieceX(compStrategy.getXCoordinate()) ;
-        setPieceY(compStrategy.getYCoordinate()) ;
+        setPieceX(compStrategy.getXCordinate()) ;
+        setPieceY(compStrategy.getYCordinate()) ;
         setOrientation(compStrategy.getOrientation());
     }
     /*getCurrentPiece()`: מחזירה את היצירה הנוכחית שנגן המחשב מחזיק.

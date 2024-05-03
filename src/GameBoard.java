@@ -538,7 +538,7 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
 
         SquaresOnTheSidesHandling();
     }
-
+//שם את החלק במקום הנכון על הלוח או שם את החלק ביד השחקן בהתאם לפעולות השחקן
     private void GetAndSetPieceOnBoard(MouseEvent e, int x, int y) {
         if(hexagon[x][y]!= null && hexagon[x][y].contains(e.getX(), e.getY())){
 
@@ -554,7 +554,7 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
             }
         }
     }
-
+//מייצג את הפעולות של הריבועי מצידי הלוח
     private void SquaresOnTheSidesHandling() {
         if(game.getCurrentPlayer().getCurrentPiece() != null){
             if(rotateClockwise.contains(X,Y)){
