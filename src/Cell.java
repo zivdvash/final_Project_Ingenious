@@ -88,17 +88,11 @@ public class Cell {
     }
 
 
-
-    public boolean getIsborder() {
-        return isborder;
-    }
-
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Cell: ").append(formatCoordinate());
         sb.append(", Color: ").append(getColor());
-        sb.append(", isBorder: ").append(isborder);
         sb.append(" ");
         return sb.toString();
     }

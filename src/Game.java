@@ -1,16 +1,17 @@
+import java.awt.*;
 import java.util.*;
 
 /*מחלקת 'משחק' היא לב ליבה של אפליקציית המשחק, שבה מנוהלים הכללים, ההתקדמות ומצבי המשחק. הוא מתזמר כיצד שחקנים מקיימים אינטראקציה עם המשחק, מעבד מהלכים, שומר על מצב לוח המשחק ובסופו של דבר קובע את תוצאת המשחק. באמצעות השיטות שלו, הוא מטמיע את ההיגיון של משחק אסטרטגיה מבוסס תורות, ומספק מסגרת למשחק הכוללת ניהול תור, פעולות שחקן, שמירת תוצאות ומעברי מצב משחק.*/
 public class Game {
 
     private static final int WHITE_CELL_COLOR = -1;
+    private static final int MAX_SCORE = 18;
+    private static final int MAX_HAND_PIECES = 18;
     private final Player[] players;
     private Player currentPlayer;
     private final Cell[][] staticBoard = new Cell[15][30];
     private final HashSet<Cell> dynamicBoard;
 
-    //private Map<Cell, Map<Cell, Direction>> grid;
-    //private Map<Cell, Map<Cell, Direction>> tempGrid;
     private final int[][] emptyGrid;
     private final GameBoard gameBoard;
     private final PiecesBag PiecesBag;
@@ -96,9 +97,9 @@ public class Game {
         // determines the suitable directions array, according to the row
         int[][] directions = x <= 3 ? directionsUpperPart : x >= 5 ? directionsLowerPart : directionsMiddleRow;
 
-        for (int i = 0; i < directions.length; i++) {
-            int newX = x + directions[i][0];
-            int newY = y + directions[i][1];
+        for (int[] direction : directions) {
+            int newX = x + direction[0];
+            int newY = y + direction[1];
             Cell neighbor = staticBoard[newX][newY];
             if (neighbor != null) {
                 neighbors.add(neighbor);
@@ -173,7 +174,7 @@ public class Game {
                 MakeSingleMove();
                 SaveGridForComputerPlayer();
                 currentPlayer.updateScore(getTurnScore(currentPlayer.getOrientation(), currentPlayer.getPieceX(), currentPlayer.getPieceY()));//עדכון נקודות
-
+                //שיטה זו מעדכנת את לוח המשחק עם לוח חדש
                 HashSet<Cell> newCells = createNewCells(currentPlayer.getOrientation(), currentPlayer.getPieceX(), currentPlayer.getPieceY());//עדכן לצמיתות את הייצוג הפנימי של המשחק של הלוח עם המהלך של השחקן הנוכחי.
                 dynamicBoard.addAll(newCells);
 
@@ -209,7 +210,7 @@ public class Game {
         for (ColorScore x : currentPlayer.getColorScores()) {
             for (ColorScore i : startScores) {
                 if (i.getColor() == x.getColor()) {
-                    if (x.getScore() == 18 && i.getScore() < 18) {//בודק האם מגיע עוד תור
+                    if (x.getScore() == MAX_SCORE && i.getScore() < MAX_SCORE) {//בודק האם מגיע עוד תור
                         isSecondPlay = true;
                     }
                 }
@@ -222,7 +223,7 @@ public class Game {
         if(!isSecondPlay){
             do{
                 currentPlayer.addNewPiece();//אם הוא לא שיחק שוב תוסיף ותוריד חלק
-            }while(currentPlayer.getHand().getSize() < 6);
+            }while(currentPlayer.getHand().getSize() < MAX_HAND_PIECES);
         }
         if(extraTern != null){//אם צריך אז לסגור מסך
             extraTern.dispose();
@@ -330,10 +331,10 @@ public class Game {
             j++;
         }
     }
-    //מעביר את שני מערכ הניקוד למטריצה לצורך נוחות בהשוואה
+    //מעביר את שני מערכי הניקוד למטריצה לצורך נוחות בהשוואה
     private static void SetScoresMatrix(int[][] score, int[] a, int[] b) {
         for (int i=0; i<2; i++) {
-            for (int j=0; j<6; j++) {
+            for (int j=0; j<MAX_HAND_PIECES; j++) {
                 if (i==0) {
                     score[i][j]= a[j];
                 }
@@ -362,9 +363,6 @@ public class Game {
     public int[] getSortedScores() {
         return sortedScores;
     }
-    //שיטה זו מעדכנת את לוח המשחק עם לוח חדש
-
-
     // שיטה זו מחזירה את לוח המשחק
     public GameBoard getGameBoard(){
         return gameBoard;
@@ -404,62 +402,62 @@ public class Game {
     // שיטה זו מחשבת את הניקוד לתורו של השחקן הנוכחי
     public int[] getTurnScore(int o, int x, int y){
         int[] newScore = {0,0,0,0,0,0};
-        makeTempGrid(o,x,y);
-        newScore[currentPlayer.getCurrentPiece().getPrimaryHexagon().getColor() - 1] += CalculateScore(x,y,tempGrid);
-        newScore[currentPlayer.getCurrentPiece().getSecondaryHexagon().getColor() - 1] += CalculateScore(getSecondX(o,x,y),getSecondY(o,x,y),tempGrid);
+        //makeTempGrid(o,x,y);
+        newScore[currentPlayer.getCurrentPiece().getPrimaryHexagon().getColor() - 1] += CalculateScore(x,y,dynamicBoard);
+        newScore[currentPlayer.getCurrentPiece().getSecondaryHexagon().getColor() - 1] += CalculateScore(getSecondX(o,x,y),getSecondY(o,x,y),dynamicBoard);
         return newScore;
     }
     //שיטה זו יוצרת לוח זמני לחישובים
-    public void makeTempGrid(int o, int x, int y){
-        tempGrid = new int[30][15];
-        for (int X = 0; X < 30; X ++){
-            for (int Y = 0; Y < 15; Y ++){
-                if(createNewCells(o,x,y)[X][Y] == 0){
-                    tempGrid[X][Y] = grid[X][Y];
-                }else{
-                    tempGrid[X][Y] = createNewCells(o,x,y)[X][Y];
-                }
-            }
-        }
+    //לא נראלי שצריך כי עכשיו יש CELLS
+    /*    public void makeTempGrid(int o, int x, int y){
+        HashSet<Cell> cells =
+
     }
+    */
+
     // שיטה זו מחשבת את הניקוד עבור הצבת חלק על הלוח
-    public int CalculateScore(int xInit, int yInit, int[][] tempGrid) {
+    public int CalculateScore(int xInit, int yInit, HashSet<Cell> tempGrid) {
         int score = 0;
         int x=xInit;
         int y=yInit;
-        int color = tempGrid[x][y];
-        while ((x-2)>=0 && grid[x-2][y]==color) {
+        int color = -1;
+        for (Cell cell : tempGrid) {
+            if (x == cell.getX() && y == cell.getY())
+                color = cell.getColor();
+        }
+
+        while ((x-2)>=0 && staticBoard[x-2][y].getColor() == color) {
             x-=2;
             score+=1;
         }
         x=xInit;
-        while ((x+2)<30 && grid[x+2][y]==color) {
+        while ((x+2)<30 && staticBoard[x+2][y].getColor()==color) {
             x+=2;
             score+=1;
         }
         x=xInit;
-        while ((x-1)>=0 && (y-1)>=0 && grid[x-1][y-1]==color) {
+        while ((x-1)>=0 && (y-1)>=0 && staticBoard[x-1][y-1].getColor()==color) {
             x-=1;
             y-=1;
             score+=1;
         }
         x=xInit;
         y=yInit;
-        while ((x+1)<30 && (y-1)>=0 && grid[x+1][y-1]==color) {
+        while ((x+1)<30 && (y-1)>=0 && staticBoard[x+1][y-1].getColor()==color) {
             x+=1;
             y-=1;
             score+=1;
         }
         x=xInit;
         y=yInit;
-        while ((x-1)>=0 && (y+1)<15 && grid[x-1][y+1]==color) {
+        while ((x-1)>=0 && (y+1)<15 && staticBoard[x-1][y+1].getColor()==color) {
             x-=1;
             y+=1;
             score+=1;
         }
         x=xInit;
         y=yInit;
-        while ((x+1)<30 && (y+1)<15 && grid[x+1][y+1]==color) {
+        while ((x+1)<30 && (y+1)<15 && staticBoard[x+1][y+1].getColor()==color) {
             x+=1;
             y+=1;
             score+=1;
@@ -481,42 +479,42 @@ public class Game {
                 if(CoordX > -1 && CoordY > -1) {
                     if (currentPlayer.getOrientation() == 0) {
                         if (CoordX > 0 && CoordY > 0) {
-                            if (grid[CoordX][CoordY] == -1 && grid[(CoordX - 1)][(CoordY - 1)] == -1) {
+                            if (staticBoard[CoordX][CoordY].getColor() == -1 && staticBoard[(CoordX - 1)][(CoordY - 1)].getColor() == -1) {
                                 if (checkAround(color1, CoordX, CoordY) || checkAround(color2, CoordX - 1, CoordY - 1))
                                     return true;
                             }
                         }
                     } else if (currentPlayer.getOrientation() == 1) {
                         if (CoordX < 29 && CoordY > 0) {
-                            if (grid[CoordX][CoordY] == -1 && grid[(CoordX + 1)][(CoordY - 1)] == -1) {
+                            if (staticBoard[CoordX][CoordY].getColor()  == -1 && staticBoard[(CoordX + 1)][(CoordY - 1)].getColor() == -1) {
                                 if (checkAround(color1, CoordX, CoordY) || checkAround(color2, CoordX + 1, CoordY - 1))
                                     return true;
                             }
                         }
                     } else if (currentPlayer.getOrientation() == 2) {
                         if (CoordX < 28) {
-                            if (grid[CoordX][CoordY] == -1 && grid[(CoordX + 2)][(CoordY)] == -1) {
+                            if (staticBoard[CoordX][CoordY].getColor() == -1 && staticBoard[(CoordX + 2)][(CoordY)].getColor() == -1) {
                                 if (checkAround(color1, CoordX, CoordY) || checkAround(color2, CoordX + 2, CoordY))
                                     return true;
                             }
                         }
                     } else if (currentPlayer.getOrientation() == 3) {
                         if (CoordX < 29 && CoordY < 14)
-                            if (grid[CoordX][CoordY] == -1 && grid[(CoordX + 1)][(CoordY + 1)] == -1) {
+                            if (staticBoard[CoordX][CoordY].getColor()  == -1 && staticBoard[(CoordX + 1)][(CoordY + 1)].getColor() == -1) {
                                 if (checkAround(color1, CoordX, CoordY) || checkAround(color2, CoordX + 1, CoordY + 1))
                                     return true;
                             }
 
                     } else if (currentPlayer.getOrientation() == 4) {
                         if (CoordX > 0 && CoordY < 14) {
-                            if (grid[CoordX][CoordY] == -1 && grid[(CoordX - 1)][(CoordY + 1)] == -1) {
+                            if (staticBoard[CoordX][CoordY].getColor()  == -1 && staticBoard[(CoordX - 1)][(CoordY + 1)].getColor() == -1) {
                                 if (checkAround(color1, CoordX, CoordY) || checkAround(color2, CoordX - 1, CoordY + 1))
                                     return true;
                             }
                         }
                     } else if (currentPlayer.getOrientation() == 5) {
                         if (CoordX > 1) {
-                            if (grid[CoordX][CoordY] == -1 && grid[(CoordX - 2)][(CoordY)] == -1) {
+                            if (staticBoard[CoordX][CoordY].getColor()  == -1 && staticBoard[(CoordX - 2)][(CoordY)].getColor() == -1) {
                                 if (checkAround(color1, CoordX, CoordY) || checkAround(color2, CoordX - 2, CoordY))
                                     return true;
                             }
@@ -541,7 +539,7 @@ public class Game {
         if(x > -1 && y > -1){
             if (o==0) {
                 if (x > 0 && y > 0) {
-                    if (grid[x][y]==-1 && grid[(x -1)][(y -1)]==-1) {
+                    if (staticBoard[x][y].getColor()==-1 && staticBoard[(x -1)][(y -1)].getColor()==-1) {
                         if (checkAround(color1, x, y) || checkAround(color2, x -1, y -1))
                             return true;
                     }
@@ -549,7 +547,7 @@ public class Game {
             }
             else if (o==1) {
                 if (x < 29 && y > 0) {
-                    if (grid[x][y]==-1 && grid[(x +1)][(y -1)]==-1) {
+                    if (staticBoard[x][y].getColor()==-1 && staticBoard[(x +1)][(y -1)].getColor()==-1) {
                         if (checkAround(color1, x, y) || checkAround(color2, x +1, y -1))
                             return true;
                     }
@@ -557,7 +555,7 @@ public class Game {
             }
             else if (o==2) {
                 if (x < 28) {
-                    if (grid[x][y]==-1 && grid[(x +2)][(y)]==-1) {
+                    if (staticBoard[x][y].getColor()==-1 && staticBoard[(x +2)][(y)].getColor()==-1) {
                         if (checkAround(color1, x, y) || checkAround(color2, x +2, y))
                             return true;
                     }
@@ -565,7 +563,7 @@ public class Game {
             }
             else if (o==3) {
                 if (x < 29 && y < 14)
-                    if (grid[x][y]==-1 && grid[(x +1)][(y +1)]==-1) {
+                    if (staticBoard[x][y].getColor()==-1 && staticBoard[(x +1)][(y +1)].getColor()==-1) {
                         if (checkAround(color1, x, y) || checkAround(color2, x +1, y +1))
                             return true;
                     }
@@ -573,7 +571,7 @@ public class Game {
             }
             else if (o==4) {
                 if (x > 0 && y < 14) {
-                    if (grid[x][y] == -1 && grid[(x - 1)][(y + 1)] == -1) {
+                    if (staticBoard[x][y].getColor() == -1 && staticBoard[(x - 1)][(y + 1)].getColor() == -1) {
                         if (checkAround(color1, x, y) || checkAround(color2, x -1, y +1))
                             return true;
                     }
@@ -581,7 +579,7 @@ public class Game {
             }
             else if (o==5) {
                 if (x > 1) {
-                    if (grid[x][y] == -1 && grid[(x - 2)][(y)] == -1) {
+                    if (staticBoard[x][y].getColor() == -1 && staticBoard[(x - 2)][(y)].getColor() == -1) {
                         if (checkAround(color1, x, y) || checkAround(color2, x -2, y))
                             return true;
                     }
@@ -599,7 +597,7 @@ public class Game {
                     || (i==2 && x>27) || (i==5 && x<3)) {
             }
             else {
-                if (grid[getSecondX(i, x, y)][getSecondY(i, x, y)]==color) {
+                if (staticBoard[getSecondX(i, x, y)][getSecondY(i, x, y)].getColor()==color) {
                     legal = true;
                 }
             }
@@ -762,29 +760,31 @@ public class Game {
             }
         }
         grid[x][y] = color1;
-        if (o==0) {
-            grid[(x -1)][(y -1)]=color2;
-        }
-        else if (o==1) {
-            grid[(x +1)][(y -1)]=color2;
-        }
-        else if (o==2) {
-            grid[(x +2)][(y)]=color2;
-        }
-        else if (o==3) {
-            grid[(x +1)][(y +1)]=color2;
-        }
-        else if (o==4) {
-            grid[(x -1)][(y +1)]=color2;
-        }
-        else if (o==5) {
-            grid[(x -2)][(y)]=color2;
+        switch (o) {
+            case 0: {
+                grid[(x - 1)][(y - 1)] = color2;
+            }
+            case 1: {
+                grid[(x + 1)][(y - 1)] = color2;
+            } case 2: {
+                grid[(x + 2)][(y)] = color2;
+            } case 3: {
+                grid[(x + 1)][(y + 1)] = color2;
+            } case  4:{
+                grid[(x - 1)][(y + 1)] = color2;
+            } case  5: {
+                grid[(x - 2)][(y)] = color2;
+            }
         }
         return grid;
     }
 
-    public Map<Cell,Map<Cell, Direction>> getGrid() {
-        return grid;
+    public Cell[][] getStaticBoard() {
+        return staticBoard;
+    }
+
+    public HashSet<Cell> getDynamicBoard() {
+        return dynamicBoard;
     }
 }
 

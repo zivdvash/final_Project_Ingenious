@@ -333,12 +333,12 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
     private void makeGameBoardTempGrid(int x, int y, int o){
         gameBoardTempGrid = new int[30][15];
         for (int X = 0; X < 30; X ++){
-            for (int Y = 0; Y < 15; Y ++){
-                if(game.createNewCells(o,x,y)[X][Y] == 0){
-                    gameBoardTempGrid[X][Y] = game.getGrid()[X][Y];
-                }else{
-                    gameBoardTempGrid[X][Y] = game.createNewCells(o,x,y)[X][Y];
-                }
+            for (int Y = 0; Y < 15; Y ++) {
+
+                gameBoardTempGrid[X][Y] = game.getStaticBoard()[X][Y].getColor();
+
+                gameBoardTempGrid[X][Y] = game.getStaticBoard()[X][Y].getColor();
+
             }
         }
     }
@@ -392,8 +392,8 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
         try{
             if(game.checkLegalMove(x, y)){
                 makeGameBoardTempGrid(x,y, orientation);
-                score1 = game.CalculateScore(x,y,gameBoardTempGrid);
-                score2 = game.CalculateScore(game.getSecondX(orientation, x, y), game.getSecondY(orientation, x, y) , gameBoardTempGrid);
+                score1 = game.CalculateScore(x,y,game.getDynamicBoard());
+                score2 = game.CalculateScore(game.getSecondX(orientation, x, y), game.getSecondY(orientation, x, y) , game.getDynamicBoard());
             }
         }catch(Exception e){
         }

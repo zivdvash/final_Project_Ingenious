@@ -50,17 +50,17 @@ public class RandomStrategy extends Strategy {
     */
 public boolean checkLegalMove(int CordX, int CordY, int orientation) {
         // Modified to use the orientation parameter
-        if (orientation==0 && CordX > 0 && CordY > 0 && getGame().getGrid()[CordX][CordY]==-1 && getGame().getGrid()[CordX-1][CordY-1]==-1) {
+        if (orientation==0 && CordX > 0 && CordY > 0 && getGame().getStaticBoard()[CordX][CordY].getColor()==-1 && getGame().getStaticBoard()[CordX-1][CordY-1].getColor()==-1) {
             return true;
-        } else if (orientation==1 && CordX < 29 && CordY > 0 && getGame().getGrid()[CordX][CordY]==-1 && getGame().getGrid()[CordX+1][CordY-1]==-1) {
+        } else if (orientation==1 && CordX < 29 && CordY > 0 && getGame().getStaticBoard()[CordX][CordY].getColor()==-1 && getGame().getStaticBoard()[CordX+1][CordY-1].getColor()==-1) {
             return true;
-        } else if (orientation==2 && CordX < 28 && getGame().getGrid()[CordX][CordY]==-1 && getGame().getGrid()[CordX+2][CordY]==-1) {
+        } else if (orientation==2 && CordX < 28 && getGame().getStaticBoard()[CordX][CordY].getColor()==-1 && getGame().getStaticBoard()[CordX+2][CordY].getColor()==-1) {
             return true;
-        } else if (orientation==3 && CordX < 29 && CordY < 14 && getGame().getGrid()[CordX][CordY]==-1 && getGame().getGrid()[CordX+1][CordY+1]==-1) {
+        } else if (orientation==3 && CordX < 29 && CordY < 14 && getGame().getStaticBoard()[CordX][CordY].getColor()==-1 && getGame().getStaticBoard()[CordX+1][CordY+1].getColor()==-1) {
             return true;
-        } else if (orientation==4 && CordX > 0 && CordY < 14 && getGame().getGrid()[CordX][CordY] == -1 && getGame().getGrid()[CordX-1][CordY+1] == -1) {
+        } else if (orientation==4 && CordX > 0 && CordY < 14 && getGame().getStaticBoard()[CordX][CordY].getColor() == -1 && getGame().getStaticBoard()[CordX-1][CordY+1].getColor() == -1) {
             return true;
-        } else if (orientation==5 && CordX > 1 && getGame().getGrid()[CordX][CordY] == -1 && getGame().getGrid()[CordX-2][CordY] == -1) {
+        } else if (orientation==5 && CordX > 1 && getGame().getStaticBoard()[CordX][CordY].getColor() == -1 && getGame().getStaticBoard()[CordX-2][CordY].getColor() == -1) {
             return true;
         }
         return false;
