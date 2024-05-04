@@ -237,7 +237,7 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
         return hex;
     }
     //מאתחל את לוח המשחק
-    private void initializeGrid(){
+        private void initializeGrid(){
         for(int x = 0; x < 30; x++){
             for(int y = 0; y < 15;y++){
                 if((y == 0 || y == 14) && (x< 8 || x >23)){

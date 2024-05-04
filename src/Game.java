@@ -1,14 +1,12 @@
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.PriorityQueue;
+import java.util.*;
 
 /*מחלקת 'משחק' היא לב ליבה של אפליקציית המשחק, שבה מנוהלים הכללים, ההתקדמות ומצבי המשחק. הוא מתזמר כיצד שחקנים מקיימים אינטראקציה עם המשחק, מעבד מהלכים, שומר על מצב לוח המשחק ובסופו של דבר קובע את תוצאת המשחק. באמצעות השיטות שלו, הוא מטמיע את ההיגיון של משחק אסטרטגיה מבוסס תורות, ומספק מסגרת למשחק הכוללת ניהול תור, פעולות שחקן, שמירת תוצאות ומעברי מצב משחק.*/
 public class Game {
 
     private final Player[] players;
     private Player currentPlayer;
-    private int[][] grid;
-    private int[][] tempGrid;
+    private Map<Cell, Map<Cell, Direction>> grid;
+    private Map<Cell, Map<Cell, Direction>> tempGrid;
     private final int[][] emptyGrid;
     private final GameBoard gameBoard;
     private final PiecesBag PiecesBag;
@@ -17,6 +15,13 @@ public class Game {
     private int sleepTimer;
     private Player[] p;
     private int[] sortedScores;
+    public final static int MAX_ROW_LENGTH = 11;
+    private final int[][] directionsUpperPart = new int[][] { { 0, 1 }, { 0, -1 }, { -1, 0 }, { -1, -1 }, { 1, 1 },
+            { 1, 0 } };
+    private final int[][] directionsLowerPart = new int[][] { { 0, 1 }, { 0, -1 }, { -1, 1 }, { -1, 0 }, { 1, 0 },
+            { 1, -1 } };
+    private final int[][] directionsMiddleRow = new int[][] { { 0, 1 }, { 0, -1 }, { -1, 0 }, { -1, -1 }, { 1, 0 },
+            { 1, -1 } };
     /*הבנאי של המחלקה `Game`. זה מאתחל משחק חדש עם שמות השחקנים, סוגי השחקנים (אנושי או מחשב) ואסטרטגיות (פשוט או אקראי).
      */
     Game(String[] names, int[] playerTypes, int[] strategies){
@@ -25,22 +30,92 @@ public class Game {
         players = new Player[names.length];
         isGameOver = false;
         initializeStrategies();
-        grid = new int[30][15];
+        grid = new HashMap<>();
         emptyGrid = new int[30][15];
 
         SetPlayerValues(names, playerTypes, strategies);
         //new ComputerPlayer(names[a], getStrategy(strategies[a] - 1), new PlayerHand(PiecesBag))
         gameBoard = new GameBoard(this);
-        InitializeBoard();
+        initializeBoard();
 
     }
-
-    private void InitializeBoard() {
-        for (int x = 0; x < 30; x ++){
-            for (int y = 0; y < 15; y ++){
-                grid[x][y] = gameBoard.getHexColor()[x][y];//מאתחל כל משושה בלוח
-                emptyGrid[x][y] = 0;//מאתחל כל משושה בלוח
+    private void initializeBoard() {
+        // Iterate through all possible positions on the board
+        for (int x = 0; x < MAX_ROW_LENGTH; x++) {
+            for (int y = 0; y < MAX_ROW_LENGTH; y++) {
+                // Check if the position is valid on the hexagonal board
+                if (isValidPosition(x, y)) {
+                    int state = gameBoard.getHexColor()[x][y];
+                    Cell cell = new Cell(x, y, state);
+                    // Initialize neighborsMap for the cell
+                    cell.setNeighborsMap(new HashMap<>());
+                    grid.put(cell, cell.getNeighborsMap()); // Use a HashMap for neighbors
+                }
             }
+        }
+
+        // Establish adjacencies for each cell
+        for (Cell cell : grid.keySet()) {
+            Map<Cell, Direction> neighborsWithDirection = findNeighbors(cell);
+            // board.put(cell, neighborsWithDirection);
+            cell.setNeighborsMap(neighborsWithDirection);
+        }
+    }
+    // Finds and returns a list of neighboring cells for a given cell
+    private Map<Cell, Direction> findNeighbors(Cell cell) {
+
+        Map<Cell, Direction> neighbors = new HashMap<>();
+        int x = cell.getX();
+        int y = cell.getY();
+
+        // determines the suitable directions array, according to the row
+        int[][] directions = x <= 3 ? directionsUpperPart : x >= 5 ? directionsLowerPart : directionsMiddleRow;
+        Direction[] dirEnums = new Direction[] { Direction.RIGHT, Direction.LEFT, Direction.UPRIGHT, Direction.UPLEFT,
+                Direction.DOWNRIGHT, Direction.DOWNLEFT };
+
+        for (int i = 0; i < directions.length; i++) {
+            int newX = x + directions[i][0];
+            int newY = y + directions[i][1];
+            Cell neighbor = getCellAt(newX, newY);
+            if (neighbor != null) {
+                neighbors.put(neighbor, dirEnums[i]);
+            }
+        }
+        return neighbors;
+
+    }
+    // Returns the Cell object at a given set of coordinates
+    public Cell getCellAt(int x, int y) {
+        // Iterate through all cells in the board
+        for (Cell cell : grid.keySet()) {
+            if (cell.getX() == x && cell.getY() == y) {
+                return cell; // Return the matching cell
+            }
+        }
+        return null; // Return null if no matching cell is found
+    }
+
+    private boolean isValidPosition(int x, int y) {
+        switch (x) {
+            case 0:
+            case 11:
+                return y >= 0 && y <= 5; // 6 cells on the first and last rows
+            case 1:
+            case 10:
+                return y >= 0 && y <= 6; // 7 cells on the second and second-to-last rows
+            case 2:
+            case 9:
+                return y >= 0 && y <= 7; // 8 cells on the third and third-to-last rows
+            case 3:
+            case 8:
+                return y >= 0 && y <= 8; // 9 cells on the fourth and fourth-to-last rows
+            case 4:
+            case 7:
+                return y >= 0 && y <= 9; // 10 cells on the middle row
+            case 6:
+                return y >= 0 && y <= 10; //11 cells on the middle row
+            default:
+                return false;
         }
     }
 
@@ -271,16 +346,18 @@ public class Game {
         return sortedScores;
     }
     //שיטה זו מעדכנת את לוח המשחק עם לוח חדש
-    public void updateGrid(int[][] newGrid){
-        for(int x = 0; x < grid[0].length; x ++){
-            for(int y = 0; y < grid.length; y ++){
-                if(newGrid[y][x] != 0){
-                    grid[y][x] = newGrid[y][x];
-                }
+    public void updateGrid(Map<Cell, Integer> newGrid) {
+        for (Map.Entry<Cell, Integer> entry : newGrid.entrySet()) {
+            Cell cell = entry.getKey();
+            Integer color = entry.getValue();
+            if (grid.containsKey(cell)) {
+                grid.get(cell).setColor(color); // Assuming a `setState` method in `Cell`
             }
         }
-        gameBoard.updateGrid(grid);
+        gameBoard.updateGrid(grid); // Assuming gameBoard can handle a grid of type Map<Cell, Map<Cell, Direction>>
     }
+
+
     // שיטה זו מחזירה את לוח המשחק
     public GameBoard getGameBoard(){
         return gameBoard;
@@ -383,56 +460,57 @@ public class Game {
         return score;
     }
     //שיטה זו בודקת אם המהלך חוקי עבור השחקן הנוכחי
+    /*אני סבור שלא צריך לרשום שם 29 אלב לעשות בכלל לוח של 15 על 15 אבל בסדר*/
     public boolean checkLegalMove() {
         if(currentPlayer.getCurrentPiece() != null){
-            int CordX = currentPlayer.getPieceX();
-            int CordY = currentPlayer.getPieceY();
+            int CoordX = currentPlayer.getPieceX();
+            int CoordY = currentPlayer.getPieceY();
 
             if (currentPlayer.getCurrentPiece().getPrimaryHexagon() != null && currentPlayer.getCurrentPiece().getSecondaryHexagon() != null) {
                 Hex primaryHex = currentPlayer.getCurrentPiece().getPrimaryHexagon();   // Potential null source
                 Hex secondaryHex = currentPlayer.getCurrentPiece().getSecondaryHexagon(); // Potential null source
                 int color1 = primaryHex.getColor();
                 int color2 = secondaryHex.getColor();
-                if(CordX > -1 && CordY > -1) {
+                if(CoordX > -1 && CoordY > -1) {
                     if (currentPlayer.getOrientation() == 0) {
-                        if (CordX > 0 && CordY > 0) {
-                            if (grid[CordX][CordY] == -1 && grid[(CordX - 1)][(CordY - 1)] == -1) {
-                                if (checkAround(color1, CordX, CordY) || checkAround(color2, CordX - 1, CordY - 1))
+                        if (CoordX > 0 && CoordY > 0) {
+                            if (grid[CoordX][CoordY] == -1 && grid[(CoordX - 1)][(CoordY - 1)] == -1) {
+                                if (checkAround(color1, CoordX, CoordY) || checkAround(color2, CoordX - 1, CoordY - 1))
                                     return true;
                             }
                         }
                     } else if (currentPlayer.getOrientation() == 1) {
-                        if (CordX < 29 && CordY > 0) {
-                            if (grid[CordX][CordY] == -1 && grid[(CordX + 1)][(CordY - 1)] == -1) {
-                                if (checkAround(color1, CordX, CordY) || checkAround(color2, CordX + 1, CordY - 1))
+                        if (CoordX < 29 && CoordY > 0) {
+                            if (grid[CoordX][CoordY] == -1 && grid[(CoordX + 1)][(CoordY - 1)] == -1) {
+                                if (checkAround(color1, CoordX, CoordY) || checkAround(color2, CoordX + 1, CoordY - 1))
                                     return true;
                             }
                         }
                     } else if (currentPlayer.getOrientation() == 2) {
-                        if (CordX < 28) {
-                            if (grid[CordX][CordY] == -1 && grid[(CordX + 2)][(CordY)] == -1) {
-                                if (checkAround(color1, CordX, CordY) || checkAround(color2, CordX + 2, CordY))
+                        if (CoordX < 28) {
+                            if (grid[CoordX][CoordY] == -1 && grid[(CoordX + 2)][(CoordY)] == -1) {
+                                if (checkAround(color1, CoordX, CoordY) || checkAround(color2, CoordX + 2, CoordY))
                                     return true;
                             }
                         }
                     } else if (currentPlayer.getOrientation() == 3) {
-                        if (CordX < 29 && CordY < 14)
-                            if (grid[CordX][CordY] == -1 && grid[(CordX + 1)][(CordY + 1)] == -1) {
-                                if (checkAround(color1, CordX, CordY) || checkAround(color2, CordX + 1, CordY + 1))
+                        if (CoordX < 29 && CoordY < 14)
+                            if (grid[CoordX][CoordY] == -1 && grid[(CoordX + 1)][(CoordY + 1)] == -1) {
+                                if (checkAround(color1, CoordX, CoordY) || checkAround(color2, CoordX + 1, CoordY + 1))
                                     return true;
                             }
 
                     } else if (currentPlayer.getOrientation() == 4) {
-                        if (CordX > 0 && CordY < 14) {
-                            if (grid[CordX][CordY] == -1 && grid[(CordX - 1)][(CordY + 1)] == -1) {
-                                if (checkAround(color1, CordX, CordY) || checkAround(color2, CordX - 1, CordY + 1))
+                        if (CoordX > 0 && CoordY < 14) {
+                            if (grid[CoordX][CoordY] == -1 && grid[(CoordX - 1)][(CoordY + 1)] == -1) {
+                                if (checkAround(color1, CoordX, CoordY) || checkAround(color2, CoordX - 1, CoordY + 1))
                                     return true;
                             }
                         }
                     } else if (currentPlayer.getOrientation() == 5) {
-                        if (CordX > 1) {
-                            if (grid[CordX][CordY] == -1 && grid[(CordX - 2)][(CordY)] == -1) {
-                                if (checkAround(color1, CordX, CordY) || checkAround(color2, CordX - 2, CordY))
+                        if (CoordX > 1) {
+                            if (grid[CoordX][CoordY] == -1 && grid[(CoordX - 2)][(CoordY)] == -1) {
+                                if (checkAround(color1, CoordX, CoordY) || checkAround(color2, CoordX - 2, CoordY))
                                     return true;
                             }
                         }
@@ -659,7 +737,7 @@ public class Game {
 
     }
 
-    public int[][] getGrid() {
+    public Map<Cell,Map<Cell, Direction>> getGrid() {
         return grid;
     }
 }

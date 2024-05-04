@@ -48,8 +48,7 @@ public class BasicStrategy extends Strategy {
         int highestPieceIndex = 0;
         int lowestScore = getGame().getCurrentPlayer().getColorScores().peek().getScore();
         int[] returnValues = new int[5];
-        int w = 0;
-        fillReturnValues(w, returnValues, highestScore, highestX, highestY, highestOrientation, highestPieceIndex);
+        fillReturnValues (returnValues, highestScore, highestX, highestY, highestOrientation, highestPieceIndex);
         ArrayList<Integer> lowestColors = new ArrayList<>();
         ArrayList<Integer> oldColors = new ArrayList<>();
         ColorScore[] scoreArray = score.toArray(new ColorScore[0]);
@@ -107,7 +106,8 @@ public class BasicStrategy extends Strategy {
         }
     }
     //ממלא את כל הערכים שצריכים לעבור בין הפונקציה המרכזית לפונקציה חיצונית שקובעים בסופו של דבר את המהלך
-    private static void fillReturnValues(int w, int[] returnValues, int highestScore, int highestX, int highestY, int highestOrientation, int highestPieceIndex) {
+    private static void fillReturnValues(int[] returnValues, int highestScore, int highestX, int highestY, int highestOrientation, int highestPieceIndex) {
+        int w = 0;
         while (w < returnValues.length){
             returnValues[w++] = highestScore;
             returnValues[w++] = highestX;
@@ -204,7 +204,7 @@ public class BasicStrategy extends Strategy {
         }
         return isMove;
     }
-    /*אחרי שווידאנו שיש מהלך בצבע הכי נמוך שמצאנו אנו ריצים למצוא את המהלך הכי טוב בהתאם לכיוון ולמיקום במגרש*/
+    /*אחרי שווידאנו שיש מהלך בצבע הכי נמוך שמצאנו אנו רוצים למצוא את המהלך הכי טוב בהתאם לכיוון ולמיקום במגרש*/
     public void FindBestMove(int[] returnValues, ArrayList<Integer>lowestColors) {
         boolean isColor1, isColor2;
         for (int x = 0; x < 30; x++) {
@@ -226,6 +226,12 @@ public class BasicStrategy extends Strategy {
                         if ((isColor1 || isColor2) && getGame().checkLegalMove(o, x, y, color1, color2)) { // אם אחד מהם שנמצא ויש איתו מהלך מתאים
                             makeTempGrid(o, x, y, color1, color2);
                             if (isColor1 && isColor2) {//אם שניהם מתאימים
+                                /*   if (getGame().CalculateScore(x, y, tempGrid) + getGame().CalculateScore(getGame().getSecondX(o, x, y),
+                                        getGame().getSecondY(o, x, y), tempGrid) > returnValues[0]) {
+                                    InsertMove(returnValues, x, y, o, piece);
+                                }
+                               check about the improve strategy!!!
+                             */
                                 //בודק את שני הכיוונים של החלק והאם הניקוד שיצא יותר גבוה מהנוכחי
                                 if (getGame().CalculateScore(x, y, tempGrid) > returnValues[0] || getGame().CalculateScore(getGame().getSecondX(o, x, y),
                                         getGame().getSecondY(o, x, y), tempGrid) > returnValues[0]) {
