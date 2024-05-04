@@ -1,20 +1,16 @@
-import java.awt.*;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 public class Cell {
     private int x, y; // Coordinates on the board
     private int Color; // Color Of Cell
-    private Map<Cell, Direction> neighborsMap;
-    private boolean isborder;
+    private HashSet<Cell> neighbors;
 
-    public Cell(int x, int y, int Color) {
+
+    public Cell(int x, int y, int color, HashSet<Cell> neighbors) {
         this.x = x;
         this.y = y;
-        this.Color = Color;
-        this.isborder = isBorder();
+        Color = color;
+        this.neighbors = neighbors;
     }
 
     private boolean isBorder() {
@@ -64,39 +60,12 @@ public class Cell {
 
     }
 
-    public Map<Cell, Direction> getNeighborsMap() {
-        return neighborsMap;
+    public HashSet<Cell> getNeighbors() {
+        return neighbors;
     }
 
-    public Cell getNeighborInDirection(Direction dir) {
-        if (neighborsMap == null) {
-            return null;
-        }
-
-        for (Map.Entry<Cell, Direction> entry : neighborsMap.entrySet()) {
-            if (entry.getValue() == dir) {
-                return entry.getKey();
-            }
-        }
-        return null; // Return null if no neighbor is found in the given direction
-    }
-
-    /**
-     * Finds the direction of the specified neighbor cell relative to this cell.
-     *
-     * @param neighbor The cell for which to find the direction.
-     * @return The direction of the neighbor cell, or null if the cell is not a
-     *         neighbor.
-     */
-    public Direction getDirectionOfNeighbor(Cell neighbor) {
-        if (neighborsMap == null) {
-            return null; // neighborsMap not initialized
-        }
-        return neighborsMap.getOrDefault(neighbor, null);
-    }
-
-    public void setNeighborsMap(Map<Cell, Direction> neighborsMap) {
-        this.neighborsMap = neighborsMap;
+    public void setNeighbors(HashSet<Cell> neighbors) {
+        this.neighbors = neighbors;
     }
 
     public String formatCoordinate() {
@@ -119,13 +88,6 @@ public class Cell {
     }
 
 
-    // Method to get neighbor cells
-    public Set<Cell> getNeighbors() {
-        if (neighborsMap == null) {
-            return new HashSet<>(); // Return an empty set if neighborsMap is null
-        }
-        return new HashSet<>(neighborsMap.keySet());
-    }
 
     public boolean getIsborder() {
         return isborder;

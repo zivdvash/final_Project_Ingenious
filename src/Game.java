@@ -3,10 +3,14 @@ import java.util.*;
 /*מחלקת 'משחק' היא לב ליבה של אפליקציית המשחק, שבה מנוהלים הכללים, ההתקדמות ומצבי המשחק. הוא מתזמר כיצד שחקנים מקיימים אינטראקציה עם המשחק, מעבד מהלכים, שומר על מצב לוח המשחק ובסופו של דבר קובע את תוצאת המשחק. באמצעות השיטות שלו, הוא מטמיע את ההיגיון של משחק אסטרטגיה מבוסס תורות, ומספק מסגרת למשחק הכוללת ניהול תור, פעולות שחקן, שמירת תוצאות ומעברי מצב משחק.*/
 public class Game {
 
+    private static final int WHITE_CELL_COLOR = -1;
     private final Player[] players;
     private Player currentPlayer;
-    private Map<Cell, Map<Cell, Direction>> grid;
-    private Map<Cell, Map<Cell, Direction>> tempGrid;
+    private final Cell[][] staticBoardRepresentation = new Cell[15][30];
+    private final HashSet<Cell> dynamicBoardRepresentation;
+
+    //private Map<Cell, Map<Cell, Direction>> grid;
+    //private Map<Cell, Map<Cell, Direction>> tempGrid;
     private final int[][] emptyGrid;
     private final GameBoard gameBoard;
     private final PiecesBag PiecesBag;
@@ -30,59 +34,78 @@ public class Game {
         players = new Player[names.length];
         isGameOver = false;
         initializeStrategies();
-        grid = new HashMap<>();
+
+        dynamicBoardRepresentation = new HashSet<>();
         emptyGrid = new int[30][15];
 
         SetPlayerValues(names, playerTypes, strategies);
         //new ComputerPlayer(names[a], getStrategy(strategies[a] - 1), new PlayerHand(PiecesBag))
         gameBoard = new GameBoard(this);
-        initializeBoard();
+        initializeDynamicBoard();
 
     }
-    private void initializeBoard() {
+
+    private void initializeStaticBoard() {
+        // MAX_ROW_LENGTH may cause bugs
+        for (int x = 0; x < MAX_ROW_LENGTH; x++) {
+            for (int y = 0; y < MAX_ROW_LENGTH; y++) {
+                // Check if the position is valid on the hexagonal board
+                if (isValidPosition(x, y)) {
+                    int color = gameBoard.getHexColor()[x][y];
+                    Cell cell = new Cell(x, y, color, null);
+                    staticBoardRepresentation[x][y] = cell;
+                }
+            }
+        }
+
+        for (int x = 0; x < MAX_ROW_LENGTH; x++) {
+            for (int y = 0; y < MAX_ROW_LENGTH; y++) {
+                // Check if the position is valid on the hexagonal board
+                if (isValidPosition(x, y)) {
+                    Cell cell = staticBoardRepresentation[x][y];
+                    HashSet<Cell> neighbors = findNeighbors(cell);
+                    cell.setNeighbors(neighbors);
+                }
+            }
+        }
+    }
+
+    private void initializeDynamicBoard() {
         // Iterate through all possible positions on the board
         for (int x = 0; x < MAX_ROW_LENGTH; x++) {
             for (int y = 0; y < MAX_ROW_LENGTH; y++) {
                 // Check if the position is valid on the hexagonal board
                 if (isValidPosition(x, y)) {
-                    int state = gameBoard.getHexColor()[x][y];
-                    Cell cell = new Cell(x, y, state);
-                    // Initialize neighborsMap for the cell
-                    cell.setNeighborsMap(new HashMap<>());
-                    grid.put(cell, cell.getNeighborsMap()); // Use a HashMap for neighbors
+                    int color = gameBoard.getHexColor()[x][y];
+
+                    if (color != WHITE_CELL_COLOR) {
+                        Cell coloredCell = staticBoardRepresentation[x][y];
+                        dynamicBoardRepresentation.add(coloredCell);
+                    }
                 }
             }
         }
-
-        // Establish adjacencies for each cell
-        for (Cell cell : grid.keySet()) {
-            Map<Cell, Direction> neighborsWithDirection = findNeighbors(cell);
-            // board.put(cell, neighborsWithDirection);
-            cell.setNeighborsMap(neighborsWithDirection);
-        }
     }
     // Finds and returns a list of neighboring cells for a given cell
-    private Map<Cell, Direction> findNeighbors(Cell cell) {
+    private HashSet<Cell> findNeighbors(Cell cell) {
 
-        Map<Cell, Direction> neighbors = new HashMap<>();
+        HashSet<Cell> neighbors = new HashSet<>();
         int x = cell.getX();
         int y = cell.getY();
 
         // determines the suitable directions array, according to the row
         int[][] directions = x <= 3 ? directionsUpperPart : x >= 5 ? directionsLowerPart : directionsMiddleRow;
-        Direction[] dirEnums = new Direction[] { Direction.RIGHT, Direction.LEFT, Direction.UPRIGHT, Direction.UPLEFT,
-                Direction.DOWNRIGHT, Direction.DOWNLEFT };
 
         for (int i = 0; i < directions.length; i++) {
             int newX = x + directions[i][0];
             int newY = y + directions[i][1];
             Cell neighbor = getCellAt(newX, newY);
             if (neighbor != null) {
-                neighbors.put(neighbor, dirEnums[i]);
+                neighbors.add(neighbor);
             }
         }
-        return neighbors;
 
+        return neighbors;
     }
     // Returns the Cell object at a given set of coordinates
     public Cell getCellAt(int x, int y) {
