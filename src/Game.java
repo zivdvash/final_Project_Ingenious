@@ -6,8 +6,8 @@ public class Game {
     private static final int WHITE_CELL_COLOR = -1;
     private final Player[] players;
     private Player currentPlayer;
-    private final Cell[][] staticBoardRepresentation = new Cell[15][30];
-    private final HashSet<Cell> dynamicBoardRepresentation;
+    private final Cell[][] staticBoard = new Cell[15][30];
+    private final HashSet<Cell> dynamicBoard;
 
     //private Map<Cell, Map<Cell, Direction>> grid;
     //private Map<Cell, Map<Cell, Direction>> tempGrid;
@@ -35,7 +35,7 @@ public class Game {
         isGameOver = false;
         initializeStrategies();
 
-        dynamicBoardRepresentation = new HashSet<>();
+        dynamicBoard = new HashSet<>();
         emptyGrid = new int[30][15];
 
         SetPlayerValues(names, playerTypes, strategies);
@@ -53,7 +53,7 @@ public class Game {
                 if (isValidPosition(x, y)) {
                     int color = gameBoard.getHexColor()[x][y];
                     Cell cell = new Cell(x, y, color, null);
-                    staticBoardRepresentation[x][y] = cell;
+                    staticBoard[x][y] = cell;
                 }
             }
         }
@@ -62,7 +62,7 @@ public class Game {
             for (int y = 0; y < MAX_ROW_LENGTH; y++) {
                 // Check if the position is valid on the hexagonal board
                 if (isValidPosition(x, y)) {
-                    Cell cell = staticBoardRepresentation[x][y];
+                    Cell cell = staticBoard[x][y];
                     HashSet<Cell> neighbors = findNeighbors(cell);
                     cell.setNeighbors(neighbors);
                 }
@@ -79,8 +79,8 @@ public class Game {
                     int color = gameBoard.getHexColor()[x][y];
 
                     if (color != WHITE_CELL_COLOR) {
-                        Cell coloredCell = staticBoardRepresentation[x][y];
-                        dynamicBoardRepresentation.add(coloredCell);
+                        Cell coloredCell = staticBoard[x][y];
+                        dynamicBoard.add(coloredCell);
                     }
                 }
             }
@@ -99,7 +99,7 @@ public class Game {
         for (int i = 0; i < directions.length; i++) {
             int newX = x + directions[i][0];
             int newY = y + directions[i][1];
-            Cell neighbor = getCellAt(newX, newY);
+            Cell neighbor = staticBoard[newX][newY];
             if (neighbor != null) {
                 neighbors.add(neighbor);
             }
@@ -108,15 +108,6 @@ public class Game {
         return neighbors;
     }
     // Returns the Cell object at a given set of coordinates
-    public Cell getCellAt(int x, int y) {
-        // Iterate through all cells in the board
-        for (Cell cell : grid.keySet()) {
-            if (cell.getX() == x && cell.getY() == y) {
-                return cell; // Return the matching cell
-            }
-        }
-        return null; // Return null if no matching cell is found
-    }
 
     private boolean isValidPosition(int x, int y) {
         switch (x) {
@@ -182,7 +173,10 @@ public class Game {
                 MakeSingleMove();
                 SaveGridForComputerPlayer();
                 currentPlayer.updateScore(getTurnScore(currentPlayer.getOrientation(), currentPlayer.getPieceX(), currentPlayer.getPieceY()));//עדכון נקודות
-                updateGrid(twoHexGrid(currentPlayer.getOrientation(), currentPlayer.getPieceX(), currentPlayer.getPieceY()));//עדכן לצמיתות את הייצוג הפנימי של המשחק של הלוח עם המהלך של השחקן הנוכחי.
+
+                HashSet<Cell> newCells = createNewCells(currentPlayer.getOrientation(), currentPlayer.getPieceX(), currentPlayer.getPieceY());//עדכן לצמיתות את הייצוג הפנימי של המשחק של הלוח עם המהלך של השחקן הנוכחי.
+                dynamicBoard.addAll(newCells);
+
                 currentPlayer.removeCurrentPiece();
                 isSecondPlay = ExtraTurnCheck(startScores, isSecondPlay);
                 EndOfTurnHandling(isSecondPlay, extraTern);
@@ -197,9 +191,9 @@ public class Game {
     }
     //שומר את המסך החדש עבור שחקן ממוחשב לצורך חישוב מהלך
     public void SaveGridForComputerPlayer()throws InterruptedException{
-        gameBoard.computerGrid(emptyGrid);//מאפס את הייצוג החזותי של לוח המשחק של שחקן המחשב למצב ריק או התחלתי
+        gameBoard.updateComputerGrid(emptyGrid);//מאפס את הייצוג החזותי של לוח המשחק של שחקן המחשב למצב ריק או התחלתי
         if(currentPlayer.getClass() == ComputerPlayer.class){
-            gameBoard.computerGrid(twoHexGrid(currentPlayer.getOrientation(), currentPlayer.getPieceX(), currentPlayer.getPieceY()));/*מעדכן את לוח המשחק כדי להציג את המהלך של שחקן המחשב,  השיטה `twoHexGrid(...)` מייצרת ייצוג רשת של המהלך של השחקן הנוכחי בהתבסס על כיוון החתיכה והקואורדינטות שבחרו, אשר לאחר מכן `computerGrid(...)` משתמש בהן כדי לעדכן את הייצוג החזותי על לוח המשחק.*/
+            gameBoard.updateComputerGrid(toHexGrid(currentPlayer.getOrientation(), currentPlayer.getPieceX(), currentPlayer.getPieceY()));/*מעדכן את לוח המשחק כדי להציג את המהלך של שחקן המחשב,  השיטה `twoHexGrid(...)` מייצרת ייצוג רשת של המהלך של השחקן הנוכחי בהתבסס על כיוון החתיכה והקואורדינטות שבחרו, אשר לאחר מכן `computerGrid(...)` משתמש בהן כדי לעדכן את הייצוג החזותי על לוח המשחק.*/
             Thread.sleep(sleepTimer);
         }
     }
@@ -369,16 +363,6 @@ public class Game {
         return sortedScores;
     }
     //שיטה זו מעדכנת את לוח המשחק עם לוח חדש
-    public void updateGrid(Map<Cell, Integer> newGrid) {
-        for (Map.Entry<Cell, Integer> entry : newGrid.entrySet()) {
-            Cell cell = entry.getKey();
-            Integer color = entry.getValue();
-            if (grid.containsKey(cell)) {
-                grid.get(cell).setColor(color); // Assuming a `setState` method in `Cell`
-            }
-        }
-        gameBoard.updateGrid(grid); // Assuming gameBoard can handle a grid of type Map<Cell, Map<Cell, Direction>>
-    }
 
 
     // שיטה זו מחזירה את לוח המשחק
@@ -430,10 +414,10 @@ public class Game {
         tempGrid = new int[30][15];
         for (int X = 0; X < 30; X ++){
             for (int Y = 0; Y < 15; Y ++){
-                if(twoHexGrid(o,x,y)[X][Y] == 0){
+                if(createNewCells(o,x,y)[X][Y] == 0){
                     tempGrid[X][Y] = grid[X][Y];
                 }else{
-                    tempGrid[X][Y] = twoHexGrid(o,x,y)[X][Y];
+                    tempGrid[X][Y] = createNewCells(o,x,y)[X][Y];
                 }
             }
         }
@@ -693,36 +677,43 @@ public class Game {
     4. **מחזיר את הלוח החדש:** לבסוף, הוא מחזיר את הלוח החדש הזה, שמכיל כעת שני ערכים שאינם אפס המתאימים לצבעים של שני המשושים של היצירה, כאשר כל שאר התאים נשארים ב-0 (ריק).
 
     הלוח שנוצר מייצג רק את המהלך הנוכחי שנחשב או נעשה, לא את כל מצב המשחק. זוהי "תמונת מצב" של המקום בו השחקן רוצה למקם את היצירה שלו על הלוח, המשמשת להצגה של המהלך, בדיקת חוקיותו או חישוב השפעתו, מבלי לשנות את רשת הלוח הראשי של המשחק. גישה זו מאפשרת בדיקת מהלכים היפותטיים וחישוב ניקוד מבלי להשפיע על מצב המשחק בפועל עד לאישור המהלך.*/
-    public int[][] twoHexGrid(int o, int x, int y) {
-        return twoHexGrid(o, x, y,currentPlayer.getCurrentPiece().getPrimaryHexagon().getColor(),currentPlayer.getCurrentPiece().getSecondaryHexagon().getColor());
+    public HashSet<Cell> createNewCells(int o, int x, int y) {
+        return createNewCells(o, x, y,currentPlayer.getCurrentPiece().getPrimaryHexagon().getColor(),currentPlayer.getCurrentPiece().getSecondaryHexagon().getColor());
     }
-    public int[][] twoHexGrid(int o, int x, int y, int color1, int color2) {
-        int[][] grid = new int[30][15];
-        for (int i = 0; i<30; i++) {
-            for (int j=0; j<15; j++) {
-                grid[i][j]=0;
-            }
-        }
-        grid[x][y] = color1;
+    public HashSet<Cell> createNewCells(int o, int x, int y, int color1, int color2) {
+
+        Cell firstCell = staticBoard[x][y];
+        firstCell.setColor(color1);
+
+        Cell secondCell = null;
+
+
         if (o==0) {
-            grid[(x -1)][(y -1)]=color2;
+            secondCell = staticBoard[x -1][y -1];
         }
         else if (o==1) {
-            grid[(x +1)][(y -1)]=color2;
+            secondCell = staticBoard[x +1][y -1];
         }
         else if (o==2) {
-            grid[(x +2)][(y)]=color2;
+            secondCell = staticBoard[x +2][y];
         }
         else if (o==3) {
-            grid[(x +1)][(y +1)]=color2;
+            secondCell = staticBoard[x + 1][y + 1];
         }
         else if (o==4) {
-            grid[(x -1)][(y +1)]=color2;
+            secondCell = staticBoard[x - 1][y + 1];
         }
         else if (o==5) {
-            grid[(x -2)][(y)]=color2;
+            secondCell = staticBoard[x - 2][y];
         }
-        return grid;
+
+        firstCell.setColor(color2);
+
+        HashSet<Cell> cells = new HashSet<>();
+
+        cells.add(firstCell);
+        cells.add(secondCell);
+        return new HashSet<>(cells);
     }
     //בודק ניצחון
     public boolean isWinner(){
@@ -758,6 +749,38 @@ public class Game {
             return isMove;
         }
 
+    }
+
+    public int[][] toHexGrid(int o, int x, int y) {
+        return toHexGrid(o, x, y,currentPlayer.getCurrentPiece().getPrimaryHexagon().getColor(),currentPlayer.getCurrentPiece().getSecondaryHexagon().getColor());
+    }
+    public int[][] toHexGrid(int o, int x, int y, int color1, int color2) {
+        int[][] grid = new int[30][15];
+        for (int i = 0; i<30; i++) {
+            for (int j=0; j<15; j++) {
+                grid[i][j]=0;
+            }
+        }
+        grid[x][y] = color1;
+        if (o==0) {
+            grid[(x -1)][(y -1)]=color2;
+        }
+        else if (o==1) {
+            grid[(x +1)][(y -1)]=color2;
+        }
+        else if (o==2) {
+            grid[(x +2)][(y)]=color2;
+        }
+        else if (o==3) {
+            grid[(x +1)][(y +1)]=color2;
+        }
+        else if (o==4) {
+            grid[(x -1)][(y +1)]=color2;
+        }
+        else if (o==5) {
+            grid[(x -2)][(y)]=color2;
+        }
+        return grid;
     }
 
     public Map<Cell,Map<Cell, Direction>> getGrid() {

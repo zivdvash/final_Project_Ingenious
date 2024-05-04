@@ -334,10 +334,10 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
         gameBoardTempGrid = new int[30][15];
         for (int X = 0; X < 30; X ++){
             for (int Y = 0; Y < 15; Y ++){
-                if(game.twoHexGrid(o,x,y)[X][Y] == 0){
+                if(game.createNewCells(o,x,y)[X][Y] == 0){
                     gameBoardTempGrid[X][Y] = game.getGrid()[X][Y];
                 }else{
-                    gameBoardTempGrid[X][Y] = game.twoHexGrid(o,x,y)[X][Y];
+                    gameBoardTempGrid[X][Y] = game.createNewCells(o,x,y)[X][Y];
                 }
             }
         }
@@ -470,7 +470,7 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
     }
 
     //עדכון הלוח של שחקן המחשב
-    public void computerGrid(int[][] newGrid){
+    public void updateComputerGrid(int[][] newGrid){
         computerGrid = newGrid;
     }
     //עדכון לוח המשחק

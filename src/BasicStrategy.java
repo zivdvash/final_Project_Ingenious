@@ -27,10 +27,10 @@ public class BasicStrategy extends Strategy {
         tempGrid = new int[30][15];
         for (int X = 0; X < 30; X++) {
             for (int Y = 0; Y < 15; Y++) {
-                if (getGame().twoHexGrid(o, x, y, color1, color2)[X][Y] == 0) {
+                if (getGame().createNewCells(o, x, y, color1, color2)[X][Y] == 0) {
                     tempGrid[X][Y] = getGame().getGrid()[X][Y];
                 } else {
-                    tempGrid[X][Y] = getGame().twoHexGrid(o, x, y, color1, color2)[X][Y];
+                    tempGrid[X][Y] = getGame().createNewCells(o, x, y, color1, color2)[X][Y];
                 }
             }
         }
