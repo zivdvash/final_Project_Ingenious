@@ -4,11 +4,11 @@ import java.util.PriorityQueue;
 public class BasicStrategy extends Strategy {
     /*שדות:
    - 'חתיכה': מייצגת את החלק שנבחר עבור המהלך הבא.
-   - `int xCord`: מאחסן את קואורדינטת ה-x עבור מיקום החלק שנבחר.
-   - `int yCord`: מאחסן את קואורדינטת ה-y עבור מיקום החלק שנבחר.
-   - `int orientation`: מאחסן את הכיוון של היצירה שנבחרה.
-   - `int pieceIndex`: מאחסן את האינדקס של החלק שנבחר ביד השחקן.
-   - `int[][] tempGrid`: מייצג רשת זמנית המשמשת להערכת מהלכים.
+   - int xCord: מאחסן את קואורדינטת ה-x עבור מיקום החלק שנבחר.
+   - int yCord: מאחסן את קואורדינטת ה-y עבור מיקום החלק שנבחר.
+   - int orientation: מאחסן את הכיוון של היצירה שנבחרה.
+   - int pieceIndex: מאחסן את האינדקס של החלק שנבחר ביד השחקן.
+   - int[][] tempGrid: מייצג רשת זמנית המשמשת להערכת מהלכים.
     */
     private Piece piece;
     private SaveMove bestMove;
@@ -22,11 +22,11 @@ public class BasicStrategy extends Strategy {
     private int pieceIndex;
     private int[][] tempGrid;
     //בנאי:
-    //   - `SimpleStrategy(Game g)`: מאתחל את האסטרטגיה עם מופע המשחק המשויך.
+    //   - SimpleStrategy(Game g): מאתחל את האסטרטגיה עם מופע המשחק המשויך.
     BasicStrategy(Game g) {
         super(g);
     }
-    //`makeTempGrid(int o, int x, int y, int color1, int color2)`: יוצר לוח זמני על סמך הפרמטרים הנתונים
+    //makeTempGrid(int o, int x, int y, int color1, int color2): יוצר לוח זמני על סמך הפרמטרים הנתונים
     private void makeTempGrid(int o, int x, int y, int color1, int color2) {
         tempGrid = new int[ROWS][COLS];
         for (int X = 0; X < ROWS; X++) {
@@ -39,8 +39,8 @@ public class BasicStrategy extends Strategy {
             }
         }
     }
-    /*`calculateMove(Hand h, int[] score)`: מחשב את המהלך הבא על סמך היד של השחקן והניקוד הנוכחי
-    שיטת `calculateMove` חוזרת על מיקומים וכיוון אפשריים של חלקים על הלוח, ומעריכה את הציון הפוטנציאלי של כל מהלך. הוא בוחר את המהלך עם הניקוד הגבוה ביותר וקובע את היצירה המתאימה, הקואורדינטות והכיוון בהתאם
+    /*calculateMove(Hand h, int[] score): מחשב את המהלך הבא על סמך היד של השחקן והניקוד הנוכחי
+    שיטת calculateMove חוזרת על מיקומים וכיוון אפשריים של חלקים על הלוח, ומעריכה את הציון הפוטנציאלי של כל מהלך. הוא בוחר את המהלך עם הניקוד הגבוה ביותר וקובע את היצירה המתאימה, הקואורדינטות והכיוון בהתאם
     אסטרטגיה זו שואפת למקסם את הניקוד על ידי התחשבות בצבעים בעלי הניקוד הנמוך ביותר בידו של השחקן וניסיון למקם כלים בעמדות המניבות את הניקוד הגבוה ביותר. הוא גם מתאים את האסטרטגיה שלו אם הוא לא יכול למצוא מהלך חוקי עם הצבעים בעלי הניקוד הנמוך ביותר.
     לבסוף, הוא מדפיס את ייצוג הרשת הזמני למטרות ניפוי באגים.
      */
@@ -64,8 +64,8 @@ public class BasicStrategy extends Strategy {
                 int a = FindNextLowestColor(oldColors);
                 lowestScore = scoreArray[a].getScore();
 
-                /*מוצא את כל הצבעים שהם באותו ניקוד כמו ההכי נמוך החדש*/
-                FindNewLowestColors(lowestScore, newLowestColors);
+                //מוצא את כל הצבעים שהם באותו ניקוד כמו ההכי נמוך החדש
+                        FindNewLowestColors(lowestScore, newLowestColors);
                 lowestColors = newLowestColors;
 
             }
@@ -78,7 +78,7 @@ public class BasicStrategy extends Strategy {
     }
 
     private void InsertHighestMove(PlayerHand hand) {
-        pieceIndex = bestMove.highestX;
+        pieceIndex = bestMove.highestPieceIndex;
         piece = hand.getPiece(bestMove.highestPieceIndex);
         xCord = bestMove.highestX;
         yCord = bestMove.highestY;
@@ -121,7 +121,7 @@ public class BasicStrategy extends Strategy {
             }
         }
     }
-//שומר את הצבעים הכי נמוכים בשביל לדעת לאילו צבעים לא להיתייחס אם החיפוש נכשל
+    //שומר את הצבעים הכי נמוכים בשביל לדעת לאילו צבעים לא להיתייחס אם החיפוש נכשל
     private static void FindPreviousLowestColors(ArrayList<Integer> lowestColor, ArrayList<Integer> oldColors) {
         for (Integer i : lowestColor){
             if (!oldColors.contains(i)){
@@ -129,7 +129,7 @@ public class BasicStrategy extends Strategy {
             }
         }
     }
-//מחפש את כל הצבעים שהם עם אותו ניקוד כמו הצבע הנמוך ביותר
+    //מחפש את כל הצבעים שהם עם אותו ניקוד כמו הצבע הנמוך ביותר
     private void FindNewLowestColors(int lowestScore, ArrayList<Integer> newLowestColors) {
         for (ColorScore i : getGame().getCurrentPlayer().getColorScores()) {
             if (i.getScore() == lowestScore) {
@@ -138,7 +138,7 @@ public class BasicStrategy extends Strategy {
             }
         }
     }
-    /*מחפש את הצבע הבא הנמוך ביותר שלא נמצא בצבעים שכבר היו הנמוכים ביותר*/
+///מחפש את הצבע הבא הנמוך ביותר שלא נמצא בצבעים שכבר היו הנמוכים ביותר
     private int FindNextLowestColor(ArrayList<Integer> oldColors) {
         boolean found = false;
         int a = 0;
@@ -156,7 +156,7 @@ public class BasicStrategy extends Strategy {
         return a;
     }
 
-    /*`getPieceIndex()`, `getPiece()`, `getXCoordinate()`, `getYCoordinate()`, `getOrientation()`: שיטות גטר לאחזר את האינדקס, החתיכה, הקואורדינטות והכיוון שנבחרו.*/
+    /*getPieceIndex(), getPiece(), getXCoordinate(), getYCoordinate(), getOrientation(): שיטות גטר לאחזר את האינדקס, החתיכה, הקואורדינטות והכיוון שנבחרו.*/
     public int getPieceIndex() {
         return pieceIndex;
     }
@@ -167,7 +167,10 @@ public class BasicStrategy extends Strategy {
         for (int x = 0; x < ROWS; x++) {
             for (int y = 0; y < COLS; y++) {
                 for (int o = 0; o < directions; o++) {
-                    isMove = isMoveExists(lowestColors, o, x, y);
+                    if (!isMove){
+                        isMove = isMoveExists(lowestColors, o, x, y);
+                    }
+
                 }
             }
         }
@@ -202,12 +205,12 @@ public class BasicStrategy extends Strategy {
         return isMove;
     }
 
-    /*אחרי שווידאנו שיש מהלך בצבע הכי נמוך שמצאנו אנו ריצים למצוא את המהלך הכי טוב בהתאם לכיוון ולמיקום במגרש*/
+    //אחרי שווידאנו שיש מהלך בצבע הכי נמוך שמצאנו אנו ריצים למצוא את המהלך הכי טוב בהתאם לכיוון ולמיקום במגרש/
     public SaveMove FindBestMove(SaveMove bestMove, ArrayList<Integer>lowestColors) {
         for (int x = 0; x < ROWS; x++) {
             for (int y = 0; y < COLS; y++) {
                 for (int o = 0; o < directions; o++) {
-                     bestMove =  FindBestMoveInOnePiece(bestMove, lowestColors, o, x, y);
+                    bestMove =  FindBestMoveInOnePiece(bestMove, lowestColors, o, x, y);
                 }
             }
         }
@@ -238,7 +241,7 @@ public class BasicStrategy extends Strategy {
                             getGame().getSecondY(o, x, y), tempGrid) > bestMove.highestScore) {
                         bestMove = InsertMove(getGame().CalculateScore(x, y, tempGrid), x, y, o,piece);
                     }
-                } else if (isColor1) {
+                }else if (isColor1) {
                     if (getGame().CalculateScore(x, y, tempGrid) > bestMove.highestScore) {
                         bestMove = InsertMove(getGame().CalculateScore(x, y, tempGrid), x, y, o,piece);
                     }
@@ -266,5 +269,5 @@ public class BasicStrategy extends Strategy {
 
     public int getOrientation() {
         return orientation;
-    }
+}
 }
