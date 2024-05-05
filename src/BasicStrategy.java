@@ -11,6 +11,7 @@ public class BasicStrategy extends Strategy {
    - `int[][] tempGrid`: מייצג רשת זמנית המשמשת להערכת מהלכים.
     */
     private Piece piece;
+    private SaveMove bestMove;
     private  static  final int ROWS = 30;
     private  static  final int  COLS = 15;
     private  static  final int  MAX_HAND_PIECE = 6;
@@ -44,26 +45,17 @@ public class BasicStrategy extends Strategy {
     לבסוף, הוא מדפיס את ייצוג הרשת הזמני למטרות ניפוי באגים.
      */
     public void calculateMove(PlayerHand h, PriorityQueue<ColorScore> score) {
-        int highestScore = 0;
-        int highestX = 0;
-        int highestY = 0;
-        int highestOrientation = 0;
-        int highestPieceIndex = 0;
         int lowestScore = getGame().getCurrentPlayer().getColorScores().peek().getScore();
-        int[] returnValues = new int[5];
-        int w = 0;
-        fillReturnValues(returnValues, highestScore, highestX, highestY, highestOrientation, highestPieceIndex);
         ArrayList<Integer> lowestColors = new ArrayList<>();
         ArrayList<Integer> oldColors = new ArrayList<>();
         ColorScore[] scoreArray = score.toArray(new ColorScore[0]);
-        
         FindLowestColorsColors(lowestScore, lowestColors);
         PlayerHand hand = getGame().getCurrentPlayer().getHand();
         //בודק אם היד צריכה החלפה ואם כן מחליפה
         HandTradeCheck();
         boolean isMove;
         do {
-            isMove = ConfirmLowestColors(returnValues,false,lowestColors);
+            isMove = ConfirmLowestColors(lowestColors);
             //אם לא נמצא מהלך מתאים
             if (!isMove) {
                 ArrayList<Integer> newLowestColors = new ArrayList<>();
@@ -78,19 +70,19 @@ public class BasicStrategy extends Strategy {
 
             }
         } while (!isMove);//כל עוד לא נמצא לנו מהלך
-        FindBestMove(returnValues,lowestColors);
-        InsertHighestMove(highestPieceIndex, hand, highestX, highestY, highestOrientation);
-        makeTempGrid(highestOrientation,highestX, highestY,hand.getPiece(pieceIndex).getPrimaryHexagon().getColor(),hand.getPiece(pieceIndex).getSecondaryHexagon().getColor());
+        bestMove = FindBestMove(bestMove,lowestColors);
+        InsertHighestMove(hand);
+        makeTempGrid(bestMove.getHighestOrientation(), bestMove.highestX, bestMove.highestY, hand.getPiece(pieceIndex).getPrimaryHexagon().getColor(),hand.getPiece(pieceIndex).getSecondaryHexagon().getColor());
         printBestMoveGrid();
 
     }
 
-    private void InsertHighestMove(int highestPieceIndex, PlayerHand hand, int highestX, int highestY, int highestOrientation) {
-        pieceIndex = highestPieceIndex;
-        piece = hand.getPiece(pieceIndex);
-        xCord = highestX;
-        yCord = highestY;
-        orientation = highestOrientation;
+    private void InsertHighestMove(PlayerHand hand) {
+        pieceIndex = bestMove.highestX;
+        piece = hand.getPiece(bestMove.highestPieceIndex);
+        xCord = bestMove.highestX;
+        yCord = bestMove.highestY;
+        orientation = bestMove.highestOrientation;
     }
 
     //בודק האם היד צריכה החלפה
@@ -108,16 +100,10 @@ public class BasicStrategy extends Strategy {
             }
         }
     }
-    //ממלא את כל הערכים שצריכים לעבור בין הפונקציה המרכזית לפונקציה חיצונית שקובעים בסופו של דבר את המהלך
-    private static void fillReturnValues(int[] returnValues, int highestScore, int highestX, int highestY, int highestOrientation, int highestPieceIndex) {
-        int w = 0;
-        while (w < returnValues.length){
-            returnValues[w++] = highestScore;
-            returnValues[w++] = highestX;
-            returnValues[w++] = highestY;
-            returnValues[w++] = highestOrientation;
-            returnValues[w++] = highestPieceIndex;
-        }
+
+    //מכניס משתנים כדי לשמור מהלך הכי טוב חדש
+    private SaveMove InsertMove (int highestScore, int highestX, int highestY, int highestOrientation, int highestPieceIndex) {
+        return new SaveMove(highestScore,highestX,highestY,highestOrientation,highestPieceIndex);
     }
 
     //מדפיס את הלוח עם המהלך הטוב ביותר
@@ -175,87 +161,95 @@ public class BasicStrategy extends Strategy {
         return pieceIndex;
     }
     /* מוודא שלצבע הכי נמוך יש מהלך אפשרי בהתאם ללוח וליד השחקן*/
-    public boolean ConfirmLowestColors(int[] returnValues, boolean isMove, ArrayList<Integer>lowestColors) {
-        boolean isColor1, isColor2;
+    public boolean ConfirmLowestColors(ArrayList<Integer>lowestColors) {
+        boolean isMove = false;
         //עובר על כל שורה כל עמודה כל צבע וכל חלק
         for (int x = 0; x < ROWS; x++) {
             for (int y = 0; y < COLS; y++) {
                 for (int o = 0; o < directions; o++) {
-                    for (int piece = 0; piece < getGame().getCurrentPlayer().getHand().getSize(); piece++) {
-                        int color1 = getGame().getCurrentPlayer().getHand().getPiece(piece).getPrimaryHexagon().getColor(); //צבע ראשון
-                        int color2 = getGame().getCurrentPlayer().getHand().getPiece(piece).getSecondaryHexagon().getColor(); //צבע שני
-                        isColor1 = false;
-                        isColor2 = false;
-                        //לכל הצבעים הכי נמוכים אם אחד מהצבעים נמצא בחתיכה תשנה דגל
-                        for (Integer lowestColor : lowestColors) {
-                            if (color1 == lowestColor) {
-                                isColor1 = true;
-                            }
-                            if (color2 == lowestColor) {
-                                isColor2 = true;
-                            }
-                        }
-                        //אם אחד מהדגלים השתנה ויש מהלך חוקי בקורדינטות האלה ובכיוון הזה עם הצבע הזה אז תעדכן את כל המשתנים עם המידע הנוכחי
-                        if ((isColor1 || isColor2) && getGame().checkLegalMove(o, x, y, color1, color2)) {
-                            isMove = true;
-                            makeTempGrid(o, x, y, color1, color2);
-                            InsertMove(returnValues, x, y, o, piece);
-                        }
-                    }
+                    isMove = isMoveExists(lowestColors, o, x, y);
                 }
             }
         }
         return isMove;
     }
+
+    private boolean isMoveExists(ArrayList<Integer> lowestColors, int o, int x, int y) {
+        boolean isMove = false;
+        boolean isColor1;
+        boolean isColor2;
+        for (int piece = 0; piece < getGame().getCurrentPlayer().getHand().getSize(); piece++) {
+            int color1 = getGame().getCurrentPlayer().getHand().getPiece(piece).getPrimaryHexagon().getColor(); //צבע ראשון
+            int color2 = getGame().getCurrentPlayer().getHand().getPiece(piece).getSecondaryHexagon().getColor(); //צבע שני
+            isColor1 = false;
+            isColor2 = false;
+            //לכל הצבעים הכי נמוכים אם אחד מהצבעים נמצא בחתיכה תשנה דגל
+            for (Integer lowestColor : lowestColors) {
+                if (color1 == lowestColor) {
+                    isColor1 = true;
+                }
+                if (color2 == lowestColor) {
+                    isColor2 = true;
+                }
+            }
+            //אם אחד מהדגלים השתנה ויש מהלך חוקי בקורדינטות האלה ובכיוון הזה עם הצבע הזה אז תעדכן את כל המשתנים עם המידע הנוכחי
+            if ((isColor1 || isColor2) && getGame().checkLegalMove(o, x, y, color1, color2)) {
+                isMove = true;
+                makeTempGrid(o, x, y, color1, color2);
+                bestMove = InsertMove(getGame().CalculateScore(x, y, tempGrid), x, y, o,piece);
+            }
+        }
+        return isMove;
+    }
+
     /*אחרי שווידאנו שיש מהלך בצבע הכי נמוך שמצאנו אנו ריצים למצוא את המהלך הכי טוב בהתאם לכיוון ולמיקום במגרש*/
-    public void FindBestMove(int[] returnValues, ArrayList<Integer>lowestColors) {
-        boolean isColor1, isColor2;
+    public SaveMove FindBestMove(SaveMove bestMove, ArrayList<Integer>lowestColors) {
         for (int x = 0; x < ROWS; x++) {
             for (int y = 0; y < COLS; y++) {
                 for (int o = 0; o < directions; o++) {
-                    for (int piece = 0; piece < getGame().getCurrentPlayer().getHand().getSize(); piece++) {
-                        int color1 = getGame().getCurrentPlayer().getHand().getPiece(piece).getPrimaryHexagon().getColor();
-                        int color2 = getGame().getCurrentPlayer().getHand().getPiece(piece).getSecondaryHexagon().getColor();
-                        isColor1 = false;
-                        isColor2 = false;
-                        for (Integer lowestColor : lowestColors) {//מוצא חתיכות שנמצאות במערך חתיכות קטנות ביותר
-                            if (color1 == lowestColor) {
-                                isColor1 = true;
-                            }
-                            if (color2 == lowestColor) {
-                                isColor2 = true;
-                            }
-                        }
-                        if ((isColor1 || isColor2) && getGame().checkLegalMove(o, x, y, color1, color2)) { // אם אחד מהם שנמצא ויש איתו מהלך מתאים
-                            makeTempGrid(o, x, y, color1, color2);
-                            if (isColor1 && isColor2) {//אם שניהם מתאימים
-                                //בודק את שני הכיוונים של החלק והאם הניקוד שיצא יותר גבוה מהנוכחי
-                                if (getGame().CalculateScore(x, y, tempGrid) > returnValues[0] || getGame().CalculateScore(getGame().getSecondX(o, x, y),
-                                        getGame().getSecondY(o, x, y), tempGrid) > returnValues[0]) {
-                                    InsertMove(returnValues, x, y, o, piece);
-                                }
-                            } else if (isColor1) {
-                                if (getGame().CalculateScore(x, y, tempGrid) > returnValues[0]) {
-                                    InsertMove(returnValues, x, y, o, piece);
-                                }
-                            } else {
-                                if (getGame().CalculateScore(getGame().getSecondX(o, x, y), getGame().getSecondY(o, x, y),tempGrid) > returnValues[0]) {
-                                    InsertMove(returnValues, x, y, o, piece);
-                                }
-                            }
-                        }
+                     bestMove =  FindBestMoveInOnePiece(bestMove, lowestColors, o, x, y);
+                }
+            }
+        }
+        return bestMove;
+    }
+
+    private SaveMove FindBestMoveInOnePiece(SaveMove bestMove, ArrayList<Integer> lowestColors, int o, int x, int y) {
+        boolean isColor1;
+        boolean isColor2;
+        for (int piece = 0; piece < getGame().getCurrentPlayer().getHand().getSize(); piece++) {
+            int color1 = getGame().getCurrentPlayer().getHand().getPiece(piece).getPrimaryHexagon().getColor();
+            int color2 = getGame().getCurrentPlayer().getHand().getPiece(piece).getSecondaryHexagon().getColor();
+            isColor1 = false;
+            isColor2 = false;
+            for (Integer lowestColor : lowestColors) {//מוצא חתיכות שנמצאות במערך חתיכות קטנות ביותר
+                if (color1 == lowestColor) {
+                    isColor1 = true;
+                }
+                if (color2 == lowestColor) {
+                    isColor2 = true;
+                }
+            }
+            if ((isColor1 || isColor2) && getGame().checkLegalMove(o, x, y, color1, color2)) { // אם אחד מהם שנמצא ויש איתו מהלך מתאים
+                makeTempGrid(o, x, y, color1, color2);
+                if (isColor1 && isColor2) {//אם שניהם מתאימים
+                    //בודק את שני הכיוונים של החלק והאם הניקוד שיצא יותר גבוה מהנוכחי
+                    if (getGame().CalculateScore(x, y, tempGrid) > bestMove.highestScore || getGame().CalculateScore(getGame().getSecondX(o, x, y),
+                            getGame().getSecondY(o, x, y), tempGrid) > bestMove.highestScore) {
+                        bestMove = InsertMove(getGame().CalculateScore(x, y, tempGrid), x, y, o,piece);
+                    }
+                } else if (isColor1) {
+                    if (getGame().CalculateScore(x, y, tempGrid) > bestMove.highestScore) {
+                        bestMove = InsertMove(getGame().CalculateScore(x, y, tempGrid), x, y, o,piece);
+                    }
+                } else {
+                    if (getGame().CalculateScore(getGame().getSecondX(o, x, y), getGame().getSecondY(o, x, y),tempGrid) > bestMove.highestScore) {
+                        bestMove = InsertMove(getGame().CalculateScore(x, y, tempGrid), x, y, o,piece);
                     }
                 }
             }
         }
-    }
-//מכניס משתנים כדי לשמור מהלך הכי טוב חדש
-    private void InsertMove(int[] returnValues, int x, int y, int o, int piece) {
-        returnValues[0] = getGame().CalculateScore(x, y, tempGrid);
-        returnValues[1] = x;
-        returnValues[2] = y;
-        returnValues[3] = o;
-        returnValues[4] = piece;
+        return bestMove;
     }
 
     public Piece getPiece() {
