@@ -1,15 +1,15 @@
-import java.awt.*;
 import java.util.*;
 
 /*מחלקת 'משחק' היא לב ליבה של אפליקציית המשחק, שבה מנוהלים הכללים, ההתקדמות ומצבי המשחק. הוא מתזמר כיצד שחקנים מקיימים אינטראקציה עם המשחק, מעבד מהלכים, שומר על מצב לוח המשחק ובסופו של דבר קובע את תוצאת המשחק. באמצעות השיטות שלו, הוא מטמיע את ההיגיון של משחק אסטרטגיה מבוסס תורות, ומספק מסגרת למשחק הכוללת ניהול תור, פעולות שחקן, שמירת תוצאות ומעברי מצב משחק.*/
 public class Game {
-
+    public static final int ROWS = 30;
+    public static final int COLS = 15;
     private static final int WHITE_CELL_COLOR = -1;
     private static final int MAX_SCORE = 18;
     private static final int MAX_HAND_PIECES = 18;
     private final Player[] players;
     private Player currentPlayer;
-    private final Cell[][] staticBoard = new Cell[15][30];
+    private final Cell[][] staticBoard = new Cell[COLS][COLS];
     private final HashSet<Cell> dynamicBoard;
 
     private final int[][] emptyGrid;
@@ -37,19 +37,21 @@ public class Game {
         initializeStrategies();
 
         dynamicBoard = new HashSet<>();
-        emptyGrid = new int[30][15];
+        emptyGrid = new int[ROWS][COLS];
 
         SetPlayerValues(names, playerTypes, strategies);
         //new ComputerPlayer(names[a], getStrategy(strategies[a] - 1), new PlayerHand(PiecesBag))
         gameBoard = new GameBoard(this);
         initializeDynamicBoard();
+        initializeStaticBoard();
+        printGrid();
 
     }
 
     private void initializeStaticBoard() {
         // MAX_ROW_LENGTH may cause bugs
-        for (int x = 0; x < MAX_ROW_LENGTH; x++) {
-            for (int y = 0; y < MAX_ROW_LENGTH; y++) {
+        for (int x = 0; x < ROWS; x++) {
+            for (int y = 0; y < COLS; y++) {
                 // Check if the position is valid on the hexagonal board
                 if (isValidPosition(x, y)) {
                     int color = gameBoard.getHexColor()[x][y];
@@ -59,8 +61,8 @@ public class Game {
             }
         }
 
-        for (int x = 0; x < MAX_ROW_LENGTH; x++) {
-            for (int y = 0; y < MAX_ROW_LENGTH; y++) {
+        for (int x = 0; x < ROWS; x++) {
+            for (int y = 0; y < COLS; y++) {
                 // Check if the position is valid on the hexagonal board
                 if (isValidPosition(x, y)) {
                     Cell cell = staticBoard[x][y];
@@ -70,11 +72,23 @@ public class Game {
             }
         }
     }
-
+    private void printGrid() {
+        for (int y = 0; y < staticBoard.length; y++) {
+            System.out.println();
+            for (int x = 0; x < staticBoard[y].length; x++) {
+                if(staticBoard[x][y] != null) {
+                    System.out.print(staticBoard[x][y].getColor());
+                }
+                else {
+                    System.out.print(" ");
+                }
+            }
+        }
+    }
     private void initializeDynamicBoard() {
         // Iterate through all possible positions on the board
-        for (int x = 0; x < MAX_ROW_LENGTH; x++) {
-            for (int y = 0; y < MAX_ROW_LENGTH; y++) {
+        for (int x = 0; x < ROWS; x++) {
+            for (int y = 0; y < COLS; y++) {
                 // Check if the position is valid on the hexagonal board
                 if (isValidPosition(x, y)) {
                     int color = gameBoard.getHexColor()[x][y];
@@ -95,19 +109,53 @@ public class Game {
         int y = cell.getY();
 
         // determines the suitable directions array, according to the row
-        int[][] directions = x <= 3 ? directionsUpperPart : x >= 5 ? directionsLowerPart : directionsMiddleRow;
 
-        for (int[] direction : directions) {
-            int newX = x + direction[0];
-            int newY = y + direction[1];
-            Cell neighbor = staticBoard[newX][newY];
-            if (neighbor != null) {
-                neighbors.add(neighbor);
+
+        if (x >= 0 && x <= 5) {
+            for (int[] direction : directionsMiddleRow) {
+                int newX = x + direction[0];
+                int newY = y + direction[1];
+                if (0 <= newX && newX < ROWS && 0 <= newY && newY < COLS)
+                {
+                    Cell neighbor = staticBoard[newX][newY];
+                    if (neighbor != null) {
+                        neighbors.add(neighbor);
+                    }
+                }
+            }
+        }
+        else if (x == 6) {
+            for (int[] direction : directionsMiddleRow) {
+                int newX = x + direction[0];
+                int newY = y + direction[1];
+                if (0 <= newX && newX < ROWS && 0 <= newY && newY < COLS)
+                {
+                    Cell neighbor = staticBoard[newX][newY];
+                    if (neighbor != null) {
+                        neighbors.add(neighbor);
+                    }
+                }
+            }
+        }
+        else if (x >= 6 && x <= 11) {
+            for (int[] direction : directionsMiddleRow) {
+                int newX = x + direction[0];
+                int newY = y + direction[1];
+                if (0 <= newX && newX < ROWS && 0 <= newY && newY < COLS)
+                {
+                    Cell neighbor = staticBoard[newX][newY];
+                    if (neighbor != null) {
+                        neighbors.add(neighbor);
+                    }
+                }
             }
         }
 
+
+
         return neighbors;
     }
+
     // Returns the Cell object at a given set of coordinates
 
     private boolean isValidPosition(int x, int y) {
@@ -591,19 +639,16 @@ public class Game {
     }
     // שיטה זו בודקת אם הצבת יצירה בקואורדינטות הנתונות תהיה חוקית בהתבסס על משושים שכנים
     private boolean checkAround(int color, int x, int y) {
-        boolean legal = false;
-        for (int i=0; i<6; i++) {
-            if (((i==0||i==1) && y<1) || ((i==3||i==4) && y>13) || ((i==0||i==4) && x<1) || ((i==1||i==3) && x>28)
-                    || (i==2 && x>27) || (i==5 && x<3)) {
-            }
-            else {
-                if (staticBoard[getSecondX(i, x, y)][getSecondY(i, x, y)].getColor()==color) {
-                    legal = true;
-                }
+        HashSet<Cell> friends = staticBoard[x][y].getNeighbors();
+
+        for (Cell friend : friends) {
+            if (friend.getColor() == color) {
+                return true;
             }
         }
-        return legal;
+        return false;
     }
+
     //שיטה זו מחזירה מערך של שחקנים
     public Player[] getPlayers(){
         return players;
@@ -787,5 +832,3 @@ public class Game {
         return dynamicBoard;
     }
 }
-
-
