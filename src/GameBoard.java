@@ -28,11 +28,16 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
     13. **ניקוד1, ניקוד2**: משתנים לאחסון תוצאות השחקנים.
     14. **computerGrid**: מערך דו-ממדי המייצג את הלוח של שחקן המחשב.
     */
-    private static final Polygon[][] hexagon = new Polygon[30][15];
-    private static final Polygon[][] handPieces = new Polygon[6][2];
+    private  static  final int ROWS = 30;
+    private  static  final int  COLS = 15;
+    private  static  final int  MAX_HAND_PIECE = 6;
+    private  static  final int  MAX_SCORE = 18;
+    private static final Polygon[][] hexagon = new Polygon[ROWS][COLS];
+    private static final Polygon[][] handPieces = new Polygon[MAX_HAND_PIECE][2];
     private int[][] gameBoardTempGrid;
     private Polygon piece;
-    private static final int[][]hexColor = new int[30][15]; //Contains value representing color of a hex on the grid - for actual game, not initializing board
+
+    private static final int[][]hexColor = new int[ROWS][COLS]; //Contains value representing color of a hex on the grid - for actual game, not initializing board
     private static final int width = 1500;
     private static final int length = 800;
     private int X, Y, stoX, stoY;
@@ -57,9 +62,9 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
         initializeGrid();
         makeBoard();
         makeHand();
-        computerGrid = new int[30][15];
-        for(int y = 0; y < 15; y++){
-            for(int x = 0; x < 30;x++){
+        computerGrid = new int[ROWS][COLS];
+        for(int y = 0; y < COLS; y++){
+            for(int x = 0; x < ROWS;x++){
                 computerGrid[x][y] = 0;
             }
         }
@@ -119,12 +124,12 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
     private void makeHand(){
         //score drawing below
         int c=85;
-        for(int x = 0; x < 6; x++){
+        for(int x = 0; x < MAX_HAND_PIECE; x++){
             handPieces[x][0] = makeScoreHex(c, 693);
             c+=65;
         }
         c = 85;
-        for(int x = 0; x < 6; x++){
+        for(int x = 0; x < MAX_HAND_PIECE; x++){
             handPieces[x][1] = makeScoreHex(c, 745);
             c+=65;
         }
@@ -153,7 +158,7 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
         int yInit = 80;
         int yInit2=93;
         for(int boxes = 0; boxes < game.getPlayers().length; boxes++){
-            for (int counter2=0;counter2<19;counter2++){
+            for (int counter2=0;counter2 <= MAX_SCORE;counter2++){
                 g.drawLine(change,yInit,change,yInit + 105);
                 g.drawString(""+counter2 ,change +5,yInit2);
                 change+=23;
@@ -171,33 +176,33 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
             g.drawRect(50,change,435,105);//380 * 10
             g.setColor(Color.RED);
             int constant=50;
-            for (int c=0;c<=getScoreByColor(game.getPlayers()[counter],3)&& c <= 18;c++)
+            for (int c=0;c<=getScoreByColor(game.getPlayers()[counter],3)&& c <= MAX_SCORE;c++)
             {
                 g.fillRect(constant+(23 * c),change+15,24,15);
             }
 
             g.setColor(Color.BLUE);
-            for (int c=0;c<=getScoreByColor(game.getPlayers()[counter],5) && c <= 18;c++)
+            for (int c=0;c<=getScoreByColor(game.getPlayers()[counter],5) && c <= MAX_SCORE;c++)
             {
                 g.fillRect(constant+(23 * c),change+30,24,15);
             }
             g.setColor(Color.GREEN);
-            for (int c=0;c<=getScoreByColor(game.getPlayers()[counter],4) && c <= 18;c++)
+            for (int c=0;c<=getScoreByColor(game.getPlayers()[counter],4) && c <= MAX_SCORE;c++)
             {
                 g.fillRect(constant+(23 * c),change+45,24,15);
             }
             g.setColor(new Color(255,128,0));//orange
-            for (int c=0;c<=getScoreByColor(game.getPlayers()[counter],0) && c <= 18;c++)
+            for (int c=0;c<=getScoreByColor(game.getPlayers()[counter],0) && c <= MAX_SCORE;c++)
             {
                 g.fillRect(constant+(23 * c),change+60,24,15);
             }
             g.setColor(Color.YELLOW);
-            for (int c=0;c<=getScoreByColor(game.getPlayers()[counter],1) && c <= 18;c++)
+            for (int c=0;c<=getScoreByColor(game.getPlayers()[counter],1) && c <= MAX_SCORE;c++)
             {
                 g.fillRect(constant+(23 * c),change+75,24,15);
             }
             g.setColor(Color.MAGENTA);
-            for (int c=0;c<=getScoreByColor(game.getPlayers()[counter],2) && c <= 18;c++)
+            for (int c=0;c<=getScoreByColor(game.getPlayers()[counter],2) && c <= MAX_SCORE;c++)
             {
                 g.fillRect(constant+(23 * c),change+90,24,15);
             }
@@ -229,7 +234,7 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
     private Polygon makeScoreHex(int x, int y){
         Polygon hex = new Polygon();
         double init,value;
-        for(int a = 0; a<=6; a++){
+        for(int a = 0; a<=MAX_HAND_PIECE; a++){
             init = Math.PI/6;
             value = Math.PI / 3.0 * a;
             hex.addPoint((int)(Math.round(x + Math.sin(value+init) * 30)), (int)(Math.round(y + Math.cos(value+init) * 30)));
@@ -238,8 +243,8 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
     }
     //מאתחל את לוח המשחק
     private void initializeGrid(){
-        for(int x = 0; x < 30; x++){
-            for(int y = 0; y < 15;y++){
+        for(int x = 0; x < ROWS; x++){
+            for(int y = 0; y < COLS;y++){
                 if((y == 0 || y == 14) && (x< 8 || x >23)){
                     hexagon[x][y] = null;
                 }else if((y == 1 || y == 13) && (x< 6 || x >24)){
@@ -331,9 +336,9 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
     }
     // יוצר לוח משחק זמני
     private void makeGameBoardTempGrid(int x, int y, int o){
-        gameBoardTempGrid = new int[30][15];
-        for (int X = 0; X < 30; X ++){
-            for (int Y = 0; Y < 15; Y ++){
+        gameBoardTempGrid = new int[ROWS][COLS];
+        for (int X = 0; X < ROWS; X ++){
+            for (int Y = 0; Y < COLS; Y ++){
                 if(game.twoHexGrid(o,x,y)[X][Y] == 0){
                     gameBoardTempGrid[X][Y] = game.getGrid()[X][Y];
                 }else{
@@ -347,8 +352,8 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
     private void paintBoard(Graphics g){
         boolean onSpace = false;
         orientation = game.getCurrentPlayer().getOrientation();
-        for(int x = 1; x<30; x++){
-            for(int y = 0; y<15;y++){
+        for(int x = 1; x<ROWS; x++){
+            for(int y = 0; y<COLS;y++){
                 onSpace = PaintBaseGrid(g, x, y, onSpace);
             }
 
@@ -400,8 +405,8 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
     }
 //מדגיש את מהלך הבוט
     private void EmphasizeBotMove(Graphics g) {
-        for(int x = 1; x<30; x++){
-            for(int y = 0; y<15;y++){
+        for(int x = 1; x<ROWS; x++){
+            for(int y = 0; y<COLS;y++){
                 if(!(hexagon[x][y] == null)){
                     if(computerGrid[x][y] != 0){
                         g.setColor(pickColor(computerGrid[x][y]));
@@ -475,8 +480,8 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
     }
     //עדכון לוח המשחק
     public void updateGrid(int[][] newGrid){
-        for(int x = 0; x<30; x++){
-            for(int y = 0; y<15;y++){
+        for(int x = 0; x<ROWS; x++){
+            for(int y = 0; y<COLS;y++){
                 hexColor[x][y] = newGrid [x][y];
             }
         }
@@ -487,8 +492,8 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
     }
     //מאתחל את לוח המשחק
     private void makeBoard (){ // could be made more efficient
-        for(int x = 1; x<30; x++){
-            for(int y = 0; y<15;y++){
+        for(int x = 1; x<ROWS; x++){
+            for(int y = 0; y<COLS;y++){
                 if(!(hexagon[x][y] == null)){
                     if(x == 1 || x == 29 || x==28 || y == 0 ||  y == 14 || hexagon[x-2][y] == null || hexagon[x+2][y] == null)
                         hexColor[x][y] = 0;
@@ -510,7 +515,7 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
     private Polygon makeHex(int x, int y){ //z is currently radius of hex
         Polygon hex = new Polygon();
         double value;
-        for(int a = 0; a<=6; a++){
+        for(int a = 0; a<=MAX_SCORE; a++){
             value = Math.PI / 3.0 * a;
             hex.addPoint((int)(Math.round(x + Math.sin(value) * 30)), (int)(Math.round(y + Math.cos(value) * 30)));
         }
@@ -526,8 +531,8 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
     public void mouseClicked(MouseEvent e) {//Currently for debugging
         X = e.getX();
         Y = e.getY();
-        for(int x = 0; x < 30; x++){
-            for(int y = 0; y < 15;y++){
+        for(int x = 0; x < ROWS; x++){
+            for(int y = 0; y < COLS;y++){
                 try{
                     GetAndSetPieceOnBoard(e, x, y);
 

@@ -3,12 +3,13 @@ import java.util.ArrayList;
 public class PlayerHand{
     //player refills hand and creates
     private final ArrayList<Piece> pieces=new ArrayList<>();
+    private  static  final int  MAX_HAND_PIECE = 6;
    private final PiecesBag bag;
     //הבנאי מאתחל אובייקט `יד` חדש על ידי מילויו בחלקים שנלקחו מה-GrabBag המסופק. זה מוסיף שישה חלקים ליד בהתחלה
     PlayerHand(PiecesBag bag)
     {
         this.bag=bag;
-        for (int counter=0;counter<6;counter++)
+        for (int counter=0;counter<MAX_HAND_PIECE;counter++)
         {
             this.addNewPiece(bag.drawPiece(counter));
         }

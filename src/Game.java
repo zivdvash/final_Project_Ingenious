@@ -4,7 +4,10 @@ import java.util.PriorityQueue;
 
 /*מחלקת 'משחק' היא לב ליבה של אפליקציית המשחק, שבה מנוהלים הכללים, ההתקדמות ומצבי המשחק. הוא מתזמר כיצד שחקנים מקיימים אינטראקציה עם המשחק, מעבד מהלכים, שומר על מצב לוח המשחק ובסופו של דבר קובע את תוצאת המשחק. באמצעות השיטות שלו, הוא מטמיע את ההיגיון של משחק אסטרטגיה מבוסס תורות, ומספק מסגרת למשחק הכוללת ניהול תור, פעולות שחקן, שמירת תוצאות ומעברי מצב משחק.*/
 public class Game {
-
+    private  static  final int ROWS = 30;
+    private  static  final int  COLS = 15;
+    private  static  final int  MAX_SCORE = 18;
+    private  static  final int  MAX_HAND_PIECE = 6;
     private final Player[] players;
     private Player currentPlayer;
     private int[][] grid;
@@ -25,8 +28,8 @@ public class Game {
         players = new Player[names.length];
         isGameOver = false;
         initializeStrategies();
-        grid = new int[30][15];
-        emptyGrid = new int[30][15];
+        grid = new int[ROWS][COLS];
+        emptyGrid = new int[ROWS][COLS];
 
         SetPlayerValues(names, playerTypes, strategies);
         //new ComputerPlayer(names[a], getStrategy(strategies[a] - 1), new PlayerHand(PiecesBag))
@@ -36,8 +39,8 @@ public class Game {
     }
 
     private void InitializeBoard() {
-        for (int x = 0; x < 30; x ++){
-            for (int y = 0; y < 15; y ++){
+        for (int x = 0; x < ROWS; x ++){
+            for (int y = 0; y < COLS; y ++){
                 grid[x][y] = gameBoard.getHexColor()[x][y];//מאתחל כל משושה בלוח
                 emptyGrid[x][y] = 0;//מאתחל כל משושה בלוח
             }
@@ -117,7 +120,7 @@ public class Game {
         for (ColorScore x : currentPlayer.getColorScores()) {
             for (ColorScore i : startScores) {
                 if (i.getColor() == x.getColor()) {
-                    if (x.getScore() == 18 && i.getScore() < 18) {//בודק האם מגיע עוד תור
+                    if (x.getScore() == MAX_SCORE && i.getScore() < MAX_SCORE) {//בודק האם מגיע עוד תור
                         isSecondPlay = true;
                     }
                 }
@@ -130,7 +133,7 @@ public class Game {
         if(!isSecondPlay){
             do{
                 currentPlayer.addNewPiece();//אם הוא לא שיחק שוב תוסיף ותוריד חלק
-            }while(currentPlayer.getHand().getSize() < 6);
+            }while(currentPlayer.getHand().getSize() < MAX_HAND_PIECE);
         }
         if(extraTern != null){//אם צריך אז לסגור מסך
             extraTern.dispose();
@@ -193,18 +196,18 @@ public class Game {
     - הוא ממיין את הניקוד של שני השחקנים ומאחסן את הניקוד הנמוך ביותר שלהם בשיטת 'setLowestScore'.
     - הוא משווה את ההניקוד הנמוך ביותר כדי לקבוע את סדר השחקנים. אם הניקוד הנמוך ביותר שלהם שווה, הוא מסתכל על הניקוד השני הנמוך ביותר כשובר שוויון כדי להכריע בדירוג.
     - לבסוף, הוא מקצה את השחקנים הממוינים ואת הניקוד הנמוכים ביותר שלהם למערכי 'p' ו-'sortedScores' בהתאמה.*/
-        if (players.length==2) {
-            p = new Player[2];
-            sortedScores = new int[2];
-            int[][] score = new int[2][6];
-            int[] a = new int[6];
-            int[] b = new int[6];
-            SetPlayersScores(a, b);
-            SetScoresMatrix(score, a, b);
-            LeadingPlayerCheck(score);
-            sortedScores[0]=p[0].getColorScores().peek().getScore();
-            sortedScores[1]=p[1].getColorScores().peek().getScore();
-        }
+
+        p = new Player[players.length];
+        sortedScores = new int[players.length];
+        int[][] score = new int[p.length][MAX_HAND_PIECE];
+        int[] a = new int[MAX_HAND_PIECE];
+        int[] b = new int[MAX_HAND_PIECE];
+        SetPlayersScores(a, b);
+        SetScoresMatrix(score, a, b);
+        LeadingPlayerCheck(score);
+        sortedScores[0] = p[0].getColorScores().peek().getScore();
+        sortedScores[1] = p[1].getColorScores().peek().getScore();
+
 
         return p;
     }
@@ -241,7 +244,7 @@ public class Game {
     //מעביר את שני מערכ הניקוד למטריצה לצורך נוחות בהשוואה
     private static void SetScoresMatrix(int[][] score, int[] a, int[] b) {
         for (int i=0; i<2; i++) {
-            for (int j=0; j<6; j++) {
+            for (int j=0; j<MAX_HAND_PIECE; j++) {
                 if (i==0) {
                     score[i][j]= a[j];
                 }
@@ -327,9 +330,9 @@ public class Game {
     }
     //שיטה זו יוצרת לוח זמני לחישובים
     public void makeTempGrid(int o, int x, int y){
-        tempGrid = new int[30][15];
-        for (int X = 0; X < 30; X ++){
-            for (int Y = 0; Y < 15; Y ++){
+        tempGrid = new int[ROWS][COLS];
+        for (int X = 0; X < ROWS; X ++){
+            for (int Y = 0; Y < COLS; Y ++){
                 if(twoHexGrid(o,x,y)[X][Y] == 0){
                     tempGrid[X][Y] = grid[X][Y];
                 }else{
@@ -509,7 +512,7 @@ public class Game {
     // שיטה זו בודקת אם הצבת יצירה בקואורדינטות הנתונות תהיה חוקית בהתבסס על משושים שכנים
     private boolean checkAround(int color, int x, int y) {
         boolean legal = false;
-        for (int i=0; i<6; i++) {
+        for (int i=0; i<MAX_HAND_PIECE; i++) {
             if (((i==0||i==1) && y<1) || ((i==3||i==4) && y>13) || ((i==0||i==4) && x<1) || ((i==1||i==3) && x>28)
                     || (i==2 && x>27) || (i==5 && x<3)) {
             }
@@ -596,9 +599,9 @@ public class Game {
         return twoHexGrid(o, x, y,currentPlayer.getCurrentPiece().getPrimaryHexagon().getColor(),currentPlayer.getCurrentPiece().getSecondaryHexagon().getColor());
     }
     public int[][] twoHexGrid(int o, int x, int y, int color1, int color2) {
-        int[][] grid = new int[30][15];
-        for (int i = 0; i<30; i++) {
-            for (int j=0; j<15; j++) {
+        int[][] grid = new int[ROWS][COLS];
+        for (int i = 0; i<ROWS; i++) {
+            for (int j=0; j<COLS; j++) {
                 grid[i][j]=0;
             }
         }
@@ -628,7 +631,7 @@ public class Game {
         try{
             boolean isWinner = true;
             for (ColorScore i : currentPlayer.getColorScores()){
-                if(i.getScore() < 18){
+                if(i.getScore() < MAX_SCORE){
                     isWinner = false;
                 }
             }
@@ -641,9 +644,9 @@ public class Game {
     public boolean isMoveRemaining(){
         boolean isMove = false;//need boolean in loop
         try{
-            for(int x = 0; x < 30 && !isMove; x ++){
-                for(int y = 0; y < 15 && !isMove; y ++){
-                    for(int o = 0; o < 6 && !isMove; o ++){
+            for(int x = 0; x < ROWS && !isMove; x ++){
+                for(int y = 0; y < COLS && !isMove; y ++){
+                    for(int o = 0; o < MAX_HAND_PIECE && !isMove; o ++){
                         for(int piece = 0; piece < currentPlayer.getHand().getSize(); piece ++){
                             if(checkLegalMove(o,x,y,currentPlayer.getHand().getPiece(piece).getPrimaryHexagon().getColor(),currentPlayer.getHand().getPiece(piece).getSecondaryHexagon().getColor())){
                                 isMove = true;

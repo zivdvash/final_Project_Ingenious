@@ -11,6 +11,9 @@ public class BasicStrategy extends Strategy {
    - `int[][] tempGrid`: מייצג רשת זמנית המשמשת להערכת מהלכים.
     */
     private Piece piece;
+    private  static  final int ROWS = 30;
+    private  static  final int  COLS = 15;
+    private  static  final int  MAX_HAND_PIECE = 6;
     private int xCord;
     private int yCord;
     private static final int directions = 6;
@@ -24,9 +27,9 @@ public class BasicStrategy extends Strategy {
     }
     //`makeTempGrid(int o, int x, int y, int color1, int color2)`: יוצר לוח זמני על סמך הפרמטרים הנתונים
     private void makeTempGrid(int o, int x, int y, int color1, int color2) {
-        tempGrid = new int[30][15];
-        for (int X = 0; X < 30; X++) {
-            for (int Y = 0; Y < 15; Y++) {
+        tempGrid = new int[ROWS][COLS];
+        for (int X = 0; X < ROWS; X++) {
+            for (int Y = 0; Y < COLS; Y++) {
                 if (getGame().twoHexGrid(o, x, y, color1, color2)[X][Y] == 0) {
                     tempGrid[X][Y] = getGame().getGrid()[X][Y];
                 } else {
@@ -49,7 +52,7 @@ public class BasicStrategy extends Strategy {
         int lowestScore = getGame().getCurrentPlayer().getColorScores().peek().getScore();
         int[] returnValues = new int[5];
         int w = 0;
-        fillReturnValues(w, returnValues, highestScore, highestX, highestY, highestOrientation, highestPieceIndex);
+        fillReturnValues(returnValues, highestScore, highestX, highestY, highestOrientation, highestPieceIndex);
         ArrayList<Integer> lowestColors = new ArrayList<>();
         ArrayList<Integer> oldColors = new ArrayList<>();
         ColorScore[] scoreArray = score.toArray(new ColorScore[0]);
@@ -106,7 +109,8 @@ public class BasicStrategy extends Strategy {
         }
     }
     //ממלא את כל הערכים שצריכים לעבור בין הפונקציה המרכזית לפונקציה חיצונית שקובעים בסופו של דבר את המהלך
-    private static void fillReturnValues(int w, int[] returnValues, int highestScore, int highestX, int highestY, int highestOrientation, int highestPieceIndex) {
+    private static void fillReturnValues(int[] returnValues, int highestScore, int highestX, int highestY, int highestOrientation, int highestPieceIndex) {
+        int w = 0;
         while (w < returnValues.length){
             returnValues[w++] = highestScore;
             returnValues[w++] = highestX;
@@ -118,9 +122,9 @@ public class BasicStrategy extends Strategy {
 
     //מדפיס את הלוח עם המהלך הטוב ביותר
     private void printBestMoveGrid() {
-        for(int y = 0; y < 15; y++){
+        for(int y = 0; y < COLS; y++){
             System.out.println();
-            for(int x = 0; x < 30;x++){
+            for(int x = 0; x < COLS;x++){
                 if(tempGrid[x][y] == 0){
                     System.out.print(" ");
                 }else if(tempGrid[x][y] == -1){
@@ -161,7 +165,7 @@ public class BasicStrategy extends Strategy {
                     a++;
             }
         }
-        if(a == 6)
+        if(a == MAX_HAND_PIECE)
             a-=1;
         return a;
     }
@@ -174,8 +178,8 @@ public class BasicStrategy extends Strategy {
     public boolean ConfirmLowestColors(int[] returnValues, boolean isMove, ArrayList<Integer>lowestColors) {
         boolean isColor1, isColor2;
         //עובר על כל שורה כל עמודה כל צבע וכל חלק
-        for (int x = 0; x < 30; x++) {
-            for (int y = 0; y < 15; y++) {
+        for (int x = 0; x < ROWS; x++) {
+            for (int y = 0; y < COLS; y++) {
                 for (int o = 0; o < directions; o++) {
                     for (int piece = 0; piece < getGame().getCurrentPlayer().getHand().getSize(); piece++) {
                         int color1 = getGame().getCurrentPlayer().getHand().getPiece(piece).getPrimaryHexagon().getColor(); //צבע ראשון
@@ -206,8 +210,8 @@ public class BasicStrategy extends Strategy {
     /*אחרי שווידאנו שיש מהלך בצבע הכי נמוך שמצאנו אנו ריצים למצוא את המהלך הכי טוב בהתאם לכיוון ולמיקום במגרש*/
     public void FindBestMove(int[] returnValues, ArrayList<Integer>lowestColors) {
         boolean isColor1, isColor2;
-        for (int x = 0; x < 30; x++) {
-            for (int y = 0; y < 15; y++) {
+        for (int x = 0; x < ROWS; x++) {
+            for (int y = 0; y < COLS; y++) {
                 for (int o = 0; o < directions; o++) {
                     for (int piece = 0; piece < getGame().getCurrentPlayer().getHand().getSize(); piece++) {
                         int color1 = getGame().getCurrentPlayer().getHand().getPiece(piece).getPrimaryHexagon().getColor();

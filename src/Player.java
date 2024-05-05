@@ -6,6 +6,8 @@ public abstract class Player{
     private final PlayerHand hand;
     // שם השחקן
     private final String name;
+    private  static  final int  MAX_HAND_PIECE = 6;
+    private  static  final int  MAX_SCORE = 18;
 
     // צבעים מסודרים לפי הציון
     private PriorityQueue<ColorScore> colorScores;
@@ -26,10 +28,9 @@ public abstract class Player{
         hand = hand1;
         name = name1;
         // הגדרת תורים מסודרים על פי הציון
-
         Comparator<ColorScore> comparator = Comparator.comparingInt(ColorScore::getScore);
         colorScores = new PriorityQueue<>(comparator);
-        for(int i = 0; i<6; i++){
+        for(int i = 0; i<MAX_HAND_PIECE; i++){
             ColorScore C = new ColorScore(i,0);
             colorScores.offer(C);
         }
@@ -74,11 +75,11 @@ public abstract class Player{
     }
     // החלפת היד של השחקן
     public void tradeHand() {
-        for (int a = 0; a < 6; a++) {
+        for (int a = 0; a < MAX_HAND_PIECE; a++) {
             hand.getBag().addPiece(hand.removePiece(0));
         }
         hand.getBag().shuffle();
-        for (int a = 0; a < 6; a++) {
+        for (int a = 0; a < MAX_HAND_PIECE; a++) {
             hand.addNewPiece(hand.getBag().drawPiece(0));
         }
     }
@@ -91,8 +92,8 @@ public abstract class Player{
             for (int a = 0; a < colorScores.size(); a++) {
                 if (cs.getColor() == a) {
                     int newScore = cs.getScore() + score[a];
-                    if (newScore > 18) {
-                        newScore = 18;
+                    if (newScore > MAX_SCORE) {
+                        newScore = MAX_SCORE;
                     }
                     cs.setScore(newScore);
                     updatedScores.add(cs);
