@@ -1,5 +1,4 @@
-import java.util.ArrayList;
-import java.util.PriorityQueue;
+import java.util.*;
 
 public class BasicStrategy extends Strategy {
     /*שדות:
@@ -20,7 +19,7 @@ public class BasicStrategy extends Strategy {
     private static final int directions = 6;
     private int orientation;
     private int pieceIndex;
-    private int[][] tempGrid;
+    private Map<Integer,Integer> tempGrid;
     //בנאי:
     //   - SimpleStrategy(Game g): מאתחל את האסטרטגיה עם מופע המשחק המשויך.
     BasicStrategy(Game g) {
@@ -28,13 +27,14 @@ public class BasicStrategy extends Strategy {
     }
     //makeTempGrid(int o, int x, int y, int color1, int color2): יוצר לוח זמני על סמך הפרמטרים הנתונים
     private void makeTempGrid(int o, int x, int y, int color1, int color2) {
-        tempGrid = new int[ROWS][COLS];
+        tempGrid = new HashMap<>();
         for (int X = 0; X < ROWS; X++) {
             for (int Y = 0; Y < COLS; Y++) {
-                if (getGame().twoHexGrid(o, x, y, color1, color2)[X][Y] == 0) {
-                    tempGrid[X][Y] = getGame().getGrid()[X][Y];
+                if (getGame().MakeTempGrid(o, x, y, color1, color2)[X][Y] == 0 && getGame().getGrid().get(X*ROWS+Y) != null) {
+                    tempGrid.put(X*ROWS+Y,getGame().getGrid().get(X*ROWS+Y));
                 } else {
-                    tempGrid[X][Y] = getGame().twoHexGrid(o, x, y, color1, color2)[X][Y];
+                    if (getGame().MakeTempGrid(o, x, y, color1, color2)[X][Y] != 0)
+                        tempGrid.put(X*ROWS+Y,getGame().convertMatrixToMap(getGame().MakeTempGrid(o, x, y, color1, color2)).get(X*ROWS+Y));
                 }
             }
         }
@@ -63,17 +63,16 @@ public class BasicStrategy extends Strategy {
                 FindPreviousLowestColors(lowestColors, oldColors);
                 int a = FindNextLowestColor(oldColors);
                 lowestScore = scoreArray[a].getScore();
-
                 //מוצא את כל הצבעים שהם באותו ניקוד כמו ההכי נמוך החדש
-                        FindNewLowestColors(lowestScore, newLowestColors);
+                FindNewLowestColors(lowestScore, newLowestColors);
                 lowestColors = newLowestColors;
 
             }
         } while (!isMove);//כל עוד לא נמצא לנו מהלך
         bestMove = FindBestMove(bestMove,lowestColors);
         InsertHighestMove(hand);
-        makeTempGrid(bestMove.highestOrientation, bestMove.highestX, bestMove.highestY, hand.getPiece(pieceIndex).getPrimaryHexagon().getColor(),hand.getPiece(pieceIndex).getSecondaryHexagon().getColor());
-        printBestMoveGrid();
+        // makeTempGrid(bestMove.highestOrientation, bestMove.highestX, bestMove.highestY, hand.getPiece(pieceIndex).getPrimaryHexagon().getColor(),hand.getPiece(pieceIndex).getSecondaryHexagon().getColor());
+        // printBestMoveGrid();
 
     }
 
@@ -107,10 +106,10 @@ public class BasicStrategy extends Strategy {
     }
 
     //מדפיס את הלוח עם המהלך הטוב ביותר
-    private void printBestMoveGrid() {
+    /*    private void printBestMoveGrid() {
         for(int y = 0; y < COLS; y++){
             System.out.println();
-            for(int x = 0; x < COLS;x++){
+            for(int x = 0; x < ROWS ;x++){
                 if(tempGrid[x][y] == 0){
                     System.out.print(" ");
                 }else if(tempGrid[x][y] == -1){
@@ -120,7 +119,8 @@ public class BasicStrategy extends Strategy {
                 }
             }
         }
-    }
+    }*/
+
     //שומר את הצבעים הכי נמוכים בשביל לדעת לאילו צבעים לא להיתייחס אם החיפוש נכשל
     private static void FindPreviousLowestColors(ArrayList<Integer> lowestColor, ArrayList<Integer> oldColors) {
         for (Integer i : lowestColor){
@@ -163,24 +163,25 @@ public class BasicStrategy extends Strategy {
     /* מוודא שלצבע הכי נמוך יש מהלך אפשרי בהתאם ללוח וליד השחקן*/
     public boolean ConfirmLowestColors(ArrayList<Integer>lowestColors) {
         boolean isMove = false;
+        Set<Integer> keys = getGame().getWhiteCells().keySet();
         //עובר על כל שורה כל עמודה כל צבע וכל חלק
-        for (int x = 0; x < ROWS; x++) {
-            for (int y = 0; y < COLS; y++) {
-                for (int o = 0; o < directions; o++) {
-                    if (!isMove){
-                        isMove = isMoveExists(lowestColors, o, x, y);
-                    }
-
+        for (int xy : keys) {
+            for (int o = 0; o < directions; o++) {
+                if (!isMove) {
+                    isMove = isMoveExists(lowestColors, o, xy);
                 }
+
             }
         }
         return isMove;
     }
 
-    private boolean isMoveExists(ArrayList<Integer> lowestColors, int o, int x, int y) {
+    private boolean isMoveExists(ArrayList<Integer> lowestColors, int o, int xy) {
         boolean isMove = false;
         boolean isColor1;
         boolean isColor2;
+        int y = xy % ROWS  ;
+        int x = (xy - y)/ROWS;
         for (int piece = 0; piece < getGame().getCurrentPlayer().getHand().getSize(); piece++) {
             int color1 = getGame().getCurrentPlayer().getHand().getPiece(piece).getPrimaryHexagon().getColor(); //צבע ראשון
             int color2 = getGame().getCurrentPlayer().getHand().getPiece(piece).getSecondaryHexagon().getColor(); //צבע שני
@@ -205,21 +206,23 @@ public class BasicStrategy extends Strategy {
         return isMove;
     }
 
-    //אחרי שווידאנו שיש מהלך בצבע הכי נמוך שמצאנו אנו ריצים למצוא את המהלך הכי טוב בהתאם לכיוון ולמיקום במגרש/
+   //אחרי שווידאנו שיש מהלך בצבע הכי נמוך שמצאנו אנו ריצים למצוא את המהלך הכי טוב בהתאם לכיוון ולמיקום במגרש/
     public SaveMove FindBestMove(SaveMove bestMove, ArrayList<Integer>lowestColors) {
-        for (int x = 0; x < ROWS; x++) {
-            for (int y = 0; y < COLS; y++) {
-                for (int o = 0; o < directions; o++) {
-                    bestMove =  FindBestMoveInOnePiece(bestMove, lowestColors, o, x, y);
-                }
+        Set<Integer> keys = getGame().getWhiteCells().keySet();
+        for (int xy : keys) {
+            for (int o = 0; o < directions; o++) {
+                bestMove = FindBestMoveInOnePiece(bestMove, lowestColors, o, xy);
             }
         }
+
         return bestMove;
     }
 
-    private SaveMove FindBestMoveInOnePiece(SaveMove bestMove, ArrayList<Integer> lowestColors, int o, int x, int y) {
+    private SaveMove FindBestMoveInOnePiece(SaveMove bestMove, ArrayList<Integer> lowestColors, int o, int xy) {
         boolean isColor1;
         boolean isColor2;
+        int y = xy % ROWS  ;
+        int x = (xy - y)/ROWS;
         for (int piece = 0; piece < getGame().getCurrentPlayer().getHand().getSize(); piece++) {
             int color1 = getGame().getCurrentPlayer().getHand().getPiece(piece).getPrimaryHexagon().getColor();
             int color2 = getGame().getCurrentPlayer().getHand().getPiece(piece).getSecondaryHexagon().getColor();

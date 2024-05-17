@@ -2,6 +2,8 @@ import java.lang.Math;
 import java.util.PriorityQueue;
 
 public class RandomStrategy extends Strategy {
+    private  static  final int ROWS = 30;
+    private  static  final int  COLS = 15;
     private Piece piece;
     private int xCord;
     private int yCord;
@@ -20,6 +22,7 @@ public class RandomStrategy extends Strategy {
             xCord = (int)(Math.random() * 30);
             yCord = (int)(Math.random() * 15);
             orientation = (int)(Math.random() * 6);
+
             if (checkLegalMove(xCord, yCord, orientation)) {
                 legalMove = true;
                 pieceIndex = (int)(Math.random() * h.getSize());
@@ -48,20 +51,20 @@ public class RandomStrategy extends Strategy {
     CordY > 0 ו-CordY < 14 בודקים גבולות אנכיים, ומבטיחים שהיצירה אינה חורגת מעבר לחלק העליון או התחתון של הרשת.
     הבדיקות game.grid[CordX][CordY] == -1 מוודאות שתא משושה ריק לפני שממקמים שם חתיכה. מערכת זו מאפשרת אסטרטגיית מיקום רב-תכליתית המתאימה לרשת המשושה של המשחק, ומאפשרת שש כיוונים אפשריים למיקום חלקים ומבטיחה שכל מהלך עומד בכללי המשחק למיקום חוקי.
     */
-public boolean checkLegalMove(int CordX, int CordY, int orientation) {
+    public boolean checkLegalMove(int CordX, int CordY, int orientation) {
         // Modified to use the orientation parameter
-        if (orientation==0 && CordX > 0 && CordY > 0 && getGame().getGrid()[CordX][CordY]==-1 && getGame().getGrid()[CordX-1][CordY-1]==-1) {
-            return true;
-        } else if (orientation==1 && CordX < 29 && CordY > 0 && getGame().getGrid()[CordX][CordY]==-1 && getGame().getGrid()[CordX+1][CordY-1]==-1) {
-            return true;
-        } else if (orientation==2 && CordX < 28 && getGame().getGrid()[CordX][CordY]==-1 && getGame().getGrid()[CordX+2][CordY]==-1) {
-            return true;
-        } else if (orientation==3 && CordX < 29 && CordY < 14 && getGame().getGrid()[CordX][CordY]==-1 && getGame().getGrid()[CordX+1][CordY+1]==-1) {
-            return true;
-        } else if (orientation==4 && CordX > 0 && CordY < 14 && getGame().getGrid()[CordX][CordY] == -1 && getGame().getGrid()[CordX-1][CordY+1] == -1) {
-            return true;
-        } else if (orientation==5 && CordX > 1 && getGame().getGrid()[CordX][CordY] == -1 && getGame().getGrid()[CordX-2][CordY] == -1) {
-            return true;
+        if (orientation==0 && CordX > 0 && CordY > 0 && getGame().getWhiteCells().get(CordX*ROWS+CordY)!=null && getGame().getWhiteCells().get((CordX-1)*ROWS+CordY-1)!=null) {
+                 return true;
+        } else if (orientation==1 && CordX < 29 && CordY > 0 && getGame().getWhiteCells().get(CordX*ROWS+CordY)!=null && getGame().getWhiteCells().get((CordX+1)*ROWS+CordY-1)!=null) {
+                 return true;
+        } else if (orientation==2 && CordX < 28 && getGame().getWhiteCells().get(CordX*ROWS+CordY)!=null && getGame().getWhiteCells().get((CordX+2)*ROWS+CordY)!=null) {
+                return true;
+        } else if (orientation==3 && CordX < 29 && CordY < 14 && getGame().getWhiteCells().get(CordX*ROWS+CordY)!=null && getGame().getWhiteCells().get((CordX+1)*ROWS+CordY+1)!=null) {
+                return true;
+        } else if (orientation==4 && CordX > 0 && CordY < 14 && getGame().getWhiteCells().get(CordX*ROWS+CordY)!=null && getGame().getWhiteCells().get((CordX-1)*ROWS+CordY+1)!=null) {
+                return true;
+        } else if (orientation==5 && CordX > 1 && getGame().getWhiteCells().get(CordX*ROWS+CordY)!=null && getGame().getWhiteCells().get((CordX-2)*ROWS+CordY)!=null) {
+                return true;
         }
         return false;
     }

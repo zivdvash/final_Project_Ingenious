@@ -9,6 +9,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Rectangle2D;
+import java.util.Map;
 import javax.swing.JPanel;
 /*`GameBoard` פועלת כמרכיב החזותי והאינטראקטיבי המרכזי של המשחק. הוא מגשר על המצב הלוגי של המשחק עם המצגת הגרפית שלו, מטפל בתשומות משתמש לפעולות משחק, ומעדכן את האלמנטים החזותיים בתגובה להתקדמות המשחק, מה שמבטיח חווית שחקן מגיבה ומושכת.*/
 public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMotionListener{
@@ -339,10 +340,10 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
         gameBoardTempGrid = new int[ROWS][COLS];
         for (int X = 0; X < ROWS; X ++){
             for (int Y = 0; Y < COLS; Y ++){
-                if(game.twoHexGrid(o,x,y)[X][Y] == 0){
-                    gameBoardTempGrid[X][Y] = game.getGrid()[X][Y];
+                if(game.MakeTempGrid(o,x,y)[X][Y] == 0){
+                    gameBoardTempGrid[X][Y] = game.getGrid().getOrDefault(X * ROWS + Y, -1);
                 }else{
-                    gameBoardTempGrid[X][Y] = game.twoHexGrid(o,x,y)[X][Y];
+                    gameBoardTempGrid[X][Y] = game.MakeTempGrid(o,x,y)[X][Y];
                 }
             }
         }
@@ -479,10 +480,11 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
         computerGrid = newGrid;
     }
     //עדכון לוח המשחק
-    public void updateGrid(int[][] newGrid){
+    public void updateGrid(Map<Integer,Integer> newGrid){
         for(int x = 0; x<ROWS; x++){
             for(int y = 0; y<COLS;y++){
-                hexColor[x][y] = newGrid [x][y];
+                if(newGrid.get(x*ROWS + y)!= null)
+                 hexColor[x][y] = newGrid.get(x*ROWS + y);
             }
         }
     }
@@ -496,9 +498,9 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
             for(int y = 0; y<COLS;y++){
                 if(!(hexagon[x][y] == null)){
                     if(x == 1 || x == 29 || x==28 || y == 0 ||  y == 14 || hexagon[x-2][y] == null || hexagon[x+2][y] == null)
-                        hexColor[x][y] = 0;
+                        hexColor[x][y] = 0;//GRAY
                     else if(y==1 || y == 13 || x == 3 || x == 27 || x== 26 || hexagon[x-4][y] == null || hexagon[x+4][y] == null)
-                        hexColor[x][y] = 0;
+                        hexColor[x][y] = 0;//LIGHT_GRAY
                     else
                         hexColor[x][y] = -1;
                 }
