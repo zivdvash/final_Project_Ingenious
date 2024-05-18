@@ -135,7 +135,7 @@ public class BasicStrategy extends Strategy {
         for (ColorScore i : getGame().getCurrentPlayer().getColorScores()) {
             if (i.getScore() == lowestScore) {
                 ColorScore cs = new ColorScore(i.getColor(),i.getScore());
-                newLowestColors.add(cs.getColor()+1);
+                newLowestColors.add(cs.getColor());
             }
         }
     }
