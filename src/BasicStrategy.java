@@ -19,22 +19,22 @@ public class BasicStrategy extends Strategy {
     private static final int directions = 6;
     private int orientation;
     private int pieceIndex;
-    private Map<Integer,Integer> tempGrid;
+    private Map<Integer,Integer> cloneBoard;
     //בנאי:
     //   - SimpleStrategy(Game g): מאתחל את האסטרטגיה עם מופע המשחק המשויך.
     BasicStrategy(Game g) {
         super(g);
     }
     //makeTempGrid(int o, int x, int y, int color1, int color2): יוצר לוח זמני על סמך הפרמטרים הנתונים
-    private void makeTempGrid(int o, int x, int y, int color1, int color2) {
-        tempGrid = new HashMap<>();
+    private void cloneBoard(int o, int x, int y, int color1, int color2) {
+        cloneBoard = new HashMap<>();
         for (int X = 0; X < ROWS; X++) {
             for (int Y = 0; Y < COLS; Y++) {
-                if (getGame().MakeTempGrid(o, x, y, color1, color2)[X][Y] == 0 && getGame().getGrid().get(X*ROWS+Y) != null) {
-                    tempGrid.put(X*ROWS+Y,getGame().getGrid().get(X*ROWS+Y));
+                if (getGame().MakeTempGrid(o, x, y, color1, color2)[X][Y] == 0 && getGame().getColorCells().get(X*ROWS+Y) != null) {
+                    cloneBoard.put(X*ROWS+Y,getGame().getColorCells().get(X*ROWS+Y));
                 } else {
                     if (getGame().MakeTempGrid(o, x, y, color1, color2)[X][Y] != 0)
-                        tempGrid.put(X*ROWS+Y,getGame().convertMatrixToMap(getGame().MakeTempGrid(o, x, y, color1, color2)).get(X*ROWS+Y));
+                        cloneBoard.put(X*ROWS+Y,getGame().convertMatrixToMap(getGame().MakeTempGrid(o, x, y, color1, color2)).get(X*ROWS+Y));
                 }
             }
         }
@@ -73,7 +73,8 @@ public class BasicStrategy extends Strategy {
         InsertHighestMove(hand);
         // makeTempGrid(bestMove.highestOrientation, bestMove.highestX, bestMove.highestY, hand.getPiece(pieceIndex).getPrimaryHexagon().getColor(),hand.getPiece(pieceIndex).getSecondaryHexagon().getColor());
         // printBestMoveGrid();
-
+        System.out.print("move it");
+        System.out.print("\n");
     }
 
     private void InsertHighestMove(PlayerHand hand) {
@@ -95,7 +96,7 @@ public class BasicStrategy extends Strategy {
     private void FindLowestColorsColors(int lowestScore, ArrayList<Integer> lowestColor) {
         for (ColorScore i : getGame().getCurrentPlayer().getColorScores()) {
             if (i.getScore() == lowestScore) {
-                lowestColor.add(i.getColor());
+                lowestColor.add(i.getColor()+1);
             }
         }
     }
@@ -134,7 +135,7 @@ public class BasicStrategy extends Strategy {
         for (ColorScore i : getGame().getCurrentPlayer().getColorScores()) {
             if (i.getScore() == lowestScore) {
                 ColorScore cs = new ColorScore(i.getColor(),i.getScore());
-                newLowestColors.add(cs.getColor());
+                newLowestColors.add(cs.getColor()+1);
             }
         }
     }
@@ -199,8 +200,8 @@ public class BasicStrategy extends Strategy {
             //אם אחד מהדגלים השתנה ויש מהלך חוקי בקורדינטות האלה ובכיוון הזה עם הצבע הזה אז תעדכן את כל המשתנים עם המידע הנוכחי
             if ((isColor1 || isColor2) && getGame().checkLegalMove(o, x, y, color1, color2)) {
                 isMove = true;
-                makeTempGrid(o, x, y, color1, color2);
-                bestMove = InsertMove(getGame().CalculateScore(x, y, tempGrid), x, y, o,piece);
+                cloneBoard(o, x, y, color1, color2);
+                bestMove = InsertMove(getGame().CalculateScore(x, y, cloneBoard), x, y, o,piece);
             }
         }
         return isMove;
@@ -237,20 +238,20 @@ public class BasicStrategy extends Strategy {
                 }
             }
             if ((isColor1 || isColor2) && getGame().checkLegalMove(o, x, y, color1, color2)) { // אם אחד מהם שנמצא ויש איתו מהלך מתאים
-                makeTempGrid(o, x, y, color1, color2);
+                cloneBoard(o, x, y, color1, color2);
                 if (isColor1 && isColor2) {//אם שניהם מתאימים
                     //בודק את שני הכיוונים של החלק והאם הניקוד שיצא יותר גבוה מהנוכחי
-                    if (getGame().CalculateScore(x, y, tempGrid) > bestMove.highestScore || getGame().CalculateScore(getGame().getSecondX(o, x, y),
-                            getGame().getSecondY(o, x, y), tempGrid) > bestMove.highestScore) {
-                        bestMove = InsertMove(getGame().CalculateScore(x, y, tempGrid), x, y, o,piece);
+                    if (getGame().CalculateScore(x, y, cloneBoard) > bestMove.highestScore || getGame().CalculateScore(getGame().getSecondX(o, x, y),
+                            getGame().getSecondY(o, x, y), cloneBoard) > bestMove.highestScore) {
+                        bestMove = InsertMove(getGame().CalculateScore(x, y, cloneBoard), x, y, o,piece);
                     }
                 }else if (isColor1) {
-                    if (getGame().CalculateScore(x, y, tempGrid) > bestMove.highestScore) {
-                        bestMove = InsertMove(getGame().CalculateScore(x, y, tempGrid), x, y, o,piece);
+                    if (getGame().CalculateScore(x, y, cloneBoard) > bestMove.highestScore) {
+                        bestMove = InsertMove(getGame().CalculateScore(x, y, cloneBoard), x, y, o,piece);
                     }
                 } else {
-                    if (getGame().CalculateScore(getGame().getSecondX(o, x, y), getGame().getSecondY(o, x, y),tempGrid) > bestMove.highestScore) {
-                        bestMove = InsertMove(getGame().CalculateScore(x, y, tempGrid), x, y, o,piece);
+                    if (getGame().CalculateScore(getGame().getSecondX(o, x, y), getGame().getSecondY(o, x, y), cloneBoard) > bestMove.highestScore) {
+                        bestMove = InsertMove(getGame().CalculateScore(x, y, cloneBoard), x, y, o,piece);
                     }
                 }
             }
@@ -262,11 +263,11 @@ public class BasicStrategy extends Strategy {
         return piece;
     }
 
-    public int getXCordinate() {
+    public int getXCoordinate() {
         return xCord;
     }
 
-    public int getYCordinate() {
+    public int getYCoordinate() {
         return yCord;
     }
 

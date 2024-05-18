@@ -15,9 +15,9 @@ public abstract class Strategy {
     //`getPieceIndex()`: מחזירה את האינדקס של החלק שנבחר ביד השחקן
     abstract public int getPieceIndex();
     //`getXCoordinate()`: מחזירה את קואורדינטת ה-x שבה תוצב החלק הנבחר על לוח המשחק
-    abstract public int getXCordinate();
+    abstract public int getXCoordinate();
     //`getYCoordinate()`: מחזירה את קואורדינטת ה-y שבה תוצב החלק הנבחר על לוח המשחק.
-    abstract public int getYCordinate();
+    abstract public int getYCoordinate();
     //`getOrientation()`: מחזירה את הכיוון של היצירה שנבחרה.
     abstract public int getOrientation();
  public Game getGame() {

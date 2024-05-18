@@ -75,10 +75,10 @@ public class RandomStrategy extends Strategy {
     public Piece getPiece() {
         return piece;
     }
-    public int getXCordinate() {
+    public int getXCoordinate() {
         return xCord;
     }
-    public int getYCordinate() {
+    public int getYCoordinate() {
         return yCord;
     }
     public int getOrientation() {

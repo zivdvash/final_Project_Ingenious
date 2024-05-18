@@ -341,7 +341,7 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
         for (int X = 0; X < ROWS; X ++){
             for (int Y = 0; Y < COLS; Y ++){
                 if(game.MakeTempGrid(o,x,y)[X][Y] == 0){
-                    gameBoardTempGrid[X][Y] = game.getGrid().getOrDefault(X * ROWS + Y, -1);
+                    gameBoardTempGrid[X][Y] = game.getColorCells().getOrDefault(X * ROWS + Y, -1);
                 }else{
                     gameBoardTempGrid[X][Y] = game.MakeTempGrid(o,x,y)[X][Y];
                 }

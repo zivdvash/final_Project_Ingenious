@@ -8,7 +8,7 @@ public class Game {
     private static final int MAX_HAND_PIECE = 6;
     private final Player[] players;
     private Player currentPlayer;
-    private Map<Integer, Integer> grid;
+    private Map<Integer, Integer> colorCells;
     private Map<Integer, Integer> whiteCells;
     private int[][] tempGrid;
     private int[][] emptyGrid;
@@ -40,14 +40,14 @@ public class Game {
     }
 
     public void InitializeBoard() {
-        grid = new HashMap<Integer, Integer>();
+        colorCells = new HashMap<Integer, Integer>();
         whiteCells = new HashMap<Integer, Integer>();
         for (int i = 0; i < ROWS; i++) {
             for (int j = 0; j < COLS; j++) {
                 if (gameBoard.getHexColor()[i][j] == -1)
                     whiteCells.put(i * ROWS + j, gameBoard.getHexColor()[i][j]);
                 else if (gameBoard.getHexColor()[i][j] != -1 && gameBoard.getHexColor()[i][j] != 0) {
-                    grid.put(i * ROWS + j, gameBoard.getHexColor()[i][j]);
+                    colorCells.put(i * ROWS + j, gameBoard.getHexColor()[i][j]);
 
                 }
             }
@@ -303,12 +303,12 @@ public class Game {
         for (int x = 0; x < ROWS; x++) {
             for (int y = 0; y < COLS; y++) {
                 if (newGrid[x][y] != 0) {
-                    grid.put(x * ROWS+ y, newGrid[x][y]);
+                    colorCells.put(x * ROWS+ y, newGrid[x][y]);
                     whiteCells.remove(x * ROWS+ y);
                 }
             }
         }
-        gameBoard.updateGrid(grid);
+        gameBoard.updateGrid(colorCells);
     }
 
     // שיטה זו מחזירה את לוח המשחק
@@ -370,7 +370,7 @@ public class Game {
         for (int X = 0; X < ROWS; X++) {
             for (int Y = 0; Y < COLS; Y++) {
                 if (MakeTempGrid(o, x, y)[X][Y] == 0) {//אם הלוח הזמני שנוצר על פי החלק ביד השחקן הוא בקורדינאטות האלה הוא 0 מכיוון שהלוח שנוצר הוא ריק בכולו פרט לחלק החדש שהונח
-                    tempGrid[X][Y] = grid.getOrDefault(X * ROWS + Y, 0);// תשווה אותו ללוח הקבוע
+                    tempGrid[X][Y] = colorCells.getOrDefault(X * ROWS + Y, 0);// תשווה אותו ללוח הקבוע
                 } else {
                     tempGrid[X][Y] = MakeTempGrid(o, x, y)[X][Y];//אחרת תשווה אותו ללוח החדש שנוצר
                 }
@@ -391,38 +391,38 @@ public class Game {
         int x = xInit;
         int y = yInit;
         int score = 0;
-        while ((x - 2) >= 0 && grid.containsKey((x - 2) * ROWS + y) && grid.get((x - 2) * ROWS + y) == color) {
+        while ((x - 2) >= 0 && colorCells.containsKey((x - 2) * ROWS + y) && colorCells.get((x - 2) * ROWS + y) == color) {
             x -= 2;
             score += 1;
         }
         x = xInit;
-        while ((x + 2) < 30 && grid.containsKey((x + 2) * ROWS + y) && grid.get((x + 2) * ROWS+ y) == color) {
+        while ((x + 2) < 30 && colorCells.containsKey((x + 2) * ROWS + y) && colorCells.get((x + 2) * ROWS+ y) == color) {
             x += 2;
             score += 1;
         }
         x = xInit;
-        while ((x - 1) >= 0 && (y - 1) >= 0 && grid.containsKey((x - 1) * ROWS  + y - 1) && grid.get((x - 1) * ROWS + y - 1) == color) {
+        while ((x - 1) >= 0 && (y - 1) >= 0 && colorCells.containsKey((x - 1) * ROWS  + y - 1) && colorCells.get((x - 1) * ROWS + y - 1) == color) {
             x -= 1;
             y -= 1;
             score += 1;
         }
         x = xInit;
         y = yInit;
-        while ((x + 1) < 30 && (y - 1) >= 0 && grid.containsKey((x + 1) * ROWS + y - 1) && grid.get((x + 1) * ROWS  + y - 1) == color) {
+        while ((x + 1) < 30 && (y - 1) >= 0 && colorCells.containsKey((x + 1) * ROWS + y - 1) && colorCells.get((x + 1) * ROWS  + y - 1) == color) {
             x += 1;
             y -= 1;
             score += 1;
         }
         x = xInit;
         y = yInit;
-        while ((x - 1) >= 0 && (y + 1) < 15 && grid.containsKey((x - 1) * ROWS + y + 1) && grid.get((x - 1) * ROWS + y + 1) == color) {
+        while ((x - 1) >= 0 && (y + 1) < 15 && colorCells.containsKey((x - 1) * ROWS + y + 1) && colorCells.get((x - 1) * ROWS + y + 1) == color) {
             x -= 1;
             y += 1;
             score += 1;
         }
         x = xInit;
         y = yInit;
-        while ((x + 1) < 30 && (y + 1) < 15 && grid.containsKey((x + 1) * ROWS + y + 1) && grid.get((x + 1) * ROWS + y + 1) == color) {
+        while ((x + 1) < 30 && (y + 1) < 15 && colorCells.containsKey((x + 1) * ROWS + y + 1) && colorCells.get((x + 1) * ROWS + y + 1) == color) {
             x += 1;
             y += 1;
             score += 1;
@@ -579,7 +579,7 @@ public class Game {
                     || (i==2 && x>27) || (i==5 && x<3)) {
             }
             else {
-                if (grid.containsKey(getSecondX(i, x, y)*ROWS+getSecondY(i, x, y)) && grid.get(getSecondX(i, x, y)*ROWS+getSecondY(i, x, y))==color){
+                if (colorCells.containsKey(getSecondX(i, x, y)*ROWS+getSecondY(i, x, y)) && colorCells.get(getSecondX(i, x, y)*ROWS+getSecondY(i, x, y))==color){
                     legal = true;
                 }
             }
@@ -734,8 +734,8 @@ public class Game {
         return map;
     }
 
-    public Map<Integer,Integer> getGrid() {
-        return grid;
+    public Map<Integer,Integer> getColorCells() {
+        return colorCells;
     }
 }
 
