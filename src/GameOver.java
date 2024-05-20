@@ -59,7 +59,7 @@ public class GameOver extends JFrame implements ActionListener{
 
         Color[] colors = colorRanks(numPlayers);
 
-        EnterPlayersOutcome(orderOfPlayers, scores, numPlayers, colors);
+        enterPlayersOutcome(orderOfPlayers, scores, numPlayers, colors);
         pan.add(dismiss);
 
         pan1.setLayout(new GridLayout(1,2));
@@ -74,7 +74,8 @@ public class GameOver extends JFrame implements ActionListener{
 
     }
 
-    private void EnterPlayersOutcome(Player[] orderOfPlayers, int[] scores, int numPlayers, Color[] colors) {
+    //מכניס את התוצאות של השחקנים לצורך תצוגה
+    private void enterPlayersOutcome(Player[] orderOfPlayers, int[] scores, int numPlayers, Color[] colors) {
         for(int i = 0; i < numPlayers; i++){
             JLabel player = new JLabel(orderOfPlayers[i].getName());
             player.setFont(new Font(Font.MONOSPACED, Font.BOLD, 24));

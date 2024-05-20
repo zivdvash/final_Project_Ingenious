@@ -91,8 +91,8 @@ public class GameWindow {
             }
             int[] wins = new int[pan.numPlayers()];
             initializeWins(wins);
-            BotGameOutcome(wins);
-            OutcomeWins(wins);
+            botGameOutcome(wins);
+            outcomeWins(wins);
             BotGameResults strats = new BotGameResults(wins[0], wins[1]);
             frame.setContentPane(strats);
             frame.pack();
@@ -110,19 +110,21 @@ public class GameWindow {
         }
 
     }
-    public void OutcomeWins(int[] wins) {
+    //מדפיס שחקנים בסוף המשחק
+    public void outcomeWins(int[] wins) {
         for(int player = 0; player < pan.numPlayers(); player ++){
             System.out.println(wins[player]);
         }
     }
-
+    //מאתחל את סדר הניצחון
     public void initializeWins(int[] wins) {
         for(int player = 0; player < pan.numPlayers(); player ++){
             wins[player] = 0;
         }
     }
 
-    public void BotGameOutcome(int[] wins) {
+    //מטפל בתוצאות של משחק בוטים
+    public void botGameOutcome(int[] wins) {
         Game game;
         GameBoard gameBoard;
         for(int i = 0; i < pan.getGames(); i ++ ){

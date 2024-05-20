@@ -208,12 +208,12 @@ public class StartPanel extends JPanel{
         public void actionPerformed(ActionEvent arg0) {
             String clicked = arg0.getActionCommand();
             int numPlayers = numPlayers();
-            PlayerCheck(numPlayers);
-            StartCancelCheck(clicked, numPlayers);
-            PlayerInput();
+            playerCheck(numPlayers);
+            startCancelCheck(clicked, numPlayers);
+            playerInput();
         }
-//מכניס ערכים לכל סוג שחקן
-        private void PlayerInput() {
+        //מכניס ערכים לכל סוג שחקן
+        private void playerInput() {
             for(int col = 0;  col < 2; col++){
                 if(topButtons[0][col].isSelected()){ //if NONE
                     names[col].disable();			//no NAME
@@ -235,7 +235,7 @@ public class StartPanel extends JPanel{
         }
         //בודק האם נלחץ כפתור המשך או ביטול
 
-        private void StartCancelCheck(String clicked, int numPlayers) {
+        private void startCancelCheck(String clicked, int numPlayers) {
             if(clicked.equals("Cancel")){
                 isCancelled = true;
             }else if(clicked.equals("Play")){
@@ -248,8 +248,8 @@ public class StartPanel extends JPanel{
                 }
             }
         }
-//בודק אם יש מספיק שחקנים בשביל להתחיל משחק
-        private void PlayerCheck(int numPlayers) {
+        //בודק אם יש מספיק שחקנים בשביל להתחיל משחק
+        private void playerCheck(int numPlayers) {
             if(numPlayers < 2){//אם אין מספיק שחקנים
                 play.disable();
                 play.setForeground(Color.GRAY);
@@ -258,7 +258,7 @@ public class StartPanel extends JPanel{
                 play.setForeground(Color.BLACK);
             }
         }
-//בודק אם כל השחקנים ממוחשבים
+        //בודק אם כל השחקנים ממוחשבים
         private boolean allComputers(){
             for(int col = 0; col < 2; col++){
                 if(topButtons[1][col].isSelected()){//if there is a human

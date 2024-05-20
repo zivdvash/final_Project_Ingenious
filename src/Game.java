@@ -6,6 +6,9 @@ public class Game {
     private static final int COLS = 15;
     private static final int MAX_SCORE = 18;
     private static final int MAX_HAND_PIECE = 6;
+    private static final int BOARD_START_INDEX = 0;
+    private static final int WHITE_CELL = 0;
+    private static final int NULL_CELL = 0;
     private final Player[] players;
     private Player currentPlayer;
     private Map<Integer, Integer> colorCells;
@@ -17,7 +20,7 @@ public class Game {
     private boolean isGameOver;
     private Strategy[] gameStrategies;
     private int sleepTimer;
-    private Player[] p;
+    private Player[] playersOrder;
     private int[] sortedScores;
 
     /*הבנאי של המחלקה `Game`. זה מאתחל משחק חדש עם שמות השחקנים, סוגי השחקנים (אנושי או מחשב) ואסטרטגיות (פשוט או אקראי).
@@ -31,30 +34,30 @@ public class Game {
         // grid = new int[ROWS][COLS];
         emptyGrid = new int[ROWS][COLS];
 
-        SetPlayerValues(names, playerTypes, strategies);
+        setPlayerValues(names, playerTypes, strategies);
         //new ComputerPlayer(names[a], getStrategy(strategies[a] - 1), new PlayerHand(PiecesBag))
         gameBoard = new GameBoard(this);
-        InitializeBoard();
-        EmptyBoard();
+        initializeBoard();
+        emptyBoard();
 
     }
 
-    public void InitializeBoard() {
+    public void initializeBoard() {
         colorCells = new HashMap<Integer, Integer>();
         whiteCells = new HashMap<Integer, Integer>();
-        for (int i = 0; i < ROWS; i++) {
-            for (int j = 0; j < COLS; j++) {
-                if (gameBoard.getHexColor()[i][j] == -1)
-                    whiteCells.put(i * ROWS + j, gameBoard.getHexColor()[i][j]);
-                else if (gameBoard.getHexColor()[i][j] != -1 && gameBoard.getHexColor()[i][j] != 0) {
-                    colorCells.put(i * ROWS + j, gameBoard.getHexColor()[i][j]);
+        for (int x = 0; x < ROWS; x++) {
+            for (int y = 0; y < COLS; y++) {
+                if (gameBoard.getHexColor()[x][y] == -1)
+                    whiteCells.put(x * ROWS + y, gameBoard.getHexColor()[x][y]);
+                else if (gameBoard.getHexColor()[x][y] != -1 && gameBoard.getHexColor()[x][y] != 0) {
+                    colorCells.put(x * ROWS + y, gameBoard.getHexColor()[x][y]);
 
                 }
             }
         }
     }
 
-    private void EmptyBoard() {
+    private void emptyBoard() {
         for (int x = 0; x < ROWS; x++) {
             for (int y = 0; y < COLS; y++) {
                 emptyGrid[x][y] = 0;//מאתחל כל משושה בלוח
@@ -62,13 +65,12 @@ public class Game {
         }
     }
 
-
-    private void SetPlayerValues(String[] names, int[] playerTypes, int[] strategies) {
-        for (int a = 0; a < names.length; a++) {
-            if (playerTypes[a] == 0) {//שם ערכים של שחקן אנושי
-                players[a] = new HumanPlayer(names[a], new PlayerHand(PiecesBag));
+    private void setPlayerValues(String[] names, int[] playerTypes, int[] strategies) {
+        for (int playrIndex = 0; playrIndex < names.length; playrIndex++) {
+            if (playerTypes[playrIndex] == 0) {//שם ערכים של שחקן אנושי
+                players[playrIndex] = new HumanPlayer(names[playrIndex], new PlayerHand(PiecesBag));
             } else {//שם ערכים של שחקן ממוחשב
-                players[a] = new ComputerPlayer(names[a], getStrategy(strategies[a] - 1), new PlayerHand(PiecesBag));
+                players[playrIndex] = new ComputerPlayer(names[playrIndex], getStrategy(strategies[playrIndex] - 1), new PlayerHand(PiecesBag));
             }
         }
     }
@@ -80,33 +82,33 @@ public class Game {
         boolean isSecondPlay = false;
         ExtraTern extraTern = null;
         while (!isGameOver) {//ניהול תורים של שחקנים
-            for (int a = 0; a < players.length && !isGameOver; a++) {//כל עוד לא הגמר המשחק וזה תור של שחקן
+            for (int playerNum = 0; playerNum < players.length && !isGameOver; playerNum++) {//כל עוד לא הגמר המשחק וזה תור של שחקן
                 if (isSecondPlay) {//האם יש תור נוסף?
                     if (currentPlayer.getClass() == HumanPlayer.class) {//לדעת אם לפתוח חלון של תור נוסף
                         extraTern = new ExtraTern();
                     }
-                    if (a == 0) {//אם לשחקן האחרון היה תור נוסף
-                        a = players.length - 1;
+                    if (playerNum == 0) {//אם לשחקן האחרון היה תור נוסף
+                        playerNum = players.length - 1;
                     } else {//תחזור לשחקן הקודם
-                        a -= 1;
+                        playerNum -= 1;
                     }
                 }
-                currentPlayer = players[a];
+                currentPlayer = players[playerNum];
                 currentPlayer.setTurnComplete(false);
                 isSecondPlay = false;
                 startScores.clear();
-                SaveStartScores(startScores);
-                HandTradeHandling();
+                saveStartScores(startScores);
+                handTradeHandling();
                 if (currentPlayer.getClass() == ComputerPlayer.class) {//שחקן ממוחשב?
                     Thread.sleep(sleepTimer);//משהה את הביצוע למשך פרק זמן שצוין על ידי 'sleepTimer'
                 }
-                MakeSingleMove();
-                SaveGridForComputerPlayer();
+                makeSingleMove();
+                saveGridForComputerPlayer();
                 currentPlayer.updateScore(getTurnScore(currentPlayer.getOrientation(), currentPlayer.getPieceX(), currentPlayer.getPieceY()));//עדכון נקודות
-                updateGrid(MakeTempGrid(currentPlayer.getOrientation(), currentPlayer.getPieceX(), currentPlayer.getPieceY()));//עדכן לצמיתות את הייצוג הפנימי של המשחק של הלוח עם המהלך של השחקן הנוכחי.
+                updateBoard(MakeTempGrid(currentPlayer.getOrientation(), currentPlayer.getPieceX(), currentPlayer.getPieceY()));//עדכן לצמיתות את הייצוג הפנימי של המשחק של הלוח עם המהלך של השחקן הנוכחי.
                 currentPlayer.removeCurrentPiece();
-                isSecondPlay = ExtraTurnCheck(startScores, isSecondPlay);
-                EndOfTurnHandling(isSecondPlay, extraTern);
+                isSecondPlay = extraTurnCheck(startScores, isSecondPlay);
+                endOfTurnHandling(isSecondPlay, extraTern);
                 if (!isMoveRemaining() || isWinner()) {//בדיקה אם נגמר המשחק
                     isGameOver = true;
                 }
@@ -118,7 +120,7 @@ public class Game {
     }
 
     //שומר את המסך החדש עבור שחקן ממוחשב לצורך חישוב מהלך
-    public void SaveGridForComputerPlayer() throws InterruptedException {
+    public void saveGridForComputerPlayer() throws InterruptedException {
         gameBoard.computerGrid(emptyGrid);//מאפס את הייצוג החזותי של לוח המשחק של שחקן המחשב למצב ריק או התחלתי
         if (currentPlayer.getClass() == ComputerPlayer.class) {
             gameBoard.computerGrid(MakeTempGrid(currentPlayer.getOrientation(), currentPlayer.getPieceX(), currentPlayer.getPieceY()));/*מעדכן את לוח המשחק כדי להציג את המהלך של שחקן המחשב,  השיטה `twoHexGrid(...)` מייצרת ייצוג לוח של המהלך של השחקן הנוכחי בהתבסס על כיוון החתיכה והקואורדינטות שבחרו, אשר לאחר מכן `computerGrid(...)` משתמש בהן כדי לעדכן את הייצוג החזותי על לוח המשחק.*/
@@ -127,15 +129,15 @@ public class Game {
     }
 
     //שומר ניקוד התחלתי בתור קדימויות חדש
-    public void SaveStartScores(PriorityQueue<ColorScore> startScores) {
-        for (ColorScore i : currentPlayer.getColorScores()) {
-            ColorScore Cs = new ColorScore(i.getColor(), i.getScore());
+    public void saveStartScores(PriorityQueue<ColorScore> startScores) {
+        for (ColorScore cs : currentPlayer.getColorScores()) {
+            ColorScore Cs = new ColorScore(cs.getColor(), cs.getScore());
             startScores.add(Cs);
         }
     }
 
     //בדיקה האם יש תור נוסף
-    public boolean ExtraTurnCheck(PriorityQueue<ColorScore> startScores, boolean isSecondPlay) {
+    public boolean extraTurnCheck(PriorityQueue<ColorScore> startScores, boolean isSecondPlay) {
         for (ColorScore x : currentPlayer.getColorScores()) {
             for (ColorScore i : startScores) {
                 if (i.getColor() == x.getColor()) {
@@ -149,7 +151,7 @@ public class Game {
     }
 
     //מתעסק עם סיום התור
-    public void EndOfTurnHandling(boolean isSecondPlay, ExtraTern extraTern) {
+    public void endOfTurnHandling(boolean isSecondPlay, ExtraTern extraTern) {
         if (!isSecondPlay) {
             do {
                 currentPlayer.addNewPiece();//אם הוא לא שיחק שוב תוסיף ותוריד חלק
@@ -165,7 +167,7 @@ public class Game {
     }
 
     //ביצוע מהלך של השחקן הנוכחי
-    public void MakeSingleMove() {
+    public void makeSingleMove() {
         do {
             if (currentPlayer.getClass() == ComputerPlayer.class) {//שחקן ממוחשב?
                 if (currentPlayer.getCurrentPiece() != null) {//לבדוק שיש חלק ביד
@@ -174,11 +176,11 @@ public class Game {
                 }
             }
             currentPlayer.move();//תעשה מהלך
-        } while (!checkLegalMove());//כל עוד המהלך לא חוקי
+        } while (!checkLegalMoveForMouseMove());//כל עוד המהלך לא חוקי
     }
 
     //אחראי על כל עניין החלפה של היד
-    public void HandTradeHandling() throws InterruptedException {
+    public void handTradeHandling() throws InterruptedException {
         if (currentPlayer.checkHand() && currentPlayer.getClass() == HumanPlayer.class) {
             HandTrade handTrade = new HandTrade();//פותח אינטראקציה של החלפת יד
             while (!handTrade.getIsClosed()) {
@@ -195,24 +197,6 @@ public class Game {
         sleepTimer = a;
     }
 
-    //שיטה זו מחזירה את סדר השחקנים על סמך התוצאות שלהם
-    public int[] scoreOrder() {
-        int[] scoreOrder = new int[players.length];
-        PriorityQueue<Player> playerQueue = new PriorityQueue<>(Comparator.comparing(p -> p.getColorScores().peek().getScore()));
-
-        // Enqueue players into the priority queue
-        for (Player player : players) {
-            playerQueue.offer(player);
-        }
-
-        // Dequeue players from the priority queue and record their order
-        for (int i = 0; i < players.length; i++) {
-            Player currentPlayer = playerQueue.poll();
-            scoreOrder[i] = Arrays.asList(players).indexOf(currentPlayer);
-        }
-
-        return scoreOrder;
-    }
 
     // שיטה זו ממיינת את השחקנים על סמך התוצאות שלהם כל שחקן משובץ על פי הניקוד שלו
     public Player[] sortPlayers() {
@@ -222,74 +206,70 @@ public class Game {
     - הוא משווה את ההניקוד הנמוך ביותר כדי לקבוע את סדר השחקנים. אם הניקוד הנמוך ביותר שלהם שווה, הוא מסתכל על הניקוד השני הנמוך ביותר כשובר שוויון כדי להכריע בדירוג.
     - לבסוף, הוא מקצה את השחקנים הממוינים ואת הניקוד הנמוכים ביותר שלהם למערכי 'p' ו-'sortedScores' בהתאמה.*/
 
-        p = new Player[players.length];
+        playersOrder = new Player[players.length];
         sortedScores = new int[players.length];
-        int[][] score = new int[p.length][MAX_HAND_PIECE];
-        int[] a = new int[MAX_HAND_PIECE];
-        int[] b = new int[MAX_HAND_PIECE];
-        SetPlayersScores(a, b);
-        SetScoresMatrix(score, a, b);
-        LeadingPlayerCheck(score);
-        sortedScores[0] = p[0].getColorScores().peek().getScore();
-        sortedScores[1] = p[1].getColorScores().peek().getScore();
+        int[][] score = new int[playersOrder.length][MAX_HAND_PIECE];
+        int[] p1 = new int[MAX_HAND_PIECE];
+        int[] p2 = new int[MAX_HAND_PIECE];
+        setPlayersScores(p1, p2);
+        setScoresMatrix(score, p1, p2);
+        leadingPlayerCheck(score);
+        sortedScores[0] = playersOrder[0].getColorScores().peek().getScore();
+        sortedScores[1] = playersOrder[1].getColorScores().peek().getScore();
 
 
-        return p;
+        return playersOrder;
     }
 
     //בודק את מצב ניקוד השחקנים לצורך תצוגת מנצח
-    private void LeadingPlayerCheck(int[][] score) {
+    private void leadingPlayerCheck(int[][] score) {
         boolean flage = false;
-        int j = 0;
+        int color = 0;
 
         while (!flage) {
-            if (score[0][j] > score[1][j]) {
-                p[0] = players[0];
-                p[1] = players[1];
+            if (score[0][color] > score[1][color]) {
+                playersOrder[0] = players[0];
+                playersOrder[1] = players[1];
                 flage = true;
-            } else if (score[0][j] < score[1][j]) {
-                p[0] = players[1];
-                p[1] = players[0];
-                flage = true;
-            } else if (j == 5) {
-                if (players[0].getName().compareTo(players[1].getName()) > 0) {
-                    p[0] = players[0];
-                    p[1] = players[1];
-                } else {
-                    p[0] = players[1];
-                    p[1] = players[0];
-                }
+            } if(score[0][color] < score[1][color]) {
+                playersOrder[0] = players[1];
+                playersOrder[1] = players[0];
                 flage = true;
             }
-            j++;
+            color++;
+        }
+        // ממיין לפי שמות
+        if (color == MAX_HAND_PIECE-1) {
+            if (players[0].getName().compareTo(players[1].getName()) > 0) {
+                playersOrder[0] = players[0];
+                playersOrder[1] = players[1];
+            } else {
+                playersOrder[0] = players[1];
+                playersOrder[1] = players[0];
+            }
         }
     }
 
     //מעביר את שני מערכ הניקוד למטריצה לצורך נוחות בהשוואה
-    private static void SetScoresMatrix(int[][] score, int[] a, int[] b) {
-        for (int i = 0; i < 2; i++) {
-            for (int j = 0; j < MAX_HAND_PIECE; j++) {
-                if (i == 0) {
-                    score[i][j] = a[j];
-                }
-                if (i == 1) {
-                    score[i][j] = b[j];
-                }
-            }
+    private static void setScoresMatrix(int[][] score, int[] p1, int[] p2) {
+        for (int color = 0; color < MAX_HAND_PIECE; color++) {
+            score[0][color] = p1[color];
+            score[1][color] = p2[color];
+
         }
     }
 
     //מכניס את הניקוד של כל שחקן למערך לצורך בדיקה של הניקוד
-    private void SetPlayersScores(int[] a, int[] b) {
-        int C = 0;
-        for (ColorScore i : players[0].getColorScores()) {
-            a[C] = i.getScore();
-            C++;
+    private void setPlayersScores(int[] p1, int[] p2) {
+        int color = 0;
+        for (ColorScore cs : players[0].getColorScores()) {
+            p1[color] = cs.getScore();
+            color++;
         }
-        C = 0;
-        for (ColorScore i : players[1].getColorScores()) {
-            b[C] = i.getScore();
-            C++;
+        color = 0;
+        for (ColorScore cs : players[1].getColorScores()) {
+            p2[color] = cs.getScore();
+            color++;
         }
     }
 
@@ -299,7 +279,7 @@ public class Game {
     }
 
     //שיטה זו מעדכנת את לוח המשחק עם לוח חדש
-    public void updateGrid(int[][] newGrid) {
+    public void updateBoard(int[][] newGrid) {
         for (int x = 0; x < ROWS; x++) {
             for (int y = 0; y < COLS; y++) {
                 if (newGrid[x][y] != 0) {
@@ -317,8 +297,8 @@ public class Game {
     }
 
     //שיטה זו מחזירה את האסטרטגיה על סמך המדד 1/2
-    public Strategy getStrategy(int a) {
-        return gameStrategies[a];
+    public Strategy getStrategy(int strategyNum) {
+        return gameStrategies[strategyNum];
     }
 
     //שיטה זו מחזירה את השחקן הנוכחי
@@ -356,11 +336,11 @@ public class Game {
     }
 
     // שיטה זו מחשבת את הניקוד לתורו של השחקן הנוכחי
-    public int[] getTurnScore(int o, int x, int y) {
+    public int[] getTurnScore(int orientation, int x, int y) {
         int[] newScore = {0, 0, 0, 0, 0, 0};
-        makeTempGrid(o, x, y);//מעדכן את הלוח הזמני כדי לבצע חישוב של נקודות
-        newScore[currentPlayer.getCurrentPiece().getPrimaryHexagon().getColor() - 1] += CalculateScore(x, y, tempGrid);//חישוב נקודות על משושה ראשי
-        newScore[currentPlayer.getCurrentPiece().getSecondaryHexagon().getColor() - 1] += CalculateScore(getSecondX(o, x, y), getSecondY(o, x, y), tempGrid);//חישוב נקודות על משושה משני
+        makeTempGrid(orientation, x, y);//מעדכן את הלוח הזמני כדי לבצע חישוב של נקודות
+        newScore[currentPlayer.getCurrentPiece().getPrimaryHexagon().getColor() - 1] += calculateScoreForScoreBoard(x, y, tempGrid);//חישוב נקודות על משושה ראשי
+        newScore[currentPlayer.getCurrentPiece().getSecondaryHexagon().getColor() - 1] += calculateScoreForScoreBoard(getSecondX(orientation, x, y), getSecondY(orientation, x, y), tempGrid);//חישוב נקודות על משושה משני
         return newScore;
     }
 
@@ -379,64 +359,87 @@ public class Game {
     }
 
     // שיטה זו מחשבת את הניקוד עבור הצבת חלק על הלוח
-    public int CalculateScore(int xInit, int yInit, Map<Integer, Integer> tempGrid) {
+    public int calculateScoreForScoreBoard(int xInit, int yInit, Map<Integer, Integer> tempGrid) {
         if (tempGrid.get(xInit * ROWS + yInit) != null){
             int color = tempGrid.get(xInit * ROWS  + yInit);
-            return CalculateScore(xInit, yInit, color);
+            return calculateScoreForScoreBoard(xInit, yInit, color);
         }
         return 0;
     }
-
-    private int CalculateScore(int xInit, int yInit, int color) {
-        int x = xInit;
-        int y = yInit;
+    //מחשב ניקוד כולל לכל הכיוונים
+    private int calculateScoreForScoreBoard(int xInit, int yInit, int color) {
         int score = 0;
-        while ((x - 2) >= 0 && colorCells.containsKey((x - 2) * ROWS + y) && colorCells.get((x - 2) * ROWS + y) == color) {
-            x -= 2;
-            score += 1;
-        }
-        x = xInit;
-        while ((x + 2) < 30 && colorCells.containsKey((x + 2) * ROWS + y) && colorCells.get((x + 2) * ROWS+ y) == color) {
-            x += 2;
-            score += 1;
-        }
-        x = xInit;
-        while ((x - 1) >= 0 && (y - 1) >= 0 && colorCells.containsKey((x - 1) * ROWS  + y - 1) && colorCells.get((x - 1) * ROWS + y - 1) == color) {
-            x -= 1;
-            y -= 1;
-            score += 1;
-        }
-        x = xInit;
-        y = yInit;
-        while ((x + 1) < 30 && (y - 1) >= 0 && colorCells.containsKey((x + 1) * ROWS + y - 1) && colorCells.get((x + 1) * ROWS  + y - 1) == color) {
-            x += 1;
-            y -= 1;
-            score += 1;
-        }
-        x = xInit;
-        y = yInit;
-        while ((x - 1) >= 0 && (y + 1) < 15 && colorCells.containsKey((x - 1) * ROWS + y + 1) && colorCells.get((x - 1) * ROWS + y + 1) == color) {
-            x -= 1;
-            y += 1;
-            score += 1;
-        }
-        x = xInit;
-        y = yInit;
-        while ((x + 1) < 30 && (y + 1) < 15 && colorCells.containsKey((x + 1) * ROWS + y + 1) && colorCells.get((x + 1) * ROWS + y + 1) == color) {
+        // calculate left side
+        score = calculateLeftSide(color, xInit, yInit, score);
+        score = calculateRightSide(color, xInit, yInit, score);
+        score = calculateBottomLeft(color, xInit, yInit, score);
+        score = calculateTopLeft(color, xInit, yInit, score);
+        score = calculateBottomRight(color, xInit, yInit, score);
+        score = calculateTopRight(color, xInit, yInit, score);
+        return score;
+    }
+    //מחשב ניקוד למעלה
+    private int calculateTopRight(int color, int x, int y, int score) {
+        while ((x + 1) < ROWS && (y + 1) < COLS && colorCells.containsKey((x + 1) * ROWS + y + 1) && colorCells.get((x + 1) * ROWS + y + 1) == color) {
             x += 1;
             y += 1;
             score += 1;
         }
         return score;
     }
-//
-    public int CalculateScore(int xInit, int yInit, int[][] tempGrid) {
+    //מחשב ניקוד לימין למטה
+    private int calculateBottomRight(int color, int x, int y, int score) {
+        while ((x - 1) >= BOARD_START_INDEX && (y + 1) < COLS && colorCells.containsKey((x - 1) * ROWS + y + 1) && colorCells.get((x - 1) * ROWS + y + 1) == color) {
+            x -= 1;
+            y += 1;
+            score += 1;
+        }
+        return score;
+    }
+    //מחשב ניקוד לשמאל למעלה
+    private int calculateTopLeft(int color, int x, int y, int score) {
+        while ((x + 1) < ROWS && (y - 1) >= BOARD_START_INDEX && colorCells.containsKey((x + 1) * ROWS + y - 1) && colorCells.get((x + 1) * ROWS  + y - 1) == color) {
+            x += 1;
+            y -= 1;
+            score += 1;
+        }
+        return score;
+    }
+    //מחשב ניקוד לשמאל למטה
+    private int calculateBottomLeft(int color, int x, int y, int score) {
+        while ((x - 1) >= BOARD_START_INDEX && (y - 1) >= BOARD_START_INDEX && colorCells.containsKey((x - 1) * ROWS  + y - 1) && colorCells.get((x - 1) * ROWS + y - 1) == color) {
+            x -= 1;
+            y -= 1;
+            score += 1;
+        }
+        return score;
+    }
+
+    //מחשב ניקוד לימין
+    private int calculateRightSide(int color, int x, int y, int score) {
+        while ((x + 2) < ROWS && colorCells.containsKey((x + 2) * ROWS + y) && colorCells.get((x + 2) * ROWS+ y) == color) {
+            x += 2;
+            score += 1;
+        }
+        return score;
+    }
+    // מחשב ניקוד לשמאל
+    private int calculateLeftSide(int color, int x, int y, int score) {
+        while ((x - 2) >= BOARD_START_INDEX && colorCells.containsKey((x - 2) * ROWS + y) && colorCells.get((x - 2) * ROWS + y) == color) {
+            x -= 2;
+            score += 1;
+        }
+        return score;
+    }
+
+    //מחשב ניקוד עבור תצוגה על המסך לכן הוא משתשמש במטריצה (לתצוגה של הניקוד משמאל למעלה)
+    public int calculateScoreForScoreBoard(int xInit, int yInit, int[][] tempGrid) {
         int color = tempGrid[xInit][yInit];
-        return CalculateScore(xInit, yInit, color);
+        return calculateScoreForScoreBoard(xInit, yInit, color);
     }
 
     //שיטה זו בודקת אם המהלך חוקי עבור השחקן הנוכחי
-    public boolean checkLegalMove() {
+    public boolean checkLegalMoveForMouseMove() {
         if (currentPlayer.getCurrentPiece() != null) {
             int CordX = currentPlayer.getPieceX();
             int CordY = currentPlayer.getPieceY();
@@ -450,24 +453,24 @@ public class Game {
                     if (currentPlayer.getOrientation() == 0) {
                         if (CordX > 0 && CordY > 0) {
                             if (whiteCells.get(CordX * ROWS + CordY) != null && whiteCells.get((CordX - 1) * ROWS + (CordY - 1)) != null) {
-                                    if (checkAround(color1, CordX, CordY) || checkAround(color2, CordX - 1, CordY - 1))
-                                        return true;
+                                if (checkAround(color1, CordX, CordY) || checkAround(color2, CordX - 1, CordY - 1))
+                                    return true;
 
                             }
                         }
                     } else if (currentPlayer.getOrientation() == 1) {
                         if (CordX < 29 && CordY > 0) {
                             if (whiteCells.get(CordX * ROWS + CordY) != null && whiteCells.get((CordX + 1) * ROWS + (CordY - 1)) != null) {
-                                    if (checkAround(color1, CordX, CordY) || checkAround(color2, CordX + 1, CordY - 1))
-                                        return true;
+                                if (checkAround(color1, CordX, CordY) || checkAround(color2, CordX + 1, CordY - 1))
+                                    return true;
                             }
                         }
                     } else if (currentPlayer.getOrientation() == 2) {
                         if (CordX < 28) {
                             if (whiteCells.get(CordX * ROWS + CordY) != null && whiteCells.get((CordX + 2) * ROWS + CordY) != null) {
 
-                                    if (checkAround(color1, CordX, CordY) || checkAround(color2, CordX + 2, CordY))
-                                        return true;
+                                if (checkAround(color1, CordX, CordY) || checkAround(color2, CordX + 2, CordY))
+                                    return true;
 
                             }
                         }
@@ -475,16 +478,16 @@ public class Game {
                         if (CordX < 29 && CordY < 14)
                             if (whiteCells.get(CordX * ROWS + CordY) != null && whiteCells.get((CordX + 1) * ROWS + (CordY + 1)) != null) {
 
-                                    if (checkAround(color1, CordX, CordY) || checkAround(color2, CordX + 1, CordY + 1))
-                                        return true;
+                                if (checkAround(color1, CordX, CordY) || checkAround(color2, CordX + 1, CordY + 1))
+                                    return true;
 
                             }
 
                     } else if (currentPlayer.getOrientation() == 4) {
                         if (CordX > 0 && CordY < 14) {
                             if (whiteCells.get(CordX * ROWS + CordY) != null && whiteCells.get((CordX - 1) * ROWS + (CordY + 1)) != null) {
-                                    if (checkAround(color1, CordX, CordY) || checkAround(color2, CordX - 1, CordY + 1))
-                                        return true;
+                                if (checkAround(color1, CordX, CordY) || checkAround(color2, CordX - 1, CordY + 1))
+                                    return true;
 
                             }
                         }
@@ -492,12 +495,48 @@ public class Game {
                         if (CordX > 1) {
                             if (whiteCells.get(CordX * ROWS + CordY) != null && whiteCells.get((CordX - 2) * ROWS + CordY) != null) {
 
-                                    if (checkAround(color1, CordX, CordY) || checkAround(color2, CordX - 2, CordY))
-                                        return true;
+                                if (checkAround(color1, CordX, CordY) || checkAround(color2, CordX - 2, CordY))
+                                    return true;
                             }
                         }
                     }
                 }
+            }
+        }
+        return false;
+    }
+
+    private boolean checkTopRight(int cordX, int cordY, int color1, int color2) {
+        if (cordX < 29 && cordY < 14)
+            if (whiteCells.get(cordX * ROWS + cordY) != null && whiteCells.get((cordX + 1) * ROWS + (cordY + 1)) != null) {
+                return checkAround(color1, cordX, cordY) || checkAround(color2, cordX + 1, cordY + 1);
+            }
+        return false;
+    }
+
+    private boolean checkRightSide(int cordX, int cordY, int color1, int color2) {
+        if (cordX < 28) {
+            if (whiteCells.get(cordX * ROWS + cordY) != null && whiteCells.get((cordX + 2) * ROWS + cordY) != null) {
+                return checkAround(color1, cordX, cordY) || checkAround(color2, cordX + 2, cordY);
+            }
+        }
+        return false;
+    }
+
+    private boolean checkTopLeft(int cordX, int cordY, int color1, int color2) {
+        if (cordX < 29 && cordY > 0) {
+            if (whiteCells.get(cordX * ROWS + cordY) != null && whiteCells.get((cordX + 1) * ROWS + (cordY - 1)) != null) {
+                return checkAround(color1, cordX, cordY) || checkAround(color2, cordX + 1, cordY - 1);
+            }
+        }
+        return false;
+    }
+
+    private boolean checkBottomLeft(int cordX, int cordY, int color1, int color2) {
+        if (cordX > 0 && cordY > 0) {
+            if (whiteCells.get(cordX * ROWS + cordY) != null && whiteCells.get((cordX - 1) * ROWS + (cordY - 1)) != null) {
+                return checkAround(color1, cordX, cordY) || checkAround(color2, cordX - 1, cordY - 1);
+
             }
         }
         return false;
@@ -508,78 +547,77 @@ public class Game {
     }
 
     // שיטה זו בודקת אם מהלך חוקי עם הכיוון והקואורדינטות הנתונות
-    public boolean checkLegalMove(int x, int y) {
+    public boolean checkLegalMoveForeScoreBoard(int x, int y) {
         if (currentPlayer.getCurrentPiece() != null) {
             int color1 = currentPlayer.getCurrentPiece().getPrimaryHexagon().getColor();
             int color2 = currentPlayer.getCurrentPiece().getSecondaryHexagon().getColor();
-            return checkLegalMove(currentPlayer.getOrientation(), x, y, color1, color2);
+            return checkLegalMovePermanent(currentPlayer.getOrientation(), x, y, color1, color2);
         }
         return false;
     }
 
     //שיטה זו בודקת אם המהלך חוקי עם הכיוון, הקואורדינטות והצבעים הנתונים
-    public boolean checkLegalMove(int o, int x, int y, int color1, int color2) {
+    public boolean checkLegalMovePermanent(int orientation, int x, int y, int color1, int color2) {
         if (x > -1 && y > -1) {
-            if (o == 0) {
+            if (orientation == 0) {
                 if (x > 0 && y > 0) {
                     if (whiteCells.get(x * ROWS + y) != null && whiteCells.get((x - 1) * ROWS + (y - 1)) != null) {
 
-                            if (checkAround(color1, x, y) || checkAround(color2, x - 1, y - 1))
-                                return true;
+                        if (checkAround(color1, x, y) || checkAround(color2, x - 1, y - 1))
+                            return true;
                     }
                 }
-            } else if (o == 1) {
+            } else if (orientation == 1) {
                 if (x < 29 && y > 0) {
                     if (whiteCells.get(x * ROWS + y) != null && whiteCells.get((x + 1) * ROWS  + (y - 1)) != null) {
 
-                            if (checkAround(color1, x, y) || checkAround(color2, x + 1, y - 1))
-                                return true;
+                        if (checkAround(color1, x, y) || checkAround(color2, x + 1, y - 1))
+                            return true;
                     }
                 }
-            } else if (o == 2) {
+            } else if (orientation == 2) {
                 if (x < 28) {
                     if (whiteCells.get(x * ROWS + y) != null && whiteCells.get((x + 2) * ROWS + y) != null) {
-                            if (checkAround(color1, x, y) || checkAround(color2, x + 2, y))
-                                return true;
+                        if (checkAround(color1, x, y) || checkAround(color2, x + 2, y))
+                            return true;
                     }
                 }
-            } else if (o == 3) {
+            } else if (orientation == 3) {
                 if (x < 29 && y < 14)
                     if (whiteCells.get(x * ROWS  + y) != null && whiteCells.get((x + 1) * ROWS  + (y + 1)) != null) {
-                            if (checkAround(color1, x, y) || checkAround(color2, x + 1, y + 1))
-                                return true;
+                        if (checkAround(color1, x, y) || checkAround(color2, x + 1, y + 1))
+                            return true;
                     }
-            } else if (o == 4) {
+            } else if (orientation == 4) {
                 if (x > 0 && y < 14) {
                     if (whiteCells.get(x * ROWS + y) != null && whiteCells.get((x - 1) * ROWS+ (y + 1)) != null) {
-                            if (checkAround(color1, x, y) || checkAround(color2, x - 1, y + 1))
-                                return true;
+                        if (checkAround(color1, x, y) || checkAround(color2, x - 1, y + 1))
+                            return true;
                     }
                 }
-            } else if (o == 5) {
+            } else if (orientation == 5) {
                 if (x > 1) {
                     if (whiteCells.get(x * ROWS + y) != null && whiteCells.get((x - 2) * ROWS + y) != null) {
 
-                            if (checkAround(color1, x, y) || checkAround(color2, x - 2, y))
-                                return true;
+                        if (checkAround(color1, x, y) || checkAround(color2, x - 2, y))
+                            return true;
 
                     }
                 }
             }
         }
 
-
         return false;
+
     }
     // שיטה זו בודקת אם הצבת יצירה בקואורדינטות הנתונות תהיה חוקית בהתבסס על משושים שכנים
+
     private boolean checkAround(int color, int x, int y) {
         boolean legal = false;
-        for (int i=0; i<MAX_HAND_PIECE; i++) {
-            if (((i==0||i==1) && y<1) || ((i==3||i==4) && y>13) || ((i==0||i==4) && x<1) || ((i==1||i==3) && x>28)
-                    || (i==2 && x>27) || (i==5 && x<3)) {
-            }
-            else {
-                if (colorCells.containsKey(getSecondX(i, x, y)*ROWS+getSecondY(i, x, y)) && colorCells.get(getSecondX(i, x, y)*ROWS+getSecondY(i, x, y))==color){
+        for (int orientation=0; orientation<MAX_HAND_PIECE; orientation++) {
+            if (!(((orientation==0||orientation==1) && y<1) || ((orientation==3||orientation==4) && y>13) || ((orientation==0||orientation==4) && x<1) || ((orientation==1||orientation==3) && x>28)
+                    || (orientation==2 && x>27) || (orientation==5 && x<3))) {
+                if (colorCells.containsKey(getSecondX(orientation, x, y)*ROWS+getSecondY(orientation, x, y)) && colorCells.get(getSecondX(orientation, x, y)*ROWS+getSecondY(orientation, x, y))==color){
                     legal = true;
                 }
             }
@@ -595,48 +633,14 @@ public class Game {
         return players.length;
     }
     //שיטה זו מחזירה את קואורדינטת ה-x של המשושה השני על סמך כיוון
-    public int getSecondX(int o, int x, int y) {
-        if (o==0) {
-            return x-1;
-        }
-        else if (o==1) {
-            return x+1;
-        }
-        else if (o==2) {
-            return x+2;
-        }
-        else if (o==3) {
-            return x+1;
-        }
-        else if (o==4) {
-            return x-1;
-        }
-        else if (o==5) {
-            return x-2;
-        }
-        return -1;
+    public int getSecondX(int orientation, int x, int y) {
+        int[] calculateOrientations = {-1, 1, 2, 1, -1, -2};
+        return calculateOrientations[orientation]+x;
     }
     //שיטה זו מחזירה את קואורדינטת ה-y של המשושה השני על סמך כיוון
-    public int getSecondY(int o, int x, int y) {
-        if (o==0) {
-            return y-1;
-        }
-        else if (o==1) {
-            return y-1;
-        }
-        else if (o==2) {
-            return y;
-        }
-        else if (o==3) {
-            return y+1;
-        }
-        else if (o==4) {
-            return y+1;
-        }
-        else if (o==5) {
-            return y;
-        }
-        return -1;
+    public int getSecondY(int orientation, int x, int y) {
+        int[] calculateOrientations = {-1, -1, 0, 1, 1, 0};
+        return calculateOrientations[orientation]+y;
     }
     /*הפונקציה `twoHexGrid` מייצרת לוח חדש (מערך) המייצגת מהלך פוטנציאלי על לוח המשחק. להלן פירוט של מה שהוא עושה:
 
@@ -711,7 +715,7 @@ public class Game {
                 for(int y = 0; y < COLS && !isMove; y ++){
                     for(int o = 0; o < MAX_HAND_PIECE && !isMove; o ++){
                         for(int piece = 0; piece < currentPlayer.getHand().getSize(); piece ++){
-                            if(checkLegalMove(o,x,y,currentPlayer.getHand().getPiece(piece).getPrimaryHexagon().getColor(),currentPlayer.getHand().getPiece(piece).getSecondaryHexagon().getColor())){
+                            if(checkLegalMovePermanent(o,x,y,currentPlayer.getHand().getPiece(piece).getPrimaryHexagon().getColor(),currentPlayer.getHand().getPiece(piece).getSecondaryHexagon().getColor())){
                                 isMove = true;
                             }
                         }

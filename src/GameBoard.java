@@ -91,12 +91,13 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
             g.setColor(pickColor(game.getCurrentPlayer().getCurrentPiece().getPrimaryHexagon().getColor()));
             g.drawPolygon(makeHex(width/3 + 40, 50)); //getColor for hexagon
             g.fillPolygon(makeHex(width/3 + 40, 50)); //getColor for hexagon
-            ShowScore(g, g2d);
+            showScore(g, g2d);
         }catch(Exception e){}
         paintBoard(g);
     }
 
-    private void ShowScore(Graphics g, Graphics2D g2d) {
+    //מציג את הניקוד בצד שמאל של המסך
+    private void showScore(Graphics g, Graphics2D g2d) {
         if(game.getCurrentPlayer().getCurrentPiece().getPrimaryHexagon().getColor() == game.getCurrentPlayer().getCurrentPiece().getSecondaryHexagon().getColor()){
             score1 = score1 + score2;
             g.setColor(Color.BLACK);
@@ -261,13 +262,13 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
                 }else if((y == 6 || y == 8) && x < 1){
                     hexagon[x][y] = null;
                 }else{
-                    SetHexes(x, y);
+                    setHexes(x, y);
                 }
             }
         }
     }
-//מכניס ערך התחלתי לכל משושה
-    private void SetHexes(int x, int y) {
+    //מכניס ערך התחלתי לכל משושה
+    private void setHexes(int x, int y) {
         if(x % 2 == 0 && y % 2 == 0){
             if(x >= 10 && x < 20)
                 hexagon[x][y] = makeHex((int)((width/3 + 110)+ x *87*.6*.5) - 1, (y *45 + 80));
@@ -355,18 +356,18 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
         orientation = game.getCurrentPlayer().getOrientation();
         for(int x = 1; x<ROWS; x++){
             for(int y = 0; y<COLS;y++){
-                onSpace = PaintBaseGrid(g, x, y, onSpace);
+                onSpace = paintBaseGrid(g, x, y, onSpace);
             }
 
         }
-        EmphasizeBotMove(g);
-        EmphasizePiece(g, onSpace);
+        emphasizeBotMove(g);
+        emphasizePiece(g, onSpace);
         g.setColor(Color.BLACK);
         orientPiece(g);
 
     }
 //שם את הצבעים בפינות הלוח
-    private boolean PaintBaseGrid(Graphics g, int x, int y, boolean onSpace) {
+    private boolean paintBaseGrid(Graphics g, int x, int y, boolean onSpace) {
         if(!(hexagon[x][y] == null)){
             if(x == 1 || x == 29 || x ==28 || y == 0 ||  y == 14 || hexagon[x -2][y] == null || hexagon[x +2][y] == null)
                 g.setColor(Color.GRAY);
@@ -396,16 +397,16 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
 //מחשב ומציג את הצבעים בריבוע משמאל למעלה ללוח
     private void getScoreToShow(int x, int y) {
         try{
-            if(game.checkLegalMove(x, y)){
+            if(game.checkLegalMoveForeScoreBoard(x, y)){
                 makeGameBoardTempGrid(x,y, orientation);
-                score1 = game.CalculateScore(x,y,gameBoardTempGrid);
-                score2 = game.CalculateScore(game.getSecondX(orientation, x, y), game.getSecondY(orientation, x, y) , gameBoardTempGrid);
+                score1 = game.calculateScoreForScoreBoard(x,y,gameBoardTempGrid);
+                score2 = game.calculateScoreForScoreBoard(game.getSecondX(orientation, x, y), game.getSecondY(orientation, x, y) , gameBoardTempGrid);
             }
         }catch(Exception e){
         }
     }
 //מדגיש את מהלך הבוט
-    private void EmphasizeBotMove(Graphics g) {
+    private void emphasizeBotMove(Graphics g) {
         for(int x = 1; x<ROWS; x++){
             for(int y = 0; y<COLS;y++){
                 if(!(hexagon[x][y] == null)){
@@ -421,7 +422,7 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
         }
     }
 //מסמן את חלק המשחק אצל שחקן אנושי לפני שהוא מונח
-    private void EmphasizePiece(Graphics g, boolean onSpace) {
+    private void emphasizePiece(Graphics g, boolean onSpace) {
         g.setColor(Color.CYAN);
         if(onSpace && game.getCurrentPlayer().getCurrentPiece() != null && game.getCurrentPlayer().getClass() == HumanPlayer.class){
             try{
@@ -536,17 +537,17 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
         for(int x = 0; x < ROWS; x++){
             for(int y = 0; y < COLS;y++){
                 try{
-                    GetAndSetPieceOnBoard(e, x, y);
+                    getAndSetPieceOnBoard(e, x, y);
 
                 }catch(Exception exception){
                 }
             }
         }
 
-        SquaresOnTheSidesHandling();
+        squaresOnTheSidesHandling();
     }
 //שם את החלק במקום הנכון על הלוח או שם את החלק ביד השחקן בהתאם לפעולות השחקן
-    private void GetAndSetPieceOnBoard(MouseEvent e, int x, int y) {
+    private void getAndSetPieceOnBoard(MouseEvent e, int x, int y) {
         if(hexagon[x][y]!= null && hexagon[x][y].contains(e.getX(), e.getY())){
 
             if(game.getCurrentPlayer().getCurrentPiece() != null){
@@ -562,7 +563,7 @@ public class GameBoard extends JPanel implements Runnable,MouseListener,MouseMot
         }
     }
 //מייצג את הפעולות של הריבועי מצידי הלוח
-    private void SquaresOnTheSidesHandling() {
+    private void squaresOnTheSidesHandling() {
         if(game.getCurrentPlayer().getCurrentPiece() != null){
             if(rotateClockwise.contains(X,Y)){
                 rotate(1);
