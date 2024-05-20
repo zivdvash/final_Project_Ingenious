@@ -12,7 +12,6 @@ public class BasicStrategy extends Strategy {
     private Piece piece;
     private SaveMove bestMove;
     private  static  final int ROWS = 30;
-    private  static  final int  COLS = 15;
     private  static  final int  MAX_HAND_PIECE = 6;
     private int xCord;
     private int yCord;
@@ -27,17 +26,7 @@ public class BasicStrategy extends Strategy {
     }
     // יוצר העתק של הלוח על סמך הפרמטרים הנתונים
     private void cloneBoard(int o, int x, int y, int color1, int color2) {
-        cloneBoard = new HashMap<>();
-        for (int X = 0; X < ROWS; X++) {
-            for (int Y = 0; Y < COLS; Y++) {
-                if (getGame().makeTempGrid(o, x, y, color1, color2)[X][Y] == 0 && getGame().getColorCells().get(X*ROWS+Y) != null) {
-                    cloneBoard.put(X*ROWS+Y,getGame().getColorCells().get(X*ROWS+Y));
-                } else {
-                    if (getGame().makeTempGrid(o, x, y, color1, color2)[X][Y] != 0)
-                        cloneBoard.put(X*ROWS+Y,getGame().convertMatrixToMap(getGame().makeTempGrid(o, x, y, color1, color2)).get(X*ROWS+Y));
-                }
-            }
-        }
+        cloneBoard = getGame().makeCloneBoardWithXY(o,x,y,color1,color2);
     }
     /*calculateMove(Hand h, int[] score): מחשב את המהלך הבא על סמך היד של השחקן והניקוד הנוכחי
     שיטת calculateMove חוזרת על מיקומים וכיוון אפשריים של חלקים על הלוח, ומעריכה את הציון הפוטנציאלי של כל מהלך. הוא בוחר את המהלך עם הניקוד הגבוה ביותר וקובע את היצירה המתאימה, הקואורדינטות והכיוון בהתאם

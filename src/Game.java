@@ -14,7 +14,6 @@ public class Game {
     private Map<Integer, Integer> colorCells;
     private Map<Integer, Integer> whiteCells;
     private Map<Integer, Integer> cloneBoard;
-    private int[][] tempGrid;
     private int[][] emptyGrid;
     private GameBoard gameBoard;
     private final PiecesBag PiecesBag;
@@ -104,7 +103,7 @@ public class Game {
                 makeSingleMove();
                 saveGridForComputerPlayer();
                 currentPlayer.updateScore(getTurnScore(currentPlayer.getOrientation(), currentPlayer.getPieceX(), currentPlayer.getPieceY()));//עדכון נקודות
-                updateBoard(makeTempGridForGameBoard(currentPlayer.getOrientation(), currentPlayer.getPieceX(), currentPlayer.getPieceY()));//עדכן לצמיתות את הייצוג הפנימי של המשחק של הלוח עם המהלך של השחקן הנוכחי.
+                updateBoard(currentPlayer.getOrientation(), currentPlayer.getPieceX(), currentPlayer.getPieceY());//עדכן לצמיתות את הייצוג הפנימי של המשחק של הלוח עם המהלך של השחקן הנוכחי.
                 currentPlayer.removeCurrentPiece();
                 isSecondPlay = extraTurnCheck(startScores, isSecondPlay);
                 endOfTurnHandling(isSecondPlay, extraTern);
@@ -137,10 +136,10 @@ public class Game {
 
     //בדיקה האם יש תור נוסף
     public boolean extraTurnCheck(PriorityQueue<ColorScore> startScores, boolean isSecondPlay) {
-        for (ColorScore x : currentPlayer.getColorScores()) {
-            for (ColorScore i : startScores) {
-                if (i.getColor() == x.getColor()) {
-                    if (x.getScore() == MAX_SCORE && i.getScore() < MAX_SCORE) {//בודק האם מגיע עוד תור
+        for (ColorScore currentCs : currentPlayer.getColorScores()) {
+            for (ColorScore cs : startScores) {
+                if (cs.getColor() == currentCs.getColor()) {
+                    if (currentCs.getScore() == MAX_SCORE && cs.getScore() < MAX_SCORE) {//בודק האם מגיע עוד תור
                         isSecondPlay = true;
                     }
                 }
@@ -192,8 +191,8 @@ public class Game {
     }
 
     //שיטה זו מגדירה את טיימר השינה המשמש למהלכים של שחקנים ממוחשבים
-    public void setSleepTimer(int a) {
-        sleepTimer = a;
+    public void setSleepTimer(int sleepTime) {
+        sleepTimer = sleepTime;
     }
 
 
@@ -277,16 +276,12 @@ public class Game {
         return sortedScores;
     }
 
-    //שיטה זו מעדכנת את לוח המשחק עם לוח חדש
-    public void updateBoard(int[][] newGrid) {
-        for (int x = 0; x < ROWS; x++) {
-            for (int y = 0; y < COLS; y++) {
-                if (newGrid[x][y] != 0) {
-                    colorCells.put(x * ROWS+ y, newGrid[x][y]);
-                    whiteCells.remove(x * ROWS+ y);
-                }
-            }
-        }
+    //שיטה זו מעדכנת את לוח המשחק
+    public void updateBoard(int Orientation, int x,int y) {
+        colorCells.put(x * ROWS+ y, getCurrentPlayer().getCurrentPiece().getPrimaryHexagon().getColor());
+        whiteCells.remove(x * ROWS+ y);
+        colorCells.put(getSecondX(Orientation,x,y) * ROWS+ getSecondY(Orientation,x,y), getCurrentPlayer().getCurrentPiece().getSecondaryHexagon().getColor());
+        whiteCells.remove(getSecondX(Orientation,x,y) * ROWS+ getSecondY(Orientation,x,y));
         gameBoard.updateGrid(colorCells);
     }
 
@@ -333,28 +328,20 @@ public class Game {
         currentPlayer.setPieceY(y);
         currentPlayer.setTurnComplete(true);
     }
-
-    // שיטה זו מחשבת את הניקוד לתורו של השחקן הנוכחי
+//שיטה זו מחשבת ומחזירה את הניקוד של התור
     public int[] getTurnScore(int orientation, int x, int y) {
         int[] newScore = {0, 0, 0, 0, 0, 0};
-        makeTempGrid(orientation, x, y);//מעדכן את הלוח הזמני כדי לבצע חישוב של נקודות
-        newScore[currentPlayer.getCurrentPiece().getPrimaryHexagon().getColor() - 1] += calculateScoreForScoreBoard(x, y, tempGrid);//חישוב נקודות על משושה ראשי
-        newScore[currentPlayer.getCurrentPiece().getSecondaryHexagon().getColor() - 1] += calculateScoreForScoreBoard(getSecondX(orientation, x, y), getSecondY(orientation, x, y), tempGrid);//חישוב נקודות על משושה משני
+        makeCloneBoardWithXY(orientation, x, y,currentPlayer.getCurrentPiece().getPrimaryHexagon().getColor(),currentPlayer.getCurrentPiece().getSecondaryHexagon().getColor());//מעדכן את הלוח הזמני כדי לבצע חישוב של נקודות
+        newScore[currentPlayer.getCurrentPiece().getPrimaryHexagon().getColor() - 1] += calculateScoreForScoreBoard(x, y, cloneBoard.get(x*ROWS+y));//חישוב נקודות על משושה ראשי
+        newScore[currentPlayer.getCurrentPiece().getSecondaryHexagon().getColor() - 1] += calculateScoreForScoreBoard(getSecondX(orientation, x, y), getSecondY(orientation, x, y), cloneBoard.get(getSecondX(orientation, x, y)*ROWS+getSecondY(orientation, x, y)));//חישוב נקודות על משושה משני
         return newScore;
     }
 
     //שיטה זו יוצרת לוח זמני לחישובים
-    public void makeTempGrid(int o, int x, int y) {
-        tempGrid = new int[ROWS][COLS];
-        for (int X = 0; X < ROWS; X++) {
-            for (int Y = 0; Y < COLS; Y++) {
-                if (makeTempGridForGameBoard(o, x, y)[X][Y] == 0) {//אם הלוח הזמני שנוצר על פי החלק ביד השחקן הוא בקורדינאטות האלה הוא 0 מכיוון שהלוח שנוצר הוא ריק בכולו פרט לחלק החדש שהונח
-                    tempGrid[X][Y] = colorCells.getOrDefault(X * ROWS + Y, 0);// תשווה אותו ללוח הקבוע
-                } else {
-                    tempGrid[X][Y] = makeTempGridForGameBoard(o, x, y)[X][Y];//אחרת תשווה אותו ללוח החדש שנוצר
-                }
-            }
-        }
+    public Map<Integer,Integer> makeCloneBoardWithXY(int Orientation, int x, int y,int color1,int color2) {
+        cloneBoard.clear();
+        cloneBoard.putAll(colorCells);
+        return makeCloneBoard(Orientation, x, y,color1,color2);
     }
 
 
@@ -474,7 +461,7 @@ public class Game {
         }
         return false;
     }
-
+//בודק מהלך בימין למעלה
     private boolean checkTopRight(int cordX, int cordY, int color1, int color2) {
         if (cordX < 29 && cordY < 14)
             if (whiteCells.get(cordX * ROWS + cordY) != null && whiteCells.get((cordX + 1) * ROWS + (cordY + 1)) != null) {
@@ -482,7 +469,7 @@ public class Game {
             }
         return false;
     }
-
+    //בודק מהלך בימין
     private boolean checkRightSide(int cordX, int cordY, int color1, int color2) {
         if (cordX < 28) {
             if (whiteCells.get(cordX * ROWS + cordY) != null && whiteCells.get((cordX + 2) * ROWS + cordY) != null) {
@@ -491,7 +478,7 @@ public class Game {
         }
         return false;
     }
-
+    //בודק מהלך בשמאל למעלה
     private boolean checkTopLeft(int cordX, int cordY, int color1, int color2) {
         if (cordX < 29 && cordY > 0) {
             if (whiteCells.get(cordX * ROWS + cordY) != null && whiteCells.get((cordX + 1) * ROWS + (cordY - 1)) != null) {
@@ -500,7 +487,7 @@ public class Game {
         }
         return false;
     }
-
+    //בודק מהלך בשמאל למטה
     private boolean checkBottomLeft(int cordX, int cordY, int color1, int color2) {
         if (cordX > 0 && cordY > 0) {
             if (whiteCells.get(cordX * ROWS + cordY) != null && whiteCells.get((cordX - 1) * ROWS + (cordY - 1)) != null) {
@@ -551,15 +538,14 @@ public class Game {
         }
         return false;
     }
-
+    //בודק מהלך בימין למטה
     private boolean checkBottomRight(int x, int y) {
         if (x > 0 && y < 14) {
             return whiteCells.get(x * ROWS + y) != null && whiteCells.get((x - 1) * ROWS + (y + 1)) != null;
         }
         return false;
     }
-    // שיטה זו בודקת אם הצבת יצירה בקואורדינטות הנתונות תהיה חוקית בהתבסס על משושים שכנים
-
+//בודק את כל החלקים מסביב בשביל לדעת אם יש לנו צבע תואם באחת מהמשבצות ליד
     private boolean checkAround(int color, int x, int y) {
         boolean legal = false;
         for (int orientation=0; orientation<MAX_HAND_PIECE; orientation++) {
@@ -610,12 +596,9 @@ public class Game {
 
     הלוח שנוצר מייצג רק את המהלך הנוכחי שנחשב או נעשה, לא את כל מצב המשחק. זוהי "תמונת מצב" של המקום בו השחקן רוצה למקם את היצירה שלו על הלוח, המשמשת להצגה של המהלך, בדיקת חוקיותו או חישוב השפעתו, מבלי לשנות את רשת הלוח הראשי של המשחק. גישה זו מאפשרת בדיקת מהלכים היפותטיים וחישוב ניקוד מבלי להשפיע על מצב המשחק בפועל עד לאישור המהלך.*/
 
-    //קשור רק לאסטרטגיה של הבוט
-    public int[][] makeTempGridForGameBoard(int o, int x, int y) {
-        return makeTempGrid(o, x, y,currentPlayer.getCurrentPiece().getPrimaryHexagon().getColor(),currentPlayer.getCurrentPiece().getSecondaryHexagon().getColor());
-    }
-    //קשור רק לאסטרטגיה של הבוט
-    public int[][] makeTempGrid(int o, int x, int y, int color1, int color2) {
+    public int[][] makeTempGridForGameBoard(int orientation, int x, int y) {
+        int color1 = currentPlayer.getCurrentPiece().getPrimaryHexagon().getColor();
+        int color2 = currentPlayer.getCurrentPiece().getSecondaryHexagon().getColor();
         int[][] grid = new int[ROWS][COLS];
         for (int i = 0; i<ROWS; i++) {
             for (int j=0; j<COLS; j++) {
@@ -623,43 +606,33 @@ public class Game {
             }
         }
         grid[x][y] = color1;
-        if (o==0) {
+        if (orientation==0) {
             grid[(x -1)][(y -1)]=color2;
         }
-        else if (o==1) {
+        else if (orientation==1) {
             grid[(x +1)][(y -1)]=color2;
         }
-        else if (o==2) {
+        else if (orientation==2) {
             grid[(x +2)][(y)]=color2;
         }
-        else if (o==3) {
+        else if (orientation==3) {
             grid[(x +1)][(y +1)]=color2;
         }
-        else if (o==4) {
+        else if (orientation==4) {
             grid[(x -1)][(y +1)]=color2;
         }
-        else if (o==5) {
+        else if (orientation==5) {
             grid[(x -2)][(y)]=color2;
         }
         return grid;
     }
-
-    public Map<Integer, Integer> convertMatrixToMap(int[][] matrix) {
-        Map<Integer, Integer> map = new HashMap<>();
-        for (int i = 0; i < ROWS; i++) {
-            for (int j = 0; j < COLS; j++) {
-                map.put(i*ROWS + j, matrix[i][j]);
-            }
-        }
-        return map;
-    }
-    /*
-    public Map<Integer,Integer> makeCloneBoard(int o, int x, int y, int color1, int color2) {
+//מייצר שיכפול של הלוח
+    public Map<Integer,Integer> makeCloneBoard(int Orientation, int x, int y, int color1, int color2) {
         cloneBoard.put(x*ROWS+y,color1);
-        cloneBoard.put(getSecondX(o,x,y)*ROWS+getSecondY(o,x,y),color2);
+        cloneBoard.put(getSecondX(Orientation,x,y)*ROWS+getSecondY(Orientation,x,y),color2);
         return cloneBoard;
     }
-    */
+
 
     //בודק ניצחון
     public boolean isWinner(){
@@ -681,9 +654,9 @@ public class Game {
         Set<Integer> keys = whiteCells.keySet();
         try {
             for (int xy : keys){
-                for (int o = 0; o < MAX_HAND_PIECE && !isMove; o++) {
+                for (int Orientation = 0; Orientation < MAX_HAND_PIECE && !isMove; Orientation++) {
                     for (int piece = 0; piece < currentPlayer.getHand().getSize(); piece++) {
-                        if (checkLegalMovePermanent(o, xy, currentPlayer.getHand().getPiece(piece).getPrimaryHexagon().getColor(), currentPlayer.getHand().getPiece(piece).getSecondaryHexagon().getColor())) {
+                        if (checkLegalMovePermanent(Orientation, xy, currentPlayer.getHand().getPiece(piece).getPrimaryHexagon().getColor(), currentPlayer.getHand().getPiece(piece).getSecondaryHexagon().getColor())) {
                             isMove = true;
                         }
                     }
