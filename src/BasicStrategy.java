@@ -108,10 +108,10 @@ public class BasicStrategy extends Strategy {
     }
     //מחפש את כל הצבעים שהם עם אותו ניקוד כמו הצבע הנמוך ביותר
     private void FindNewLowestColors(int lowestScore, ArrayList<Integer> newLowestColors) {
-        for (ColorScore i : getGame().getCurrentPlayer().getColorScores()) {
-            if (i.getScore() == lowestScore) {
-                ColorScore cs = new ColorScore(i.getColor(),i.getScore());
-                newLowestColors.add(cs.getColor()+1);
+        for (ColorScore cs : getGame().getCurrentPlayer().getColorScores()) {
+            if (cs.getScore() == lowestScore) {
+                ColorScore newCs = new ColorScore(cs.getColor(),cs.getScore());
+                newLowestColors.add(newCs.getColor()+1);
             }
         }
     }
