@@ -54,6 +54,7 @@ public class BasicStrategy extends Strategy {
         //בודק אם היד צריכה החלפה ואם כן מחליפה
         handTradeCheck();
         boolean isMove;
+        int count = 0;
         do {
             isMove = confirmLowestColors(lowestColors);
             //אם לא נמצא מהלך מתאים
@@ -68,10 +69,12 @@ public class BasicStrategy extends Strategy {
                 lowestColors = newLowestColors;
 
             }
-        } while (!isMove);//כל עוד לא נמצא לנו מהלך
+            count++;
+        } while (!isMove && count<6);//כל עוד לא נמצא לנו מהלך
         bestMove = findBestMove(bestMove,lowestColors);
         insertHighestMove(hand);
-        System.out.print("+++++++++++++++++++");
+        System.out.print("Move It");
+        System.out.print("\n");
     }
     //מעביר את המהלך הכי טוב שנמצא לבסוף למשתנים שמבצעים את המהלך
 
