@@ -7,7 +7,7 @@ public class Game {
     private static final int MAX_SCORE = 18;
     private static final int MAX_HAND_PIECE = 6;
     private static final int BOARD_START_INDEX = 0;
-    private static final int WHITE_CELL =-1;
+    private static final int WHITE_CELL = 0;
     private static final int NULL_CELL = 0;
     private final Player[] players;
     private Player currentPlayer;
@@ -31,8 +31,11 @@ public class Game {
         players = new Player[names.length];
         isGameOver = false;
         initializeStrategies();
+        // grid = new int[ROWS][COLS];
         emptyGrid = new int[ROWS][COLS];
+
         setPlayerValues(names, playerTypes, strategies);
+        //new ComputerPlayer(names[a], getStrategy(strategies[a] - 1), new PlayerHand(PiecesBag))
         gameBoard = new GameBoard(this);
         initializeBoard();
         emptyBoard();
@@ -448,21 +451,52 @@ public class Game {
                 int color2 = secondaryHex.getColor();
                 if (CordX > -1 && CordY > -1) {
                     if (currentPlayer.getOrientation() == 0) {
-                        return checkBottomLeft(CordX, CordY, color1, color2);
+                        if (CordX > 0 && CordY > 0) {
+                            if (whiteCells.get(CordX * ROWS + CordY) != null && whiteCells.get((CordX - 1) * ROWS + (CordY - 1)) != null) {
+                                if (checkAround(color1, CordX, CordY) || checkAround(color2, CordX - 1, CordY - 1))
+                                    return true;
+
+                            }
+                        }
                     } else if (currentPlayer.getOrientation() == 1) {
-                        return checkTopLeft(CordX, CordY, color1, color2);
+                        if (CordX < 29 && CordY > 0) {
+                            if (whiteCells.get(CordX * ROWS + CordY) != null && whiteCells.get((CordX + 1) * ROWS + (CordY - 1)) != null) {
+                                if (checkAround(color1, CordX, CordY) || checkAround(color2, CordX + 1, CordY - 1))
+                                    return true;
+                            }
+                        }
                     } else if (currentPlayer.getOrientation() == 2) {
-                        return checkRightSide(CordX, CordY, color1, color2);
+                        if (CordX < 28) {
+                            if (whiteCells.get(CordX * ROWS + CordY) != null && whiteCells.get((CordX + 2) * ROWS + CordY) != null) {
+
+                                if (checkAround(color1, CordX, CordY) || checkAround(color2, CordX + 2, CordY))
+                                    return true;
+
+                            }
+                        }
                     } else if (currentPlayer.getOrientation() == 3) {
-                        return checkTopRight(CordX, CordY, color1, color2);
+                        if (CordX < 29 && CordY < 14)
+                            if (whiteCells.get(CordX * ROWS + CordY) != null && whiteCells.get((CordX + 1) * ROWS + (CordY + 1)) != null) {
+
+                                if (checkAround(color1, CordX, CordY) || checkAround(color2, CordX + 1, CordY + 1))
+                                    return true;
+
+                            }
 
                     } else if (currentPlayer.getOrientation() == 4) {
-                        if (checkBottomRight(CordX, CordY))
-                            return checkAround(color1, CordX, CordY) || checkAround(color2, CordX - 1, CordY + 1);
+                        if (CordX > 0 && CordY < 14) {
+                            if (whiteCells.get(CordX * ROWS + CordY) != null && whiteCells.get((CordX - 1) * ROWS + (CordY + 1)) != null) {
+                                if (checkAround(color1, CordX, CordY) || checkAround(color2, CordX - 1, CordY + 1))
+                                    return true;
+
+                            }
+                        }
                     } else if (currentPlayer.getOrientation() == 5) {
                         if (CordX > 1) {
                             if (whiteCells.get(CordX * ROWS + CordY) != null && whiteCells.get((CordX - 2) * ROWS + CordY) != null) {
-                                return checkAround(color1, CordX, CordY) || checkAround(color2, CordX - 2, CordY);
+
+                                if (checkAround(color1, CordX, CordY) || checkAround(color2, CordX - 2, CordY))
+                                    return true;
                             }
                         }
                     }
@@ -526,33 +560,55 @@ public class Game {
     public boolean checkLegalMovePermanent(int orientation, int x, int y, int color1, int color2) {
         if (x > -1 && y > -1) {
             if (orientation == 0) {
-                return checkBottomLeft(x, y, color1, color2);
+                if (x > 0 && y > 0) {
+                    if (whiteCells.get(x * ROWS + y) != null && whiteCells.get((x - 1) * ROWS + (y - 1)) != null) {
+
+                        if (checkAround(color1, x, y) || checkAround(color2, x - 1, y - 1))
+                            return true;
+                    }
+                }
             } else if (orientation == 1) {
-                return checkTopLeft(x, y, color1, color2);
+                if (x < 29 && y > 0) {
+                    if (whiteCells.get(x * ROWS + y) != null && whiteCells.get((x + 1) * ROWS  + (y - 1)) != null) {
+
+                        if (checkAround(color1, x, y) || checkAround(color2, x + 1, y - 1))
+                            return true;
+                    }
+                }
             } else if (orientation == 2) {
-                return checkRightSide(x, y, color1, color2);
+                if (x < 28) {
+                    if (whiteCells.get(x * ROWS + y) != null && whiteCells.get((x + 2) * ROWS + y) != null) {
+                        if (checkAround(color1, x, y) || checkAround(color2, x + 2, y))
+                            return true;
+                    }
+                }
             } else if (orientation == 3) {
-                return checkTopRight(x, y, color1, color2);
+                if (x < 29 && y < 14)
+                    if (whiteCells.get(x * ROWS  + y) != null && whiteCells.get((x + 1) * ROWS  + (y + 1)) != null) {
+                        if (checkAround(color1, x, y) || checkAround(color2, x + 1, y + 1))
+                            return true;
+                    }
             } else if (orientation == 4) {
-                if (checkBottomRight(x, y)) return checkAround(color1, x, y) || checkAround(color2, x - 1, y + 1);
+                if (x > 0 && y < 14) {
+                    if (whiteCells.get(x * ROWS + y) != null && whiteCells.get((x - 1) * ROWS+ (y + 1)) != null) {
+                        if (checkAround(color1, x, y) || checkAround(color2, x - 1, y + 1))
+                            return true;
+                    }
+                }
             } else if (orientation == 5) {
                 if (x > 1) {
                     if (whiteCells.get(x * ROWS + y) != null && whiteCells.get((x - 2) * ROWS + y) != null) {
-                        return checkAround(color1, x, y) || checkAround(color2, x - 2, y);
+
+                        if (checkAround(color1, x, y) || checkAround(color2, x - 2, y))
+                            return true;
+
                     }
                 }
             }
         }
 
-
         return false;
-    }
 
-    private boolean checkBottomRight(int x, int y) {
-        if (x > 0 && y < 14) {
-            return whiteCells.get(x * ROWS + y) != null && whiteCells.get((x - 1) * ROWS + (y + 1)) != null;
-        }
-        return false;
     }
     // שיטה זו בודקת אם הצבת יצירה בקואורדינטות הנתונות תהיה חוקית בהתבסס על משושים שכנים
 
