@@ -30,11 +30,11 @@ public class BasicStrategy extends Strategy {
         cloneBoard = new HashMap<>();
         for (int X = 0; X < ROWS; X++) {
             for (int Y = 0; Y < COLS; Y++) {
-                if (getGame().MakeTempGrid(o, x, y, color1, color2)[X][Y] == 0 && getGame().getColorCells().get(X*ROWS+Y) != null) {
+                if (getGame().makeTempGrid(o, x, y, color1, color2)[X][Y] == 0 && getGame().getColorCells().get(X*ROWS+Y) != null) {
                     cloneBoard.put(X*ROWS+Y,getGame().getColorCells().get(X*ROWS+Y));
                 } else {
-                    if (getGame().MakeTempGrid(o, x, y, color1, color2)[X][Y] != 0)
-                        cloneBoard.put(X*ROWS+Y,getGame().convertMatrixToMap(getGame().MakeTempGrid(o, x, y, color1, color2)).get(X*ROWS+Y));
+                    if (getGame().makeTempGrid(o, x, y, color1, color2)[X][Y] != 0)
+                        cloneBoard.put(X*ROWS+Y,getGame().convertMatrixToMap(getGame().makeTempGrid(o, x, y, color1, color2)).get(X*ROWS+Y));
                 }
             }
         }
@@ -169,7 +169,7 @@ public class BasicStrategy extends Strategy {
                 }
             }
             //אם אחד מהדגלים השתנה ויש מהלך חוקי בקורדינטות האלה ובכיוון הזה עם הצבע הזה אז תעדכן את כל המשתנים עם המידע הנוכחי
-            if ((isColor1 || isColor2) && getGame().checkLegalMovePermanent(o, x, y, color1, color2)) {
+            if ((isColor1 || isColor2) && getGame().checkLegalMovePermanent(o, xy, color1, color2)) {
                 isMove = true;
                 cloneBoard(o, x, y, color1, color2);
                 bestMove = insertMove(getGame().calculateScoreForScoreBoard(x, y, cloneBoard), x, y, o,piece);
@@ -208,7 +208,7 @@ public class BasicStrategy extends Strategy {
                     isColor2 = true;
                 }
             }
-            if ((isColor1 || isColor2) && getGame().checkLegalMovePermanent(o, x, y, color1, color2)) { // אם אחד מהם שנמצא ויש איתו מהלך מתאים
+            if ((isColor1 || isColor2) && getGame().checkLegalMovePermanent(o, xy, color1, color2)) { // אם אחד מהם שנמצא ויש איתו מהלך מתאים
                 cloneBoard(o, x, y, color1, color2);
                 if (isColor1 && isColor2) {//אם שניהם מתאימים
                     //בודק את שני הכיוונים של החלק והאם הניקוד שיצא יותר גבוה מהנוכחי
