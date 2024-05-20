@@ -54,6 +54,7 @@ public class BasicStrategy extends Strategy {
         //בודק אם היד צריכה החלפה ואם כן מחליפה
         handTradeCheck();
         boolean isMove;
+        int counter = 0;
         do {
             isMove = confirmLowestColors(lowestColors);
             //אם לא נמצא מהלך מתאים
@@ -68,10 +69,12 @@ public class BasicStrategy extends Strategy {
                 lowestColors = newLowestColors;
 
             }
-        } while (!isMove);//כל עוד לא נמצא לנו מהלך
+            counter++;
+        } while (!isMove && counter<MAX_HAND_PIECE);//כל עוד לא נמצא לנו מהלך
         bestMove = findBestMove(bestMove,lowestColors);
         insertHighestMove(hand);
-        System.out.print("+++++++++++++++++++");
+        System.out.print("Move It");
+        System.out.print("\n");
     }
     //מעביר את המהלך הכי טוב שנמצא לבסוף למשתנים שמבצעים את המהלך
 
@@ -105,10 +108,10 @@ public class BasicStrategy extends Strategy {
     }
     //מחפש את כל הצבעים שהם עם אותו ניקוד כמו הצבע הנמוך ביותר
     private void FindNewLowestColors(int lowestScore, ArrayList<Integer> newLowestColors) {
-        for (ColorScore i : getGame().getCurrentPlayer().getColorScores()) {
-            if (i.getScore() == lowestScore) {
-                ColorScore cs = new ColorScore(i.getColor(),i.getScore());
-                newLowestColors.add(cs.getColor()+1);
+        for (ColorScore cs : getGame().getCurrentPlayer().getColorScores()) {
+            if (cs.getScore() == lowestScore) {
+                ColorScore newCs = new ColorScore(cs.getColor(),cs.getScore());
+                newLowestColors.add(newCs.getColor()+1);
             }
         }
     }
@@ -148,7 +151,7 @@ public class BasicStrategy extends Strategy {
         return isMove;
     }
 //בודק אם קיים מהלך בצבעים הכי נמוכים
-    private boolean isMoveExists(ArrayList<Integer> lowestColors, int o, int xy) {
+    private boolean isMoveExists(ArrayList<Integer> lowestColors, int orientetion, int xy) {
         boolean isMove = false;
         boolean isColor1;
         boolean isColor2;
@@ -169,10 +172,10 @@ public class BasicStrategy extends Strategy {
                 }
             }
             //אם אחד מהדגלים השתנה ויש מהלך חוקי בקורדינטות האלה ובכיוון הזה עם הצבע הזה אז תעדכן את כל המשתנים עם המידע הנוכחי
-            if ((isColor1 || isColor2) && getGame().checkLegalMovePermanent(o, x, y, color1, color2)) {
+            if ((isColor1 || isColor2) && getGame().checkLegalMovePermanent(orientetion, x, y, color1, color2)) {
                 isMove = true;
-                cloneBoard(o, x, y, color1, color2);
-                bestMove = insertMove(getGame().calculateScoreForScoreBoard(x, y, cloneBoard), x, y, o,piece);
+                cloneBoard(orientetion, x, y, color1, color2);
+                bestMove = insertMove(getGame().calculateScoreForScoreBoard(x, y, cloneBoard), x, y, orientetion,piece);
             }
         }
         return isMove;
@@ -182,15 +185,15 @@ public class BasicStrategy extends Strategy {
     public SaveMove findBestMove(SaveMove bestMove, ArrayList<Integer>lowestColors) {
         Set<Integer> keys = getGame().getWhiteCells().keySet();
         for (int xy : keys) {
-            for (int o = 0; o < directions; o++) {
-                bestMove = findBestMove(bestMove, lowestColors, o, xy);
+            for (int orientetion = 0; orientetion < directions; orientetion++) {
+                bestMove = findBestMove(bestMove, lowestColors, orientetion, xy);
             }
         }
 
         return bestMove;
     }
 //מוצא מהלך הכי טוב
-    private SaveMove findBestMove(SaveMove bestMove, ArrayList<Integer> lowestColors, int o, int xy) {
+    private SaveMove findBestMove(SaveMove bestMove, ArrayList<Integer> lowestColors, int orientetion, int xy) {
         boolean isColor1;
         boolean isColor2;
         int y = xy % ROWS  ;
@@ -208,21 +211,21 @@ public class BasicStrategy extends Strategy {
                     isColor2 = true;
                 }
             }
-            if ((isColor1 || isColor2) && getGame().checkLegalMovePermanent(o, x, y, color1, color2)) { // אם אחד מהם שנמצא ויש איתו מהלך מתאים
-                cloneBoard(o, x, y, color1, color2);
+            if ((isColor1 || isColor2) && getGame().checkLegalMovePermanent(orientetion, x, y, color1, color2)) { // אם אחד מהם שנמצא ויש איתו מהלך מתאים
+                cloneBoard(orientetion, x, y, color1, color2);
                 if (isColor1 && isColor2) {//אם שניהם מתאימים
                     //בודק את שני הכיוונים של החלק והאם הניקוד שיצא יותר גבוה מהנוכחי
-                    if (getGame().calculateScoreForScoreBoard(x, y, cloneBoard) > bestMove.highestScore || getGame().calculateScoreForScoreBoard(getGame().getSecondX(o, x, y),
-                            getGame().getSecondY(o, x, y), cloneBoard) > bestMove.highestScore) {
-                        bestMove = insertMove(getGame().calculateScoreForScoreBoard(x, y, cloneBoard), x, y, o,piece);
+                    if (getGame().calculateScoreForScoreBoard(x, y, cloneBoard) > bestMove.highestScore || getGame().calculateScoreForScoreBoard(getGame().getSecondX(orientetion, x, y),
+                            getGame().getSecondY(orientetion, x, y), cloneBoard) > bestMove.highestScore) {
+                        bestMove = insertMove(getGame().calculateScoreForScoreBoard(x, y, cloneBoard), x, y, orientetion,piece);
                     }
                 }else if (isColor1) {
                     if (getGame().calculateScoreForScoreBoard(x, y, cloneBoard) > bestMove.highestScore) {
-                        bestMove = insertMove(getGame().calculateScoreForScoreBoard(x, y, cloneBoard), x, y, o,piece);
+                        bestMove = insertMove(getGame().calculateScoreForScoreBoard(x, y, cloneBoard), x, y, orientetion,piece);
                     }
                 } else {
-                    if (getGame().calculateScoreForScoreBoard(getGame().getSecondX(o, x, y), getGame().getSecondY(o, x, y), cloneBoard) > bestMove.highestScore) {
-                        bestMove = insertMove(getGame().calculateScoreForScoreBoard(x, y, cloneBoard), x, y, o,piece);
+                    if (getGame().calculateScoreForScoreBoard(getGame().getSecondX(orientetion, x, y), getGame().getSecondY(orientetion, x, y), cloneBoard) > bestMove.highestScore) {
+                        bestMove = insertMove(getGame().calculateScoreForScoreBoard(x, y, cloneBoard), x, y, orientetion,piece);
                     }
                 }
             }
