@@ -2,11 +2,6 @@
 public class ColorScore implements Comparable<ColorScore> {
     private int color;
     private int score;
-
-    public void setColor(int color) {
-        this.color = color;
-    }
-
     public void setScore(int score) {
         this.score = score;
     }

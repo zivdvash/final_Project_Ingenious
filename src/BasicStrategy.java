@@ -59,7 +59,7 @@ public class BasicStrategy extends Strategy {
 
             }
             count++;
-        } while (!isMove && count<6);//כל עוד לא נמצא לנו מהלך
+        } while (!isMove && count<MAX_HAND_PIECE+1);//כל עוד לא נמצא לנו מהלך
         bestMove = findBestMove(bestMove,lowestColors);
         insertHighestMove(hand);
         System.out.print("Move It");
